@@ -111,7 +111,7 @@ const campaignsData = [
 const indianNames = ["Aditi Sharma", "Rahul Verma", "Sneha Patel", "Vikram Singh", "Pooja Desai", "Karan Malhotra", "Riya Gupta", "Arjun Reddy", "Neha Kapoor", "Rohan Iyer", "Anita Kumar", "Deepak Rao", "Sunita Nair", "Suresh Menon", "Kavita Joshi", "Ajay Kadam", "Ravi Pillai"];
 
 function generateRandomDonations(campaignId: string, count: number) {
-  const donations = [];
+  const donations: any[] = [];
   for (let i = 0; i < count; i++) {
     const isAnonymous = Math.random() > 0.7;
     const name = indianNames[Math.floor(Math.random() * indianNames.length)];
@@ -180,7 +180,7 @@ async function runSeed() {
   console.log(`Inserted ${capData.length} Campaigns.`)
 
   // 3. Insert Donations
-  let allDonations = [];
+  let allDonations: any[] = [];
   for (const campaign of capData) {
     const numDonations = Math.floor(Math.random() * 10) + 5; // 5 to 15 donations per campaign
     const campaignDonations = generateRandomDonations(campaign.id, numDonations);

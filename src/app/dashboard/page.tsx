@@ -20,7 +20,7 @@ export default async function DashboardHub() {
   }
 
   // Fetch KPI Data
-  const { data: campaigns } = await supabase.from("campaigns").select("raised_amount, status").eq("organization_id", orgId)
+  const { data: campaigns } = await supabase.from("campaigns").select("id, raised_amount, status").eq("organization_id", orgId)
   
   const { data: apps } = await supabase.from("beneficiary_applications").select("id").eq("organization_id", orgId).eq("status", "pending")
   
