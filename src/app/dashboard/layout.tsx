@@ -1,0 +1,73 @@
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { createClient } from "@/lib/supabase/server"
+import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2 } from "lucide-react"
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+
+  // MVP Mock Auth handling: We'll retrieve the first NGO for demo purposes if no user is logged in
+  // In production, this strictly uses await supabase.auth.getUser()
+  const { data: user } = await supabase.auth.getUser()
+  
+  let orgId = null
+  let orgName = "Demo NGO Admin"
+
+  if (user?.user) {
+    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.user.id).single()
+    orgId = profile?.organization_id
+  }
+
+  // Fallback for MVP Presentation if not strictly logged in
+  if (!orgId) {
+    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name").limit(1).single()
+    orgId = fallbackOrg?.id
+    orgName = fallbackOrg?.name || orgName
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      {/* Sidebar sidebar */}
+      <aside className="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 flex-shrink-0">
+        <div className="p-6 border-b border-slate-800 flex items-center gap-2">
+          <HeartPulse className="h-6 w-6 text-teal-500" />
+          <span className="font-bold text-lg text-white">NGO Portal</span>
+        </div>
+        
+        <div className="p-6 pb-2">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Organization</p>
+          <p className="font-medium text-white truncate" title={orgName}>{orgName}</p>
+        </div>
+
+        <nav className="flex-1 px-4 py-4 space-y-1">
+          <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <LayoutDashboard className="h-5 w-5 text-teal-500" /> Dashboard Hub
+          </Link>
+          <Link href="/dashboard/campaigns/new" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <Send className="h-5 w-5 text-teal-500" /> Create Campaign
+          </Link>
+          <Link href="/dashboard/applications" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <UsersRound className="h-5 w-5 text-teal-500" /> Beneficiary Queue
+          </Link>
+          <Link href="/dashboard/donations" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <ReceiptIndianRupee className="h-5 w-5 text-teal-500" /> Verify UTRs
+          </Link>
+          <Link href="/dashboard/share" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <Share2 className="h-5 w-5 text-teal-500" /> AI Share Studio
+          </Link>
+        </nav>
+
+        <div className="p-4 border-t border-slate-800">
+           <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+             <LogOut className="h-4 w-4" /> Exit to Public Site
+           </Link>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 md:p-10 max-h-screen overflow-y-auto">
+         {children}
+      </main>
+    </div>
+  )
+}
