@@ -2,7 +2,8 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldCheck, HeartPulse, QrCode, ArrowRight } from "lucide-react"
+import { ShieldCheck, QrCode, ArrowRight, HeartPulse } from "lucide-react"
+import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -25,25 +26,7 @@ export default async function LandingPage() {
     
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <HeartPulse className="h-7 w-7 text-teal-600" />
-            <span className="font-bold text-xl tracking-tight text-slate-900">
-              Philanthroforge
-            </span>
-          </div>
-          <div className="flex gap-6 items-center">
-            <Link href="/leaderboard" className="text-sm font-medium text-slate-600 hover:text-teal-600 flex items-center gap-1">
-              Leaderboard
-            </Link>
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-              NGO Login
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <SiteNavbar />
 
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center px-4 py-24 sm:py-32 bg-slate-900 overflow-hidden">
@@ -171,20 +154,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-auto bg-slate-900 border-t border-slate-800 text-slate-400 py-12 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <HeartPulse className="h-6 w-6 text-teal-600" />
-            <span className="font-bold text-lg text-white">
-              Philanthroforge
-            </span>
-          </div>
-          <div className="text-sm">
-            &copy; 2026 Philanthroforge Fundraising. Trust-first giving.
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   )
 }

@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import { ShieldCheck, HeartPulse, QrCode, ArrowRight, CheckCircle2, TrendingUp } from "lucide-react"
+import { ShieldCheck, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
+import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 
 export default async function CampaignPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -49,15 +50,7 @@ export default async function CampaignPage({ params }: { params: { id: string } 
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24 lg:pb-0">
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
-          <a href="/" className="flex items-center gap-2">
-            <HeartPulse className="h-6 w-6 text-teal-600" />
-            <span className="font-bold text-lg text-slate-900">Philanthroforge</span>
-          </a>
-        </div>
-      </nav>
+      <SiteNavbar />
 
       {/* Hero Banner Image */}
       <div className="w-full h-64 sm:h-96 relative bg-slate-900">

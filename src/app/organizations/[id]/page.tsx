@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import { ShieldCheck, HeartPulse, Building2, MapPin, FileCheck, ExternalLink } from "lucide-react"
+import { ShieldCheck, Building2, FileCheck } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
+import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 
 export default async function NGOProfilePage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -33,15 +34,7 @@ export default async function NGOProfilePage({ params }: { params: { id: string 
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <HeartPulse className="h-6 w-6 text-teal-600" />
-            <span className="font-bold text-lg text-slate-900">Philanthroforge</span>
-          </Link>
-        </div>
-      </nav>
+      <SiteNavbar />
 
       {/* NGO Banner & Header */}
       <div className="bg-slate-900 border-b border-slate-800">
@@ -155,9 +148,7 @@ export default async function NGOProfilePage({ params }: { params: { id: string 
         )}
       </main>
 
-      <footer className="mt-auto bg-slate-900 text-slate-400 py-8 text-center text-sm border-t border-slate-800">
-          Powered by Philanthroforge Trust Infrastructure.
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
