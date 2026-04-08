@@ -204,9 +204,15 @@ export function SiteFooter() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4">Services</h4>
             <ul className="space-y-2 text-sm text-gray-700">
-              {["Digital Strategy", "Consultancy & Advice", "UX Optimization", "Donation Optimization", "Campaign Design", "Analysis & Growth", "CSR & Major Donor", "KPIs & Dashboards"].map(s => (
-                <li key={s}><a href="https://www.philanthroforge.com/services" className="hover:text-gray-900 transition-colors">{s}</a></li>
-              ))}
+              <li><a href="https://www.philanthroforge.com/services/digital-fundraising-strategy" className="hover:text-gray-900 transition-colors">Digital Strategy</a></li>
+              <li><a href="https://www.philanthroforge.com/services/consultancy-advisory" className="hover:text-gray-900 transition-colors">Consultancy & Advice</a></li>
+              <li><a href="https://www.philanthroforge.com/services/website-donation-optimization" className="hover:text-gray-900 transition-colors">UX Optimization</a></li>
+              <li><a href="https://www.philanthroforge.com/services/donation-form-optimization" className="hover:text-gray-900 transition-colors">Donation Optimization</a></li>
+              <li><a href="https://www.philanthroforge.com/services/fundraising-campaign-journey-design" className="hover:text-gray-900 transition-colors">Campaign Design</a></li>
+              <li><a href="https://www.philanthroforge.com/services/donor-behaviour-analysis-revenue-growth" className="hover:text-gray-900 transition-colors">Analysis & Growth</a></li>
+              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">Communication</a></li>
+              <li><a href="https://www.philanthroforge.com/services/csr-major-donor-support" className="hover:text-gray-900 transition-colors">CSR & Major Donor</a></li>
+              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">KPIs & Dashboards</a></li>
             </ul>
           </div>
 
@@ -227,17 +233,17 @@ export function SiteFooter() {
           {/* Col 4: Contact */}
           <div>
             <h4 className="font-bold text-gray-900 mb-2">Legal</h4>
-            <a href="https://www.philanthroforge.com/privacy" className="text-sm text-gray-700 hover:text-gray-900 block mb-1">Privacy Policy</a>
-            <a href="https://www.philanthroforge.com/terms" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">Terms and Conditions</a>
+            <a href="https://www.philanthroforge.com/privacy-policy" className="text-sm text-gray-700 hover:text-gray-900 block mb-1">Privacy Policy</a>
+            <a href="https://www.philanthroforge.com/terms-and-conditions" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">Terms and Conditions</a>
             <h4 className="font-bold text-gray-900 mb-1">Email</h4>
             <a href="mailto:hello@philanthroforge.com" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">hello@philanthroforge.com</a>
             <h4 className="font-bold text-gray-900 mb-3">Schedule a Meeting</h4>
-            <a
-              href="https://www.philanthroforge.com/lets-talk"
+            <Link
+              href="/onboarding"
               className="block w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-center py-3 px-6 rounded transition-colors"
             >
               Book Now
-            </a>
+            </Link>
           </div>
         </div>
 
