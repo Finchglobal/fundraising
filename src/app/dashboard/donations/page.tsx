@@ -4,23 +4,29 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, Loader2, RefreshCw, Receipt } from "lucide-react"
+import { CheckCircle2, XCircle, Loader2, RefreshCw, Receipt, Download } from "lucide-react"
+import { generate80GReceipt, numToWords } from "@/lib/utils/generateReceipt"
 
-export default function UTRVerificationPage() {
+export default function DonationsDashboardPage() {
   const supabase = createClient()
   const [donations, setDonations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"pending" | "verified">("pending")
+  const [orgData, setOrgData] = useState<any>(null)
 
-  const fetchPendingDonations = async () => {
+  const fetchDashboardData = async () => {
     setLoading(true)
     
-    // MVP Fallback: Grabbing all pending for Demo if Auth isn't strict. 
-    // In production, RLS handles this using org_id linked to the user's active session.
-    const { data: user } = await supabase.auth.getUser()
-    let query = supabase.from("donations").select("*, campaigns(title)").eq("status", "pending").order("created_at", { ascending: false })
-    
-    const { data } = await query
+    // MVP Fallback: Grabbing all for Demo if Auth isn't strict. 
+    // In production, RLS handles this using org_id linked to user.
+    const { data: org } = await supabase.from("organizations").select("*").limit(1).single()
+    if (org) setOrgData(org)
+
+    const { data } = await supabase
+      .from("donations")
+      .select("*, campaigns(title)")
+      .order("created_at", { ascending: false })
     
     if (data) {
       setDonations(data)
@@ -29,64 +35,101 @@ export default function UTRVerificationPage() {
   }
 
   useEffect(() => {
-    fetchPendingDonations()
+    fetchDashboardData()
   }, [])
 
   const handleVerify = async (id: string, amount: number, campaignId: string) => {
     setActionLoading(id)
-    
-    // 1. Update Donation Status
     const { error } = await supabase.from("donations").update({ status: "verified" }).eq("id", id)
     
     if (!error) {
-      // 2. Fetch current campaign raised amount safely using an RPC or double query (MVP: double query)
       const { data: campaign } = await supabase.from("campaigns").select("raised_amount").eq("id", campaignId).single()
       if (campaign) {
          await supabase.from("campaigns").update({ raised_amount: (campaign.raised_amount || 0) + amount }).eq("id", campaignId)
       }
-      
-      // Remove from list visually
-      setDonations(prev => prev.filter(d => d.id !== id))
+      setDonations(prev => prev.map(d => d.id === id ? { ...d, status: "verified" } : d))
     }
-    
     setActionLoading(null)
   }
 
   const handleReject = async (id: string) => {
     setActionLoading(id)
     await supabase.from("donations").update({ status: "rejected" }).eq("id", id)
-    setDonations(prev => prev.filter(d => d.id !== id))
+    setDonations(prev => prev.map(d => d.id === id ? { ...d, status: "rejected" } : d))
     setActionLoading(null)
   }
+
+  const handleDownloadReceipt = (donation: any) => {
+    generate80GReceipt({
+      receiptNumber: `PF-${new Date(donation.created_at).getFullYear()}-${donation.id.slice(0, 6).toUpperCase()}`,
+      date: new Date(donation.created_at).toLocaleDateString("en-IN"),
+      donorName: donation.donor_name,
+      donorPan: donation.donor_pan || "Not Provided",
+      donorEmail: donation.donor_email || "",
+      amount: donation.amount,
+      amountWords: numToWords(donation.amount),
+      paymentMode: "UPI / Bank Transfer",
+      utr: donation.upi_utr,
+      campaignName: donation.campaigns?.title || "General Fund",
+      ngoContext: {
+        name: orgData?.name || "Verified NGO Partner",
+        address: orgData?.address || "India",
+        pan: orgData?.pan || "PENDING PAN",
+        registration_detail: orgData?.registration_number || "PENDING REG"
+      }
+    })
+  }
+
+  const pendingList = donations.filter(d => d.status === "pending")
+  const verifiedList = donations.filter(d => d.status === "verified")
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">UTR Verification Queue</h1>
-          <p className="text-slate-600">Cross-reference these donor claims with your bank statement before approving.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Donor Management</h1>
+          <p className="text-slate-600">Verify UPI transactions and issue 80G tax receipts to your supporters.</p>
         </div>
-        <Button variant="outline" onClick={fetchPendingDonations} disabled={loading} className="gap-2">
+        <Button variant="outline" onClick={fetchDashboardData} disabled={loading} className="gap-2">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           Refresh
         </Button>
       </div>
 
+      <div className="flex gap-4 mb-6 border-b border-slate-200">
+        <button 
+          onClick={() => setActiveTab("pending")}
+          className={`pb-3 px-4 font-semibold text-sm transition-colors ${activeTab === 'pending' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          Pending Verifications ({pendingList.length})
+        </button>
+        <button 
+          onClick={() => setActiveTab("verified")}
+          className={`pb-3 px-4 font-semibold text-sm transition-colors ${activeTab === 'verified' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          Approved & Receipts
+        </button>
+      </div>
+
       <Card className="border-slate-200">
         <CardHeader>
-          <CardTitle>Pending Bank Transfers</CardTitle>
-          <CardDescription>Only approve matching UTRs. Approved donations generate a receipt and update campaign progress.</CardDescription>
+          <CardTitle>{activeTab === "pending" ? "Pending Bank Transfers" : "Verified Donations"}</CardTitle>
+          <CardDescription>
+            {activeTab === "pending" 
+              ? "Cross-reference these claims with your bank statement before approving." 
+              : "Generates an automated 80G PDF receipt using your NGO registration details."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">Date & Time</th>
+                  <th className="px-6 py-4 font-semibold">Date</th>
                   <th className="px-6 py-4 font-semibold">Donor Details</th>
                   <th className="px-6 py-4 font-semibold">Campaign</th>
-                  <th className="px-6 py-4 font-semibold">Claimed Amount</th>
-                  <th className="px-6 py-4 font-semibold text-center">UTR Number</th>
+                  <th className="px-6 py-4 font-semibold">Amount</th>
+                  <th className="px-6 py-4 font-semibold text-center">UTR / Ref</th>
                   <th className="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -94,24 +137,24 @@ export default function UTRVerificationPage() {
                 {loading && donations.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                      Loading pending verifications...
+                      Loading data...
                     </td>
                   </tr>
-                ) : donations.length === 0 ? (
+                ) : (activeTab === "pending" && pendingList.length === 0) || (activeTab === "verified" && verifiedList.length === 0) ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                      No pending UTRs! Your queue is clear.
+                      No {activeTab} records found!
                     </td>
                   </tr>
                 ) : (
-                  donations.map((donation) => (
+                  (activeTab === "pending" ? pendingList : verifiedList).map((donation) => (
                     <tr key={donation.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                        {new Date(donation.created_at).toLocaleString()}
+                        {new Date(donation.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-slate-900">{donation.donor_name} {donation.is_anonymous && "(Anon)"}</div>
-                        <div className="text-slate-500 text-xs">{donation.donor_email || "No email provided"}</div>
+                        <div className="text-slate-500 text-xs">{donation.donor_email || "No email"} | PAN: {donation.donor_pan || "N/A"}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="truncate max-w-[200px] text-slate-700" title={donation.campaigns?.title}>
@@ -120,34 +163,42 @@ export default function UTRVerificationPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="font-bold text-slate-900">₹{donation.amount.toLocaleString('en-IN')}</span>
-                        {donation.platform_tip > 0 && <div className="text-xs text-slate-400">+ ₹{donation.platform_tip} Tip</div>}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded font-mono text-xs border border-slate-200 shadow-sm inline-block tracking-wider">
+                        <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded font-mono text-xs border border-slate-200 flex items-center justify-center min-w-[120px]">
                           {donation.upi_utr}
                         </code>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"
-                            disabled={actionLoading === donation.id}
-                            onClick={() => handleVerify(donation.id, donation.amount, donation.campaign_id)}
-                          >
-                            {actionLoading === donation.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
-                            Verify
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
-                            disabled={actionLoading === donation.id}
-                            onClick={() => handleReject(donation.id)}
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
+                          {activeTab === "pending" ? (
+                            <>
+                              <Button 
+                                variant="outline" size="sm" 
+                                className="bg-green-50 text-green-700 hover:bg-green-100"
+                                disabled={actionLoading === donation.id}
+                                onClick={() => handleVerify(donation.id, donation.amount, donation.campaign_id)}
+                              >
+                                {actionLoading === donation.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />} Verify
+                              </Button>
+                              <Button 
+                                variant="outline" size="sm" 
+                                className="bg-red-50 text-red-700 hover:bg-red-100 px-2"
+                                disabled={actionLoading === donation.id}
+                                onClick={() => handleReject(donation.id)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button 
+                              variant="outline" size="sm"
+                              onClick={() => handleDownloadReceipt(donation)}
+                              className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 transition-colors"
+                            >
+                              <Download className="h-4 w-4 mr-1" /> PDF Receipt
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -159,13 +210,15 @@ export default function UTRVerificationPage() {
         </CardContent>
       </Card>
       
-      <div className="mt-6 text-sm text-slate-500 bg-amber-50 border border-amber-200 p-4 rounded-xl flex gap-3 items-start">
-        <Receipt className="h-5 w-5 text-amber-600 flex-shrink-0" />
-        <div>
-          <strong className="text-amber-800 font-semibold block mb-1">Important Legal Note</strong>
-          Verify receipts against your bank statement exactly. False approvals create compliance issues. Rejecting a UTR will email the donor asking for correction (in production).
+      {activeTab === "pending" && (
+        <div className="mt-6 text-sm text-slate-500 bg-amber-50 border border-amber-200 p-4 rounded-xl flex gap-3 items-start">
+          <Receipt className="h-5 w-5 text-amber-600 flex-shrink-0" />
+          <div>
+             <strong className="text-amber-800 font-semibold block mb-1">Important Legal Note</strong>
+             Verify receipts against your bank statement exactly. False approvals create compliance issues. Rejecting a UTR will email the donor asking for correction (in production).
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
