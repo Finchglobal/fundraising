@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee } from "lucide-react"
+import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee, Plus, FileSpreadsheet, Sparkles, ArrowRight, ShieldCheck } from "lucide-react"
+import Link from "next/link"
 
 export default async function DashboardHub() {
   const supabase = await createClient()
@@ -8,88 +9,182 @@ export default async function DashboardHub() {
   const { data: user } = await supabase.auth.getUser()
   
   let orgId = null
+  let orgName = "Demo NGO"
   if (user?.user) {
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id, organizations(name)")
+      .eq("id", user.user.id)
+      .single()
     orgId = profile?.organization_id
+    orgName = (profile?.organizations as any)?.name || orgName
   }
 
-  // Fallback for MVP Presentation
+  // MVP Fallback
   if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id").limit(1).single()
+    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name").limit(1).single()
     orgId = fallbackOrg?.id
+    orgName = fallbackOrg?.name || orgName
   }
 
-  // Fetch KPI Data
-  const { data: campaigns } = await supabase.from("campaigns").select("id, raised_amount, status").eq("organization_id", orgId)
-  
-  const { data: apps } = await supabase.from("beneficiary_applications").select("id").eq("organization_id", orgId).eq("status", "pending")
-  
-  // To fetch pending donations, we need campaign IDs
+  // KPIs
+  const { data: campaigns } = await supabase
+    .from("campaigns")
+    .select("id, title, raised_amount, public_goal, status, hero_image_url, created_at")
+    .eq("organization_id", orgId)
+    .order("created_at", { ascending: false })
+
+  const { data: apps } = await supabase
+    .from("beneficiary_applications")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("status", "pending")
+
   const campaignIds = campaigns?.map(c => c.id) || []
   let pendingDonations: any[] | null = []
   if (campaignIds.length > 0) {
-    const { data: pDonations } = await supabase.from("donations").select("id").in("campaign_id", campaignIds).eq("status", "pending")
+    const { data: pDonations } = await supabase
+      .from("donations")
+      .select("id")
+      .in("campaign_id", campaignIds)
+      .eq("status", "pending")
     pendingDonations = pDonations
   }
 
-  const activeCampaigns = campaigns?.filter(c => c.status === "published").length || 0
+  const activeCampaigns = campaigns?.filter(c => c.status === "published") || []
   const totalRaised = campaigns?.reduce((sum, c) => sum + (c.raised_amount || 0), 0) || 0
+  const platformFee = Math.round(totalRaised * 0.02)
+  const recentCampaigns = campaigns?.slice(0, 4) || []
+
+  const kpiCards = [
+    { label: "Total Funds Raised", value: `₹${totalRaised.toLocaleString("en-IN")}`, sub: "Across all campaigns", icon: TrendingUp, color: "text-teal-600", bg: "bg-teal-50" },
+    { label: "Active Campaigns", value: activeCampaigns.length, sub: "Currently live & published", icon: Activity, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Pending Reviews", value: apps?.length || 0, sub: "Beneficiary applications to vet", icon: UsersRound, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: "UTRs to Verify", value: pendingDonations?.length || 0, sub: "Awaiting bank confirmation", icon: ReceiptIndianRupee, color: "text-indigo-600", bg: "bg-indigo-50" },
+  ]
+
+  const quickActions = [
+    { label: "Create Campaign", desc: "Launch a new fundraising page", href: "/dashboard/campaigns/new", icon: Plus, color: "bg-teal-600 hover:bg-teal-500 text-white" },
+    { label: "Verify UTRs", desc: "Approve donations & issue receipts", href: "/dashboard/donations", icon: ReceiptIndianRupee, color: "bg-indigo-600 hover:bg-indigo-500 text-white" },
+    { label: "AI Share Studio", desc: "Generate social media content", href: "/dashboard/share", icon: Sparkles, color: "bg-purple-600 hover:bg-purple-500 text-white" },
+    { label: "Platform Invoices", desc: "View your 2% billing summary", href: "/dashboard/invoices", icon: FileSpreadsheet, color: "bg-slate-700 hover:bg-slate-600 text-white" },
+  ]
 
   return (
     <div>
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-8">NGO Dashboard Hub</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="border-slate-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Funds Raised</CardTitle>
-            <TrendingUp className="h-5 w-5 text-teal-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">₹{totalRaised.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-slate-500 mt-1">Across all campaigns</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Active Campaigns</CardTitle>
-            <Activity className="h-5 w-5 text-teal-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{activeCampaigns}</div>
-            <p className="text-xs text-slate-500 mt-1">Currently live and publishing</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Pending Reviews</CardTitle>
-            <UsersRound className="h-5 w-5 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{apps?.length || 0}</div>
-            <p className="text-xs text-slate-500 mt-1">Beneficiary applications to vet</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">UTRs to Verify</CardTitle>
-            <ReceiptIndianRupee className="h-5 w-5 text-indigo-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{pendingDonations?.length || 0}</div>
-            <p className="text-xs text-slate-500 mt-1">Awaiting manual confirmation</p>
-          </CardContent>
-        </Card>
+      {/* Welcome Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome back 👋</h1>
+        <p className="text-slate-500 text-sm">Managing campaigns for <strong className="text-slate-700">{orgName}</strong></p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center max-w-2xl mx-auto mt-12 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Welcome to your Philanthroforge Hub</h3>
-        <p className="text-slate-600 mb-6">
-          From here, you can manage your digital fundraising presence. Create new campaigns with our 2% platform buffer, verify UTR payments from your bank account to issue official receipts, and review applications submitted by individuals in need.
-        </p>
+      {/* KPI Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        {kpiCards.map(card => (
+          <Card key={card.label} className="border-slate-200 hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <div className={`h-10 w-10 rounded-xl ${card.bg} flex items-center justify-center mb-3`}>
+                <card.icon className={`h-5 w-5 ${card.color}`} />
+              </div>
+              <div className={`text-3xl font-extrabold ${card.color}`}>{card.value}</div>
+              <p className="text-xs text-slate-500 mt-1">{card.sub}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Quick Actions + Recent Campaigns Grid */}
+      <div className="grid lg:grid-cols-5 gap-8">
+        {/* Quick Actions */}
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            {quickActions.map(action => (
+              <Link key={action.href} href={action.href}>
+                <div className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all ${action.color} group`}>
+                  <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold">{action.label}</p>
+                    <p className="text-xs opacity-80">{action.desc}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 opacity-60 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Platform Fee Nudge */}
+          {totalRaised > 0 && (
+            <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-sm text-indigo-800">
+              <p className="font-semibold mb-1 flex items-center gap-1.5">
+                <FileSpreadsheet className="h-4 w-4" /> Invoice Due
+              </p>
+              <p className="text-xs text-indigo-600">
+                ₹{platformFee.toLocaleString("en-IN")} (2% platform fee) is billable based on funds raised.
+              </p>
+              <Link href="/dashboard/invoices" className="text-xs font-semibold text-indigo-700 underline mt-1 inline-block">View Invoice →</Link>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Campaigns */}
+        <div className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900">Recent Campaigns</h2>
+            <Link href="/dashboard/campaigns/new" className="text-sm text-teal-600 font-semibold hover:underline">+ New Campaign</Link>
+          </div>
+
+          {recentCampaigns.length === 0 ? (
+            <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-10 text-center text-slate-500">
+              <Plus className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+              <p className="font-semibold">No campaigns yet</p>
+              <p className="text-sm mt-1">Create your first fundraising campaign to get started.</p>
+              <Link href="/dashboard/campaigns/new">
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-semibold rounded-lg hover:bg-teal-500 transition-colors">
+                  <Plus className="h-4 w-4" /> Create Campaign
+                </div>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentCampaigns.map(c => {
+                const progress = Math.min(((c.raised_amount || 0) / c.public_goal) * 100, 100)
+                return (
+                  <Link key={c.id} href={`/campaigns/${c.id}`} target="_blank">
+                    <div className="flex gap-4 bg-white border border-slate-200 rounded-xl p-4 hover:border-teal-300 hover:shadow-sm transition-all group">
+                      <img
+                        src={c.hero_image_url || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400&q=60"}
+                        alt={c.title}
+                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-semibold text-slate-900 line-clamp-1 group-hover:text-teal-700 transition-colors">{c.title}</p>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                            c.status === "published" ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
+                          }`}>
+                            {c.status}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-slate-500 mb-1">
+                            <span className="font-semibold text-slate-700">₹{(c.raised_amount || 0).toLocaleString("en-IN")} raised</span>
+                            <span>of ₹{c.public_goal.toLocaleString("en-IN")}</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
