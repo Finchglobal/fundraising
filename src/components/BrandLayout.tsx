@@ -10,8 +10,7 @@ const NAV_LINKS = [
   { label: "About", href: "https://www.philanthroforge.com/about" },
   { label: "Services", href: "https://www.philanthroforge.com/services" },
   { 
-    label: "Case Studies", 
-    href: "/case-studies",
+    label: "Case Studies",
     subLinks: [
       { label: "Rewarding Generosity Unlocks New Giving", href: "https://www.philanthroforge.com/case-studies/rewarding-generosity" },
       { label: "Referral Rewards Turn Supporters Into Fundraisers", href: "https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" },
@@ -92,14 +91,7 @@ export function SiteNavbar() {
                           {sub.label}
                         </a>
                       ))}
-                      <div className="border-t border-gray-100 my-1"></div>
-                      <Link 
-                        href={link.href} 
-                        className="block px-5 py-2 text-xs font-bold text-green-600 hover:text-green-800 uppercase tracking-wider"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        View All
-                      </Link>
+                      <div className="h-2"></div>
                     </div>
                   )}
                 </div>
@@ -164,13 +156,6 @@ export function SiteNavbar() {
                         {sub.label}
                       </a>
                     ))}
-                    <Link
-                       href={link.href}
-                       className="block px-3 py-2 rounded text-sm font-bold text-green-600 hover:bg-green-50"
-                       onClick={() => setOpen(false)}
-                    >
-                      View All Studies →
-                    </Link>
                   </div>
                 </div>
               )
@@ -236,7 +221,6 @@ export function SiteFooter() {
               <li><a href="https://www.philanthroforge.com/case-studies/rewarding-generosity" className="hover:text-gray-900">Rewarding Generosity</a></li>
               <li><a href="https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" className="hover:text-gray-900">Supporters Into Fundraisers</a></li>
               <li><a href="https://www.philanthroforge.com/case-studies/integrated-ecosystems" className="hover:text-gray-900">Integrated Ecosystems</a></li>
-              <li className="pt-2"><Link href="/case-studies" className="font-bold text-gray-900 hover:text-green-700">View All →</Link></li>
             </ul>
           </div>
 
