@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 
-export default async function CampaignPage({ params }: { params: { id: string } }) {
+export default async function CampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
 
   // Ensure params.id is resolved for Next.js 15

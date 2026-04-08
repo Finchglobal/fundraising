@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 
-export default async function NGOProfilePage({ params }: { params: { id: string } }) {
+export default async function NGOProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
 
   // Ensure params.id is resolved for Next.js 15
