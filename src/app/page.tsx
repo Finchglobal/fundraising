@@ -67,14 +67,12 @@ export default async function LandingPage() {
             >
               Donate Now <ArrowRight className="h-5 w-5" />
             </a>
-            <a
-              href="https://www.philanthroforge.com/lets-talk"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/onboarding"
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl text-lg border border-white/20 transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm"
             >
-              Start a Fundraiser
-            </a>
+              Start a Fundraiser <ArrowRight className="h-5 w-5" />
+            </Link>
           </div>
 
           {/* Stats strip */}
@@ -209,15 +207,21 @@ export default async function LandingPage() {
       <section className="py-16 px-4 bg-gray-950 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-black mb-4">Want to raise funds for your NGO?</h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">PhilanthroForge onboards registered Indian nonprofits with a fully-verified, zero-fee fundraising infrastructure.</p>
-          <a
-            href="https://www.philanthroforge.com/lets-talk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-8 py-4 rounded-xl text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(250,204,21,0.4)]"
-          >
-            Start a Fundraiser <ArrowRight className="h-5 w-5" />
-          </a>
+          <p className="text-gray-400 mb-8 max-w-xl mx-auto">PhilanthroForge onboards registered Indian NGOs and trusts with fully-verified, zero-fee fundraising infrastructure.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-8 py-4 rounded-xl text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(250,204,21,0.4)]"
+            >
+              Apply as an NGO Partner <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-4 rounded-xl text-sm border border-white/20 transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm"
+            >
+              NGO Dashboard →
+            </Link>
+          </div>
         </div>
       </section>
 

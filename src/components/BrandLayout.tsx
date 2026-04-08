@@ -241,8 +241,13 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="border-t border-yellow-300 mt-12 pt-6 text-center text-sm font-semibold text-gray-800">
-          © 2025 PhilanthroForge. All Rights Reserved.
+        <div className="border-t border-yellow-300 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm font-semibold text-gray-800">
+          <span>© 2025 PhilanthroForge. All Rights Reserved.</span>
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            <Link href="/login" className="hover:text-gray-800 transition-colors">NGO Login</Link>
+            <span>·</span>
+            <Link href="/admin" className="hover:text-gray-800 transition-colors">Platform Admin</Link>
+          </div>
         </div>
       </div>
     </footer>
