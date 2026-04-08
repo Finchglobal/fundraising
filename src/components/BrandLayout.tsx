@@ -2,22 +2,44 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
+import { ChevronDown } from "lucide-react"
 
 const NAV_LINKS = [
   { label: "Home", href: "https://www.philanthroforge.com" },
   { label: "About", href: "https://www.philanthroforge.com/about" },
   { label: "Services", href: "https://www.philanthroforge.com/services" },
-  { label: "Case Studies", href: "https://www.philanthroforge.com/case-studies" },
+  { 
+    label: "Case Studies", 
+    href: "/case-studies",
+    subLinks: [
+      { label: "Rewarding Generosity Unlocks New Giving", href: "https://www.philanthroforge.com/case-studies/rewarding-generosity" },
+      { label: "Referral Rewards Turn Supporters Into Fundraisers", href: "https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" },
+      { label: "Integrated ecosystems make complex impact simple", href: "https://www.philanthroforge.com/case-studies/integrated-ecosystems" },
+    ]
+  },
   { label: "Fundraising", href: "/", active: true },
   { label: "Let's Talk", href: "https://www.philanthroforge.com/lets-talk", cta: true },
 ]
 
 export function SiteNavbar() {
   const [open, setOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
+    <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link href="https://www.philanthroforge.com" className="flex items-center">
@@ -32,17 +54,59 @@ export function SiteNavbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-700">
-          {NAV_LINKS.map(link => (
-            link.cta ? (
-              <a
-                key={link.label}
-                href={link.href}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-5 py-2 rounded transition-colors"
-              >
-                {link.label}
-              </a>
-            ) : (
+        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-700" ref={dropdownRef}>
+          {NAV_LINKS.map(link => {
+            if (link.cta) {
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-5 py-2 rounded transition-colors"
+                >
+                  {link.label}
+                </a>
+              )
+            }
+            
+            if (link.subLinks) {
+              return (
+                <div key={link.label} className="relative group">
+                  <button 
+                    onClick={() => setOpenDropdown(openDropdown === link.label ? null : link.label)}
+                    className={`flex items-center gap-1 hover:text-gray-900 transition-colors ${link.active ? "font-bold text-green-700" : ""}`}
+                  >
+                    {link.label}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === link.label ? "rotate-180" : ""}`} />
+                  </button>
+                  
+                  {/* Dropdown panel */}
+                  {openDropdown === link.label && (
+                    <div className="absolute top-full right-0 mt-4 w-80 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden py-2 z-50">
+                      {link.subLinks.map(sub => (
+                        <a 
+                          key={sub.label} 
+                          href={sub.href}
+                          className="block px-5 py-3 hover:bg-gray-50 text-gray-700 hover:text-green-700 transition-colors font-medium text-sm"
+                          onClick={() => setOpenDropdown(null)}
+                        >
+                          {sub.label}
+                        </a>
+                      ))}
+                      <div className="border-t border-gray-100 my-1"></div>
+                      <Link 
+                        href={link.href} 
+                        className="block px-5 py-2 text-xs font-bold text-green-600 hover:text-green-800 uppercase tracking-wider"
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        View All
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            return (
               <Link
                 key={link.label}
                 href={link.href}
@@ -51,7 +115,7 @@ export function SiteNavbar() {
                 {link.label}
               </Link>
             )
-          ))}
+          })}
         </div>
 
         {/* Mobile Hamburger Toggle */}
@@ -68,30 +132,63 @@ export function SiteNavbar() {
 
       {/* Mobile Dropdown Menu */}
       {open && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 pb-4 pt-2 flex flex-col gap-1 shadow-lg">
-          {NAV_LINKS.map(link => (
-            link.cta ? (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="mt-2 block text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-5 py-2.5 rounded transition-colors"
-              >
-                {link.label}
-              </a>
-            ) : (
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 pb-6 pt-2 flex flex-col gap-1 shadow-lg max-h-[80vh] overflow-y-auto">
+          {NAV_LINKS.map(link => {
+            if (link.cta) {
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="mt-4 block text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-5 py-3 rounded-lg transition-colors"
+                >
+                  {link.label}
+                </a>
+              )
+            }
+
+            if (link.subLinks) {
+              return (
+                <div key={link.label} className="mt-1">
+                  <div className="px-3 py-2 text-sm font-bold text-gray-500 uppercase tracking-wider">
+                    {link.label}
+                  </div>
+                  <div className="flex flex-col gap-1 pl-4 border-l-2 border-gray-100 ml-4 mb-2">
+                    {link.subLinks.map(sub => (
+                      <a
+                        key={sub.label}
+                        href={sub.href}
+                        className="block px-3 py-2 rounded text-sm font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50"
+                        onClick={() => setOpen(false)}
+                      >
+                        {sub.label}
+                      </a>
+                    ))}
+                    <Link
+                       href={link.href}
+                       className="block px-3 py-2 rounded text-sm font-bold text-green-600 hover:bg-green-50"
+                       onClick={() => setOpen(false)}
+                    >
+                      View All Studies →
+                    </Link>
+                  </div>
+                </div>
+              )
+            }
+
+            return (
               <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`block px-3 py-2.5 rounded text-sm font-medium transition-colors hover:bg-gray-50 ${
-                  link.active ? "text-green-700 font-bold" : "text-gray-700 hover:text-gray-900"
+                className={`block px-3 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 ${
+                  link.active ? "text-green-700 font-bold bg-green-50" : "text-gray-700 hover:text-gray-900"
                 }`}
               >
                 {link.label}
               </Link>
             )
-          ))}
+          })}
         </div>
       )}
     </nav>
@@ -136,9 +233,10 @@ export function SiteFooter() {
             </ul>
             <h4 className="font-bold text-gray-900 mb-4">Case Studies</h4>
             <ul className="space-y-2 text-sm text-gray-700">
-              {["Rewarding Generosity", "Supporters Into Fundraisers", "Integrated Ecosystems"].map(s => (
-                <li key={s}><a href="https://www.philanthroforge.com/case-studies" className="hover:text-gray-900">{s}</a></li>
-              ))}
+              <li><a href="https://www.philanthroforge.com/case-studies/rewarding-generosity" className="hover:text-gray-900">Rewarding Generosity</a></li>
+              <li><a href="https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" className="hover:text-gray-900">Supporters Into Fundraisers</a></li>
+              <li><a href="https://www.philanthroforge.com/case-studies/integrated-ecosystems" className="hover:text-gray-900">Integrated Ecosystems</a></li>
+              <li className="pt-2"><Link href="/case-studies" className="font-bold text-gray-900 hover:text-green-700">View All →</Link></li>
             </ul>
           </div>
 

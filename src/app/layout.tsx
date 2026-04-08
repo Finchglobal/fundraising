@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
+import { FloatingWhatsApp } from "@/components/ui/FloatingWhatsApp";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -19,10 +20,16 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "PhilanthroForge Fundraising | Trust-First Giving for India",
   description: "100% verified NGOs. Zero gateway fees. UPI-led donations for Indian nonprofits. Powered by PhilanthroForge.",
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#22c55e",
 };
 
 export default function RootLayout({
@@ -35,7 +42,10 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} ${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-montserrat">{children}</body>
+      <body className="min-h-full flex flex-col font-montserrat dark:bg-gray-950 dark:text-white">
+        {children}
+        <FloatingWhatsApp phoneNumber="919999999999" message="Hi PhilanthroForge, I need some help with fundraising." />
+      </body>
     </html>
   );
 }
