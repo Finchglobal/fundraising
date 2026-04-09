@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee, Plus, FileSpreadsheet, Sparkles, ArrowRight, ShieldCheck } from "lucide-react"
 import Link from "next/link"
+import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 
 export default async function DashboardHub() {
   const supabase = await createClient()
@@ -10,21 +11,25 @@ export default async function DashboardHub() {
   
   let orgId = null
   let orgName = "Demo NGO"
+  let isVerified = false
+
   if (user?.user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("organization_id, organizations(name)")
+      .select("organization_id, organizations(name, is_verified)")
       .eq("id", user.user.id)
       .single()
     orgId = profile?.organization_id
     orgName = (profile?.organizations as any)?.name || orgName
+    isVerified = (profile?.organizations as any)?.is_verified || false
   }
 
   // MVP Fallback
   if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name").limit(1).single()
+    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name, is_verified").limit(1).single()
     orgId = fallbackOrg?.id
     orgName = fallbackOrg?.name || orgName
+    isVerified = fallbackOrg?.is_verified || false
   }
 
   // KPIs
@@ -73,10 +78,38 @@ export default async function DashboardHub() {
   return (
     <div>
       {/* Welcome Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome back 👋</h1>
-        <p className="text-slate-500 text-sm">Managing campaigns for <strong className="text-slate-700">{orgName}</strong></p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Welcome back 👋</h1>
+          <div className="flex items-center gap-2">
+            <p className="text-slate-500 text-sm">Managing campaigns for <strong className="text-slate-700">{orgName}</strong></p>
+            {isVerified ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full border border-teal-200 uppercase tracking-wider">
+                <ShieldCheck className="h-3 w-3" /> Verified NGO
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200 uppercase tracking-wider">
+                Pending Review
+              </span>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Verification Nudge for Unverified NGOs */}
+      {!isVerified && (
+        <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 shadow-sm">
+          <div className="h-10 w-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+             <ShieldCheck className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-amber-900 leading-tight">Your NGO is awaiting verification</h3>
+            <p className="text-sm text-amber-700 mt-0.5 leading-relaxed">
+              Our compliance team is currently reviewing your application. You can create campaigns and simulate donations, but they won't be visible to the public until your account is approved.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -113,6 +146,10 @@ export default async function DashboardHub() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-8">
+            <PitchSimulationTool orgId={orgId} campaigns={campaigns || []} />
           </div>
 
           {/* Platform Fee Nudge */}

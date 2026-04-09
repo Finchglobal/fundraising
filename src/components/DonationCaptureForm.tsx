@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -13,6 +13,7 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   // Form State
   const [name, setName] = useState("")
@@ -24,6 +25,29 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
   const [tip, setTip] = useState<number>(0)
   const [anonymous, setAnonymous] = useState(false)
 
+  // Pre-fill user data if logged in
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+        setEmail(user.email || "")
+        
+        // Fetch profile for name
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single()
+        
+        if (profile?.full_name) {
+          setName(profile.full_name)
+        }
+      }
+    }
+    getUser()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !amount || !utr) return
@@ -32,6 +56,7 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
 
     const { error } = await supabase.from("donations").insert({
       campaign_id: campaignId,
+      donor_id: userId,
       donor_name: name,
       donor_email: email || null,
       donor_phone: phone || null,

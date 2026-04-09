@@ -44,7 +44,7 @@ export default function LoginPage() {
         const role = profile?.role || "donor"
         if (role === "super_admin") router.push("/admin")
         else if (role === "ngo_admin") router.push("/dashboard")
-        else router.push("/")
+        else router.push("/donor")
       }
     } else {
       // Magic Link Login

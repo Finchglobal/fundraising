@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import { ShieldCheck, CheckCircle2 } from "lucide-react"
+import { ShieldCheck, CheckCircle2, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
@@ -39,6 +39,12 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
     .eq("status", "verified")
     .order("created_at", { ascending: false })
     .limit(5)
+
+  const { data: updates } = await supabase
+    .from("impact_updates")
+    .select("*")
+    .eq("campaign_id", id)
+    .order("created_at", { ascending: false })
 
   const raised = campaign.raised_amount || 0
   const goal = campaign.public_goal || 0
@@ -94,9 +100,32 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                 Funds are deployed directly to the verified causes.
               </p>
               <Button variant="outline" className="text-teal-600 border-teal-200 hover:bg-teal-50">
-                View Proof Documents
               </Button>
             </div>
+
+            {/* Impact Timeline */}
+            {updates && updates.length > 0 && (
+              <div className="mt-12">
+                <h3 className="font-bold text-xl mb-6 flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-green-600" /> Impact Timeline
+                </h3>
+                <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                  {updates.map((update: any) => (
+                    <div key={update.id} className="relative flex items-start gap-6 group">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white border-2 border-green-500 text-green-600 z-10 shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                        <div className="w-2 h-2 bg-current rounded-full" />
+                      </div>
+                      <div className="flex-1 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="text-xs font-bold text-slate-400 mb-1">
+                          {new Date(update.created_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                        <p className="text-slate-800 leading-relaxed">{update.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Recent Donations */}
             <div className="mt-12">

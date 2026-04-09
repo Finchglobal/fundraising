@@ -18,13 +18,21 @@ const TEST_USERS = [
     email: 'ngo@bmat.org',
     password: 'NGO@Demo2025!',
     role: 'ngo_admin',
-    full_name: 'Bangalore Medical Aid Trust'
+    full_name: 'Bangalore Medical Aid Trust',
+    organization_id: '3326759e-b8d4-4bb3-accb-8ab2d9cd7ea1' // Bangalore Medical Aid Trust
   },
   {
     email: 'ngo@rgef.org',
     password: 'NGO@Demo2025!',
     role: 'ngo_admin',
-    full_name: 'Rural Girls Education Foundation'
+    full_name: 'Rural Girls Education Foundation',
+    organization_id: '3326759e-b8d4-4bb3-accb-8ab2d9cd7ea2' // Rural Girls Education Foundation
+  },
+  {
+    email: 'donor@example.com',
+    password: 'Donor@Demo2025!',
+    role: 'donor',
+    full_name: 'Regular Impact Donor'
   }
 ]
 
@@ -40,40 +48,37 @@ async function createTestUsers() {
       user_metadata: { full_name: user.full_name, role: user.role }
     })
 
+    let userId = authData.user?.id
+
     if (authError) {
       if (authError.message.includes('already been registered')) {
-        console.log(`⚠️  ${user.email} already exists, updating role...`)
-        // Find existing user and update profile
+        console.log(`⚠️  ${user.email} already exists, updating role/organization...`)
+        // Find existing user
         const { data: existingUsers } = await supabase.auth.admin.listUsers()
         const existingUser = existingUsers?.users?.find(u => u.email === user.email)
         if (existingUser) {
-          await supabase.from('profiles').upsert({
-            id: existingUser.id,
-            full_name: user.full_name,
-            role: user.role,
-            updated_at: new Date().toISOString()
-          })
-          console.log(`✅ Updated profile for ${user.email} → role: ${user.role}`)
+          userId = existingUser.id
         }
       } else {
         console.error(`❌ Error creating ${user.email}:`, authError.message)
+        continue
       }
-      continue
     }
 
-    if (authData.user) {
-      // Update or insert profile with role
+    if (userId) {
+      // Update or insert profile with role and organization_id
       const { error: profileError } = await supabase.from('profiles').upsert({
-        id: authData.user.id,
+        id: userId,
         full_name: user.full_name,
         role: user.role,
-        updated_at: new Date().toISOString()
+        organization_id: (user as any).organization_id || null
       })
       
       if (profileError) {
         console.error(`❌ Profile error for ${user.email}:`, profileError.message)
       } else {
-        console.log(`✅ Created: ${user.email} | Role: ${user.role} | Password: ${user.password}`)
+        const orgSuffix = (user as any).organization_id ? ` | Org Linked` : ''
+        console.log(`✅ Ready: ${user.email} | Role: ${user.role}${orgSuffix}`)
       }
     }
   }

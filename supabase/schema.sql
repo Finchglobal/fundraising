@@ -32,12 +32,19 @@ CREATE TABLE profiles (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Trigger to create profile after user signs up
+-- Trigger to create profile after user signs up and link legacy donations
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS TRIGGER AS $$
 BEGIN
+  -- 1. Create the profile
   INSERT INTO public.profiles (id, full_name, role)
   VALUES (new.id, new.raw_user_meta_data->>'full_name', 'donor');
+
+  -- 2. Link any legacy anonymous donations that match this email
+  UPDATE public.donations
+  SET donor_id = new.id
+  WHERE donor_email = new.email AND donor_id IS NULL;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -69,6 +76,7 @@ CREATE TABLE campaigns (
     public_goal NUMERIC NOT NULL,
     raised_amount NUMERIC DEFAULT 0,
     status campaign_status DEFAULT 'draft'::campaign_status,
+    is_featured BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -154,6 +162,31 @@ USING (
 CREATE POLICY "NGO Admins can update own campaign donations" 
 ON donations FOR UPDATE 
 USING (
+  campaign_id IN (
+    SELECT id FROM campaigns WHERE organization_id IN (
+      SELECT organization_id FROM profiles WHERE id = auth.uid() AND role = 'ngo_admin'
+    )
+  )
+);
+
+-- 7. Impact Updates
+CREATE TABLE impact_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- RLS for Impact Updates
+ALTER TABLE impact_updates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view impact updates" 
+ON impact_updates FOR SELECT 
+USING (true);
+
+CREATE POLICY "NGO Admins can post updates to own campaigns" 
+ON impact_updates FOR INSERT 
+WITH CHECK (
   campaign_id IN (
     SELECT id FROM campaigns WHERE organization_id IN (
       SELECT organization_id FROM profiles WHERE id = auth.uid() AND role = 'ngo_admin'

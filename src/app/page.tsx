@@ -1,12 +1,30 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users } from "lucide-react"
+import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp } from "lucide-react"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
+import { LiveActivityTicker } from "@/components/LiveActivityTicker"
+import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 
 export default async function LandingPage() {
   const supabase = await createClient()
   
+  const { data: featuredCampaigns } = await supabase
+    .from("campaigns")
+    .select(`
+      id,
+      title,
+      hero_image_url,
+      public_goal,
+      raised_amount,
+      story,
+      organization_id,
+      organizations ( name, is_verified )
+    `)
+    .eq("status", "published")
+    .eq("is_featured", true)
+    .limit(3)
+
   const { data: campaigns } = await supabase
     .from("campaigns")
     .select(`
@@ -20,6 +38,7 @@ export default async function LandingPage() {
       organizations ( name, is_verified )
     `)
     .eq("status", "published")
+    .eq("is_featured", false)
     .limit(6)
     
   return (
@@ -90,6 +109,99 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      <LiveActivityTicker />
+      
+      {/* Simulation Tool for Pitch Demo */}
+      <section className="bg-slate-50 py-8 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4">
+          <PitchSimulationTool 
+            orgId={featuredCampaigns?.[0]?.organization_id || ""} 
+            campaigns={featuredCampaigns || []} 
+          />
+        </div>
+      </section>
+
+      {/* ── CURATED SELECTIONS ───────────────────────────── */}
+      {featuredCampaigns && featuredCampaigns.length > 0 && (
+        <section className="py-20 px-4 bg-white relative overflow-hidden">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#22c55e 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }}></div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-[10px] font-black tracking-widest uppercase text-green-700 bg-green-100 rounded-full border border-green-200">
+                <Trophy className="h-3 w-3" /> Editor's Choice
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight mb-4">Curated Selections</h2>
+              <p className="text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed">
+                Hand-picked campaigns that represent our most urgent needs and highest-impact community projects.
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-10">
+              {/* Primary Featured Card */}
+              {featuredCampaigns[0] && (
+                <Link href={`/campaigns/${featuredCampaigns[0].id}`} className="group relative flex flex-col h-full bg-slate-950 rounded-3xl overflow-hidden shadow-2xl shadow-green-900/10 transition-transform duration-500 hover:-translate-y-2 lg:col-span-1">
+                  <div className="relative h-96 w-full">
+                    <img 
+                      src={featuredCampaigns[0].hero_image_url} 
+                      alt="" 
+                      className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                    <div className="absolute top-6 left-6 flex gap-2">
+                       <span className="bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Most Urgent</span>
+                    </div>
+                  </div>
+                  <div className="p-8 mt-auto relative z-10">
+                    <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-3">{(featuredCampaigns[0].organizations as any)?.name}</p>
+                    <h3 className="text-3xl font-black text-white mb-4 leading-tight">{featuredCampaigns[0].title}</h3>
+                    <p className="text-gray-400 text-sm mb-8 line-clamp-2">{featuredCampaigns[0].story}</p>
+                    <div className="flex items-center justify-between group/btn">
+                      <div className="text-white text-lg font-black">
+                        ₹{Number(featuredCampaigns[0].raised_amount).toLocaleString()} <span className="text-gray-500 text-sm font-normal">raised</span>
+                      </div>
+                      <span className="bg-white text-slate-950 px-6 py-3 rounded-xl font-bold text-sm transition-all group-hover/btn:bg-green-400 group-hover/btn:text-white flex items-center gap-2">
+                        Give Now <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Secondary Featured List */}
+              <div className="flex flex-col gap-6 lg:col-span-1">
+                {featuredCampaigns.slice(1, 4).map((c: any) => (
+                  <Link key={c.id} href={`/campaigns/${c.id}`} className="flex flex-col sm:flex-row bg-white border border-gray-100 p-4 rounded-2xl gap-5 group hover:border-green-300 hover:shadow-xl hover:shadow-green-500/5 transition-all">
+                    <div className="w-full sm:w-40 h-40 flex-shrink-0 rounded-xl overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500">
+                      <img src={c.hero_image_url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="flex flex-col justify-center py-2">
+                      <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1.5">{c.organizations?.name}</p>
+                      <h4 className="font-black text-gray-900 mb-2 leading-snug group-hover:text-green-700 transition-colors line-clamp-2">{c.title}</h4>
+                      <div className="flex items-center gap-4 mt-auto">
+                         <div className="text-sm font-black text-slate-900">₹{Number(c.raised_amount).toLocaleString()}</div>
+                         <div className="h-4 w-px bg-gray-200"></div>
+                         <span className="text-xs font-bold text-green-600 flex items-center gap-1">Fast Track <TrendingUp className="h-3 w-3" /></span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+                
+                {/* Visual Filler if less than 3 featured */}
+                {featuredCampaigns.length < 3 && (
+                   <div className="flex-1 bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl flex flex-col items-center justify-center p-8 text-center border border-dashed border-green-200">
+                      <HeartPulse className="h-10 w-10 text-green-300 mb-3" />
+                      <p className="text-sm font-bold text-green-800">More curated causes coming soon</p>
+                      <p className="text-xs text-green-600 mt-1">Our team is verifying more NGOs right now.</p>
+                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
       <section className="py-20 px-4 bg-gray-50 border-y border-gray-100">
