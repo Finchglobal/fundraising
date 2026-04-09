@@ -159,6 +159,16 @@ USING (
   )
 );
 
+CREATE POLICY "Donors can view own donations" 
+ON donations FOR SELECT 
+USING (auth.uid() = donor_id);
+
+CREATE POLICY "Platform Admins can view all donations" 
+ON donations FOR SELECT 
+USING (
+  (SELECT role FROM profiles WHERE id = auth.uid()) = 'super_admin'
+);
+
 CREATE POLICY "NGO Admins can update own campaign donations" 
 ON donations FOR UPDATE 
 USING (

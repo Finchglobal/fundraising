@@ -54,9 +54,13 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
 
     setLoading(true)
 
+    // Ensure we have the latest user ID at submission time
+    const { data: { user } } = await supabase.auth.getUser()
+    const currentUserId = user?.id || userId
+
     const { error } = await supabase.from("donations").insert({
       campaign_id: campaignId,
-      donor_id: userId,
+      donor_id: currentUserId,
       donor_name: name,
       donor_email: email || null,
       donor_phone: phone || null,
