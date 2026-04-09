@@ -18,14 +18,31 @@ export default function DonationsDashboardPage() {
   const fetchDashboardData = async () => {
     setLoading(true)
     
-    // MVP Fallback: Grabbing all for Demo if Auth isn't strict. 
-    // In production, RLS handles this using org_id linked to user.
-    const { data: org } = await supabase.from("organizations").select("*").limit(1).single()
-    if (org) setOrgData(org)
+    // Get current user's organization
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = "/login"
+      return
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id, organizations(*)")
+      .eq("id", user.id)
+      .single()
+
+    const currentOrgId = profile?.organization_id
+    if (profile?.organizations) setOrgData(profile.organizations)
+
+    if (!currentOrgId) {
+      setLoading(false)
+      return
+    }
 
     const { data } = await supabase
       .from("donations")
-      .select("*, campaigns(title)")
+      .select("*, campaigns!inner(title, organization_id)")
+      .eq("campaigns.organization_id", currentOrgId)
       .order("created_at", { ascending: false })
     
     if (data) {

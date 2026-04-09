@@ -216,6 +216,7 @@ export default function LoginPage() {
               {[
                 { label: "Super Admin", email: "admin@philanthroforge.com", pw: "PF@Admin2025!" },
                 { label: "NGO Admin", email: "ngo@bmat.org", pw: "NGO@Demo2025!" },
+                { label: "Donor Profile", email: "donor@example.com", pw: "Donor@Demo2025!" },
               ].map(cred => (
                 <button
                   key={cred.label}

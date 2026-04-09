@@ -1,285 +1,136 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/server"
+import { AlertCircle, FileSpreadsheet, Download, ReceiptIndianRupee, CreditCard, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Download, FileSpreadsheet, IndianRupee, CheckCircle2, Clock, RefreshCw, Loader2 } from "lucide-react"
-import jsPDF from "jspdf"
-import "jspdf-autotable"
 
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF
-    lastAutoTable: { finalY: number }
-  }
-}
+export default async function PlatformInvoicesPage() {
+  const supabase = await createClient()
 
-interface InvoiceLineItem {
-  campaign_id: string
-  campaign_title: string
-  raised_amount: number
-  fee_rate: number
-  fee_due: number
-  period: string
-}
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
 
-export default function InvoicesPage() {
-  const supabase = createClient()
-  const [loading, setLoading] = useState(true)
-  const [orgData, setOrgData] = useState<any>(null)
-  const [campaigns, setCampaigns] = useState<any[]>([])
-  const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
-  const [totalDue, setTotalDue] = useState(0)
-  const [totalRaised, setTotalRaised] = useState(0)
-  const [generatingPdf, setGeneratingPdf] = useState(false)
+  // Fetch organization based on user profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", user.id)
+    .single()
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
+  const orgId = profile?.organization_id
+  if (!orgId) return (
+    <div className="py-20 text-center">
+      <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+      <h2 className="text-xl font-bold text-slate-900">No Organization Linked</h2>
+      <p className="text-slate-500 mt-2">You need to be part of a verified NGO to view this page.</p>
+    </div>
+  )
 
-      const { data: org } = await supabase.from("organizations").select("*").limit(1).single()
-      if (org) setOrgData(org)
-
-      const { data: camps } = await supabase
-        .from("campaigns")
-        .select("id, title, public_goal, raised_amount, platform_buffer, status, created_at")
-        .order("created_at", { ascending: false })
-
-      if (camps) {
-        setCampaigns(camps)
-        
-        // Build line items only for campaigns that have raised money
-        const items: InvoiceLineItem[] = camps
-          .filter(c => (c.raised_amount || 0) > 0)
-          .map(c => {
-            const feeRate = 0.02 // 2% SaaS usage fee
-            const feeDue = Math.round(c.raised_amount * feeRate)
-            const period = new Date(c.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
-            return {
-              campaign_id: c.id,
-              campaign_title: c.title,
-              raised_amount: c.raised_amount,
-              fee_rate: feeRate,
-              fee_due: feeDue,
-              period,
-            }
-          })
-        
-        setLineItems(items)
-        setTotalRaised(items.reduce((s, i) => s + i.raised_amount, 0))
-        setTotalDue(items.reduce((s, i) => s + i.fee_due, 0))
-      }
-      setLoading(false)
-    }
-    fetchData()
-  }, [])
-
-  const generateInvoicePDF = () => {
-    if (!orgData) return
-    setGeneratingPdf(true)
-
-    const doc = new jsPDF()
-    const invoiceNo = `PF-INV-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
-
-    // Header block
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(24)
-    doc.setTextColor(15, 118, 110)
-    doc.text("PHILANTHROFORGE", 14, 20)
-
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    doc.text("Fundraising Infrastructure for Indian NGOs & Trusts", 14, 27)
-    doc.text("contact@philanthroforge.com | www.philanthroforge.com", 14, 33)
-
-    // Invoice metadata (right-aligned)
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(18)
-    doc.setTextColor(30, 30, 30)
-    doc.text("TAX INVOICE", 196, 20, { align: "right" })
-
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    doc.text(`Invoice No: ${invoiceNo}`, 196, 28, { align: "right" })
-    doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, 196, 34, { align: "right" })
-    doc.text(`Due Date: ${new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN")}`, 196, 40, { align: "right" })
-
-    // Divider
-    doc.setDrawColor(200, 200, 200)
-    doc.setLineWidth(0.5)
-    doc.line(14, 48, 196, 48)
-
-    // Bill To block
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(11)
-    doc.setTextColor(30, 30, 30)
-    doc.text("BILLED TO:", 14, 58)
-
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(10)
-    doc.text(orgData.name || "NGO Partner", 14, 65)
-    doc.text(`PAN: ${orgData.pan_number || "On file"}`, 14, 71)
-    doc.text(`Reg No: ${orgData.registration_number || "On file"}`, 14, 77)
-
-    // Service Description table
-    doc.autoTable({
-      startY: 90,
-      head: [["Campaign Title", "Funds Raised (₹)", "Fee Rate", "Amount Due (₹)"]],
-      body: lineItems.map(item => [
-        item.campaign_title,
-        item.raised_amount.toLocaleString("en-IN"),
-        "2%",
-        item.fee_due.toLocaleString("en-IN"),
-      ]),
-      foot: [
-        ["", `Total Raised: ₹${totalRaised.toLocaleString("en-IN")}`, "", `Total Due: ₹${totalDue.toLocaleString("en-IN")}`]
-      ],
-      theme: "grid",
-      headStyles: { fillColor: [15, 118, 110], textColor: [255, 255, 255], fontStyle: "bold" },
-      footStyles: { fillColor: [241, 245, 249], textColor: [30, 30, 30], fontStyle: "bold" },
-      styles: { fontSize: 9, cellPadding: 5 },
-    })
-
-    const finalY = doc.lastAutoTable.finalY || 160
-
-    // Payment Instructions
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(11)
-    doc.setTextColor(30, 30, 30)
-    doc.text("Payment Instructions", 14, finalY + 18)
-    
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(9)
-    doc.setTextColor(80, 80, 80)
-    doc.text("Please transfer the total amount due to the Philanthroforge account within 15 days of this invoice date.", 14, finalY + 26)
-    doc.text("Payment via NEFT/IMPS/UPI to: philanthroforge@hdfcbank | A/C: 1234567890 | IFSC: HDFC0001234", 14, finalY + 33)
-
-    // Disclaimer
-    doc.setFontSize(8)
-    doc.setTextColor(150, 150, 150)
-    doc.text("This invoice is generated automatically by the Philanthroforge Fundraising Platform. The 2% usage fee covers:", 14, finalY + 50)
-    doc.text("verification infrastructure, campaign hosting, AI share tools, receipt management, and technical support.", 14, finalY + 56)
-
-    doc.save(`Philanthroforge_Invoice_${invoiceNo}.pdf`)
-    setGeneratingPdf(false)
-  }
-
-  const statCards = [
-    { label: "Total Raised Across Campaigns", value: `₹${totalRaised.toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-teal-600", bg: "bg-teal-50" },
-    { label: "Platform Fee Due (2%)", value: `₹${totalDue.toLocaleString("en-IN")}`, icon: FileSpreadsheet, color: "text-indigo-600", bg: "bg-indigo-50" },
-    { label: "Active Campaigns", value: campaigns.filter(c => c.status === "published").length, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-    { label: "Pending Settlement", value: campaigns.filter(c => (c.raised_amount || 0) > 0).length, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
-  ]
+  // Fetch Invoices
+  const { data: invoices } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("organization_id", orgId)
+    .order("billing_period_start", { ascending: false })
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2 flex items-center gap-2">
-            <FileSpreadsheet className="h-8 w-8 text-indigo-500" /> Platform Invoices
-          </h1>
-          <p className="text-slate-600">Monthly billing summary for your 2% Philanthroforge platform usage fee.</p>
+    <div className="max-w-5xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Platform Invoices & Billing</h1>
+        <p className="text-slate-500 font-medium">PhilanthroForge is a SaaS tool. Manage your usage statements and access GST invoices below.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-2xl text-white overflow-hidden relative shadow-xl">
+          <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4">
+             <ReceiptIndianRupee className="h-24 w-24 text-slate-800/50" />
+          </div>
+          
+          <h3 className="text-lg font-bold mb-2">Our Transparent Pricing Logic</h3>
+          <p className="text-slate-400 text-sm leading-relaxed mb-6 max-w-md">
+            Direct bank transfers via UPI bear zero gateway fees in standard use. PhilanthroForge invoices organizations separately at 2% for SaaS usage (including verification algorithms, receipts printing, and AI Share features) ensuring zero opaque deductions.
+          </p>
+          
+          <div className="flex gap-4">
+             <Button className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold border-0">
+               Update Billing Details
+             </Button>
+          </div>
         </div>
-        <Button
-          onClick={generateInvoicePDF}
-          disabled={loading || generatingPdf || lineItems.length === 0}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
-        >
-          {generatingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          Download Invoice PDF
-        </Button>
+
+        <div className="bg-teal-50/50 p-6 rounded-2xl border border-teal-100 flex flex-col justify-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-2">Current Balance</p>
+          <div className="text-4xl font-black text-slate-900 mb-1">₹0.00</div>
+          <p className="text-xs text-teal-800 font-medium">All dues cleared</p>
+        </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statCards.map((s) => (
-          <Card key={s.label} className="border-slate-200">
-            <CardContent className="p-5">
-              <div className={`h-10 w-10 rounded-xl ${s.bg} flex items-center justify-center mb-3`}>
-                <s.icon className={`h-5 w-5 ${s.color}`} />
-              </div>
-              <div className={`text-2xl font-extrabold ${s.color}`}>{loading ? "—" : s.value}</div>
-              <p className="text-xs text-slate-500 mt-1">{s.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Line Items Table */}
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader>
-          <CardTitle>Fee Breakdown by Campaign</CardTitle>
-          <CardDescription>
-            The 2% platform support fee is calculated on successfully raised funds and billed monthly.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4 font-semibold">Campaign</th>
-                  <th className="px-6 py-4 font-semibold">Period</th>
-                  <th className="px-6 py-4 font-semibold">Raised Amount</th>
-                  <th className="px-6 py-4 font-semibold text-center">Fee Rate</th>
-                  <th className="px-6 py-4 font-semibold text-right">Fee Due</th>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2"><FileSpreadsheet className="h-5 w-5 text-teal-600" /> Billing History</h2>
+        </div>
+        
+        {invoices && invoices.length > 0 ? (
+          <div className="overflow-x-auto text-slate-900">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Billing Period</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                      <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" /> Loading billing data...
+              <tbody className="divide-y divide-slate-50">
+                {invoices.map((invoice: any) => (
+                  <tr key={invoice.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-bold text-slate-900">
+                        {new Date(invoice.billing_period_start).toLocaleDateString()} - {new Date(invoice.billing_period_end).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-slate-400 font-medium font-mono mt-0.5">INV-{invoice.id.split("-")[0].toUpperCase()}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-black text-slate-900">₹{Number(invoice.total_amount).toLocaleString()}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                       <span className={`inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                         invoice.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                       }`}>
+                         {invoice.status}
+                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {invoice.status !== 'paid' && (
+                          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100">
+                            <CreditCard className="h-3 w-3" /> Pay Now
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs text-slate-500 hover:text-slate-900">
+                          <Download className="h-3 w-3" /> PDF
+                        </Button>
+                      </div>
                     </td>
                   </tr>
-                ) : lineItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                      No billable campaigns yet. Invoice will generate once campaigns start raising funds.
-                    </td>
-                  </tr>
-                ) : (
-                  lineItems.map((item) => (
-                    <tr key={item.campaign_id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-slate-800 truncate max-w-[260px]">{item.campaign_title}</p>
-                      </td>
-                      <td className="px-6 py-4 text-slate-500">{item.period}</td>
-                      <td className="px-6 py-4 font-semibold text-slate-900">₹{item.raised_amount.toLocaleString("en-IN")}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">2%</span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-bold text-indigo-700">₹{item.fee_due.toLocaleString("en-IN")}</td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
-              {!loading && lineItems.length > 0 && (
-                <tfoot className="bg-slate-50 border-t-2 border-slate-200">
-                  <tr>
-                    <td colSpan={2} className="px-6 py-4 font-bold text-slate-900">Total</td>
-                    <td className="px-6 py-4 font-bold text-slate-900">₹{totalRaised.toLocaleString("en-IN")}</td>
-                    <td></td>
-                    <td className="px-6 py-4 text-right text-xl font-extrabold text-indigo-700">₹{totalDue.toLocaleString("en-IN")}</td>
-                  </tr>
-                </tfoot>
-              )}
             </table>
           </div>
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="p-12 text-center text-slate-500">
+            <p className="font-semibold">No invoices generated yet.</p>
+            <p className="text-sm mt-1">Invoices are automatically generated at the end of every active month.</p>
+          </div>
+        )}
+      </div>
 
-      {/* Info note */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800 flex gap-3 items-start">
-        <FileSpreadsheet className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <strong className="font-semibold block mb-1">Transparent Billing Policy</strong>
-          Philanthroforge charges 2% of successfully raised funds as a monthly software support fee. This covers campaign hosting, verification infrastructure, AI tools, receipt management, and technical support. 
-          You are never charged upfront. Invoices are generated after funds are raised.
+      {/* Tax Section Note */}
+      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-start gap-4">
+        <div className="bg-white p-2 border border-slate-100 rounded-lg shadow-sm">
+           <ExternalLink className="h-5 w-5 text-slate-400" />
+        </div>
+        <div className="flex-1 text-sm text-slate-600">
+           <p className="font-bold text-slate-900 mb-1">Corporate Details & GST</p>
+           <p>Updating your organization’s profile with accurate GST and legal jurisdiction establishes exact SaaS fee calculation based on current domestic billing rules.</p>
         </div>
       </div>
     </div>

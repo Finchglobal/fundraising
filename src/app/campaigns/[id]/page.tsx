@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
+import CopyUpiButton from "@/components/CopyUpiButton"
 
 export default async function CampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -50,9 +51,10 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
   const goal = campaign.public_goal || 0
   const progress = Math.min((raised / goal) * 100, 100)
 
-  // Demo QR Code using quickchart.io for the UPI ID
+  // Demo QR Code using quickchart.io for the UPI ID — properly URL-encoded
   const upiId = campaign.organizations?.upi_id || "demo@upi"
-  const qrUrl = `https://quickchart.io/qr?text=upi://pay?pa=${upiId}&pn=${encodeURIComponent(campaign.organizations?.name)}&size=300`
+  const upiDeeplink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(campaign.organizations?.name || "")}&cu=INR`
+  const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiDeeplink)}&size=300&margin=2`
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24 lg:pb-0">
@@ -100,6 +102,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                 Funds are deployed directly to the verified causes.
               </p>
               <Button variant="outline" className="text-teal-600 border-teal-200 hover:bg-teal-50">
+                View Proof Documents
               </Button>
             </div>
 
@@ -175,9 +178,10 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                     <img src={qrUrl} alt="UPI QR Code" className="w-40 h-40 object-contain mx-auto" />
                   </div>
                   <p className="font-bold text-slate-800 mb-1">Scan to Pay via Any UPI App</p>
-                  <p className="text-sm text-slate-500 mb-4 break-all font-mono bg-slate-200/50 p-2 rounded">
+                  <p className="text-xs text-slate-500 mb-3 break-all font-mono bg-slate-100 p-2 rounded border border-slate-200">
                     {upiId}
                   </p>
+                  <CopyUpiButton upiId={upiId} />
                 </div>
 
                 <div className="space-y-4">
@@ -196,14 +200,18 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
       </main>
 
       {/* Sticky Bottom Bar (Mobile Only) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 flex items-center justify-between gap-4">
-        <div className="flex flex-col flex-1">
-          <span className="font-bold text-slate-900 text-lg">₹{raised.toLocaleString('en-IN')} raised</span>
-          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mt-1">
-            <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />
-          </div>
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-3 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="font-bold text-slate-900">₹{raised.toLocaleString('en-IN')} raised</span>
+          <span className="text-sm text-slate-400">of ₹{goal.toLocaleString('en-IN')}</span>
         </div>
-        <DonationCaptureForm campaignId={campaign.id} triggerClassName="bg-teal-600 hover:bg-teal-500 text-white font-bold py-6 px-6 rounded-xl shadow-md whitespace-nowrap" />
+        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="flex gap-2">
+          <CopyUpiButton upiId={upiId} compact />
+          <DonationCaptureForm campaignId={campaign.id} triggerClassName="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-md text-sm flex items-center justify-center gap-2" />
+        </div>
       </div>
     </div>
   )

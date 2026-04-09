@@ -57,7 +57,7 @@ export default async function DonationHistoryPage() {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <p className="text-lg font-black text-gray-900">₹{Number(d.amount).toLocaleString()}</p>
-                      {d.platform_tip > 0 && (
+                      {Number(d.platform_tip) > 0 && (
                         <p className="text-[10px] text-gray-400 font-bold">+ ₹{d.platform_tip} Tip</p>
                       )}
                     </td>

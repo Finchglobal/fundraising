@@ -38,7 +38,7 @@ export default async function LandingPage() {
       organizations ( name, is_verified )
     `)
     .eq("status", "published")
-    .eq("is_featured", false)
+    .order("raised_amount", { ascending: false })
     .limit(6)
     
   return (

@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ShieldCheck, Loader2, Upload, FileText } from "lucide-react"
+import { ShieldCheck, Loader2, Upload, FileText, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
 export default function NGOOnboardingPage() {
@@ -16,54 +16,89 @@ export default function NGOOnboardingPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
-  
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     name: "",
     pan_number: "",
     registration_number: "",
     upi_id: "",
     description: "",
+    "12a_number": "",
+    "80g_number": "",
+    csr_number: "",
   })
 
-  // Mock fields for CSR & 80G intended for MVP Pitch, 
-  // not yet in SQL schema but visually present for trust demonstration.
-  const [trustExt, setTrustExt] = useState({
-    csr1: "",
-    has80G: "yes",
-    docFile: null as File | null
-  })
+  // State for success feedback
+  const [isSuccess, setIsSuccess] = useState(false)
+
+  const validateStep1 = () => {
+    const newErrors: Record<string, string> = {}
+    if (!formData.name || formData.name.length < 3) newErrors.name = "Entity name must be at least 3 characters."
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number.toUpperCase())) newErrors.pan_number = "Invalid PAN format (e.g., AAATT1234T)."
+    if (!formData.registration_number) newErrors.registration_number = "Registration ID is required."
+    if (!formData.description || formData.description.length < 50) newErrors.description = "Please provide a more detailed mission statement (min 50 chars)."
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep2 = () => {
+    const newErrors: Record<string, string> = {}
+    if (!formData.upi_id || !formData.upi_id.includes("@")) newErrors.upi_id = "Invalid UPI ID. Must contain @ (e.g., ngo@bank)."
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleNextStep = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validateStep1()) {
+      setStep(2)
+      window.scrollTo(0, 0)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!validateStep2()) return
     setLoading(true)
 
-    // Insert into Supabase Organizations table (is_verified defaults to false)
-    const { data: orgData, error: orgError } = await supabase.from("organizations").insert({
-      name: formData.name,
-      pan_number: formData.pan_number,
-      registration_number: formData.registration_number,
-      upi_id: formData.upi_id,
-      description: formData.description,
-      is_verified: false 
-    }).select().single()
+    try {
+      // Insert into Supabase Organizations table
+      const { data: orgData, error: orgError } = await supabase.from("organizations").insert({
+        name: formData.name,
+        pan_number: formData.pan_number.toUpperCase(),
+        registration_number: formData.registration_number,
+        upi_id: formData.upi_id,
+        description: formData.description,
+        "12a_number": formData["12a_number"] || null,
+        "80g_number": formData["80g_number"] || null,
+        csr_number: formData.csr_number || null,
+        is_verified: false 
+      }).select().single()
 
-    if (orgError) {
-      toast.error("Registration failed.", { description: orgError.message })
+      if (orgError) {
+        toast.error("Registration failed.", { description: orgError.message })
+        setLoading(false)
+        return
+      }
+
+      // Connect this user profile to the newly created org
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from("profiles").update({ 
+          organization_id: orgData.id, 
+          role: 'ngo_admin' 
+        }).eq("id", user.id)
+        
+        toast.success("Organization registered successfully!")
+      }
+
       setLoading(false)
-      return
+      setStep(3)
+      window.scrollTo(0, 0)
+    } catch (err: any) {
+      toast.error("An unexpected error occurred.")
+      setLoading(false)
     }
-
-    // Connect this user profile to the newly created org
-    const { data: userData } = await supabase.auth.getUser()
-    if (userData?.user) {
-       await supabase.from("profiles").update({ 
-         organization_id: orgData.id, 
-         role: 'ngo_admin' 
-       }).eq("id", userData.user.id)
-    }
-
-    setLoading(false)
-    setStep(3) // Success Step
   }
 
   return (
@@ -72,86 +107,135 @@ export default function NGOOnboardingPage() {
       
       <main className="flex-grow flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-2xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">NGO Partner Onboarding</h1>
-            <p className="text-slate-600">Join the trust-first fundraising network for Indian nonprofits.</p>
+          {/* Progress Indicator */}
+          <div className="mb-8 flex justify-between items-center px-2">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className="flex items-center gap-2">
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                  step === s ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/20' : 
+                  step > s ? 'bg-teal-100 text-teal-700' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
+                </div>
+                {s < 3 && <div className={`h-0.5 w-12 sm:w-20 rounded ${step > s ? 'bg-teal-600' : 'bg-slate-200'}`} />}
+              </div>
+            ))}
           </div>
 
-          <Card className="border-slate-200 shadow-lg border-t-4 border-t-teal-500">
+          <Card className="border-slate-200 shadow-xl overflow-hidden rounded-2xl">
             {step === 1 && (
-              <form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
-                <CardHeader>
-                  <CardTitle className="text-xl">Step 1: Core Organization Details</CardTitle>
-                  <CardDescription>We strictly onboard registered trusts and Section 8 companies.</CardDescription>
+              <form onSubmit={handleNextStep} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                  <CardTitle className="text-xl font-bold text-slate-900">Step 1: Core Organization Details</CardTitle>
+                  <CardDescription>We strictly onboard registered trusts, societies and Section 8 companies.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                     <Label>Legal Entity Name</Label>
-                     <Input required placeholder="As per PAN card" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                     <Label className="text-slate-700 font-semibold">Legal Entity Name <span className="text-red-500">*</span></Label>
+                     <Input 
+                       placeholder="As per PAN card" 
+                       value={formData.name} 
+                       onChange={e => { setFormData({...formData, name: e.target.value}); if(errors.name) setErrors(prev => ({...prev, name: ''})) }} 
+                       className={errors.name ? "border-red-400 focus-visible:ring-red-400" : ""}
+                     />
+                     {errors.name && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.name}</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                       <Label>Organization PAN Number</Label>
-                       <Input required placeholder="e.g. AAATT1234T" className="uppercase" value={formData.pan_number} onChange={e => setFormData({...formData, pan_number: e.target.value})} />
+                       <Label className="text-slate-700 font-semibold">Organization PAN <span className="text-red-500">*</span></Label>
+                       <Input 
+                         placeholder="e.g. AAATT1234T" 
+                         className={`uppercase ${errors.pan_number ? "border-red-400 focus-visible:ring-red-400" : ""}`} 
+                         maxLength={10}
+                         value={formData.pan_number} 
+                         onChange={e => { setFormData({...formData, pan_number: e.target.value}); if(errors.pan_number) setErrors(prev => ({...prev, pan_number: ''})) }} 
+                       />
+                       {errors.pan_number && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.pan_number}</p>}
                     </div>
                     <div className="space-y-2">
-                       <Label>Trust / Society Registration ID</Label>
-                       <Input required placeholder="Registration Number" value={formData.registration_number} onChange={e => setFormData({...formData, registration_number: e.target.value})} />
+                       <Label className="text-slate-700 font-semibold">Registration ID <span className="text-red-500">*</span></Label>
+                       <Input 
+                         placeholder="Trust/Society Reg No." 
+                         value={formData.registration_number} 
+                         onChange={e => { setFormData({...formData, registration_number: e.target.value}); if(errors.registration_number) setErrors(prev => ({...prev, registration_number: ''})) }} 
+                         className={errors.registration_number ? "border-red-400 focus-visible:ring-red-400" : ""}
+                       />
+                       {errors.registration_number && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.registration_number}</p>}
                     </div>
                   </div>
                   <div className="space-y-2">
-                     <Label>Brief Mission Statement</Label>
-                     <textarea required className="flex min-h-[100px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500" placeholder="What does your NGO do?" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                     <div className="flex justify-between items-center">
+                       <Label className="text-slate-700 font-semibold">Mission Statement <span className="text-red-500">*</span></Label>
+                       <span className={`text-[10px] font-bold ${formData.description.length < 50 ? 'text-red-400' : 'text-slate-400 uppercase tracking-wider'}`}>
+                         {formData.description.length}/50 min
+                       </span>
+                     </div>
+                     <textarea 
+                       className={`flex min-h-[100px] w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+                         errors.description ? "border-red-400" : "border-slate-200"
+                       }`} 
+                       placeholder="What is your organization's primary objective?" 
+                       value={formData.description} 
+                       onChange={e => { setFormData({...formData, description: e.target.value}); if(errors.description) setErrors(prev => ({...prev, description: ''})) }} 
+                     />
+                     {errors.description && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.description}</p>}
                   </div>
-                  <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-500">Continue to Step 2</Button>
+                  <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-500 rounded-xl h-11 shadow-lg shadow-teal-500/10">Continue to Step 2</Button>
                 </CardContent>
               </form>
             )}
 
             {step === 2 && (
-              <form onSubmit={handleSubmit}>
-                <CardHeader>
-                  <CardTitle className="text-xl">Step 2: Financial & Compliance</CardTitle>
-                  <CardDescription>We ensure zero platform fees by routing directly to your official UPI.</CardDescription>
+              <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-right-2 duration-300">
+                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                  <CardTitle className="text-xl font-bold text-slate-900">Step 2: Financial & Compliance</CardTitle>
+                  <CardDescription>Zero platform fees by routing donations directly to your bank account.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                     <Label>Official Bank UPI ID</Label>
-                     <Input required placeholder="ngo@sbi" value={formData.upi_id} onChange={e => setFormData({...formData, upi_id: e.target.value})} />
-                     <p className="text-xs text-slate-500 mt-1">Must be linked to your official current account.</p>
+                     <Label className="text-slate-700 font-semibold">Official UPI ID <span className="text-red-500">*</span></Label>
+                     <Input 
+                       placeholder="ngo@bank" 
+                       value={formData.upi_id} 
+                       onChange={e => { setFormData({...formData, upi_id: e.target.value}); if(errors.upi_id) setErrors(prev => ({...prev, upi_id: ''})) }} 
+                       className={errors.upi_id ? "border-red-400 focus-visible:ring-red-400" : ""}
+                     />
+                     <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-tighter font-semibold">Must be linked to your trust's official bank account.</p>
+                     {errors.upi_id && <p className="text-[10px] text-red-500 font-bold uppercase mt-1">{errors.upi_id}</p>}
                   </div>
                   
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-4">
-                     <h3 className="font-semibold text-sm flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> Foundation Readiness</h3>
+                  <div className="p-5 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-4 shadow-inner">
+                     <h3 className="font-bold text-sm text-teal-900 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> Tax Compliance (Optional but Recommended)</h3>
                      
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                        <div className="space-y-2">
-                          <Label>80G Tax Exemption</Label>
-                          <select className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm" value={trustExt.has80G} onChange={e => setTrustExt({...trustExt, has80G: e.target.value})}>
-                            <option value="yes">Active</option>
-                            <option value="no">Not Applicable</option>
-                            <option value="pending">Applied</option>
-                          </select>
+                          <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
+                          <Input placeholder="e.g. IT/80G/12345" value={formData["80g_number"]} onChange={e => setFormData({...formData, "80g_number": e.target.value})} />
                        </div>
                        <div className="space-y-2">
-                          <Label>CSR-1 Log (Optional)</Label>
-                          <Input placeholder="CSR Registration Number" value={trustExt.csr1} onChange={e => setTrustExt({...trustExt, csr1: e.target.value})} />
+                          <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
+                          <Input placeholder="CSR000123456" value={formData.csr_number} onChange={e => setFormData({...formData, csr_number: e.target.value})} />
                        </div>
+                     </div>
+                     <div className="space-y-2">
+                        <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
+                        <Input placeholder="e.g. IT/12A/12345" value={formData["12a_number"]} onChange={e => setFormData({...formData, "12a_number": e.target.value})} />
                      </div>
                   </div>
 
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer">
-                     <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                     <p className="text-sm font-semibold text-slate-700">Upload Registration Certificate (PDF)</p>
-                     <p className="text-xs text-slate-500 mt-1">Select file or drag and drop</p>
+                  <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:bg-slate-50 transition-all group cursor-pointer">
+                     <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                        <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />
+                     </div>
+                     <p className="text-sm font-bold text-slate-700">Registration Certificate (PDF)</p>
+                     <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Select file or drag and drop</p>
                   </div>
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)} disabled={loading}>Back</Button>
-                    <Button type="submit" className="flex-[2] bg-teal-600 hover:bg-teal-500" disabled={loading}>
+                    <Button type="button" variant="outline" className="flex-1 rounded-xl h-11" onClick={() => setStep(1)} disabled={loading}>Back</Button>
+                    <Button type="submit" className="flex-[2] bg-teal-600 hover:bg-teal-500 rounded-xl h-11 shadow-lg shadow-teal-500/10 transition-all active:scale-[0.98]" disabled={loading}>
                       {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-                      Submit Application
+                      Register Organization
                     </Button>
                   </div>
                 </CardContent>
@@ -159,15 +243,15 @@ export default function NGOOnboardingPage() {
             )}
 
             {step === 3 && (
-              <CardContent className="py-16 flex flex-col items-center justify-center text-center">
-                 <div className="h-20 w-20 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-6">
-                    <ShieldCheck className="h-10 w-10" />
+              <CardContent className="py-20 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+                 <div className="h-20 w-20 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-teal-500/10">
+                    <CheckCircle2 className="h-10 w-10" />
                  </div>
-                 <h2 className="text-2xl font-bold text-slate-900 mb-2">Application Received!</h2>
-                 <p className="text-slate-600 mb-8 max-w-sm">
-                   Our compliance team will review your registration and PAN details. You will receive an email once your NGO is verified and can start publishing campaigns.
+                 <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Application Submitted!</h2>
+                 <p className="text-slate-600 mb-10 max-w-sm leading-relaxed">
+                   Our compliance team will review your registration details and PAN. You will receive an email once your NGO is verified and can start publishing campaigns.
                  </p>
-                 <Button onClick={() => router.push("/dashboard")} className="bg-slate-900 hover:bg-slate-800 text-white">
+                 <Button onClick={() => router.push("/dashboard")} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-12 px-8 font-bold shadow-lg">
                    Go to Workspace
                  </Button>
               </CardContent>

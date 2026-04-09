@@ -7,29 +7,37 @@ import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 export default async function DashboardHub() {
   const supabase = await createClient()
 
-  const { data: user } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    const { redirect } = await import("next/navigation")
+    redirect("/login")
+  }
   
   let orgId = null
   let orgName = "Demo NGO"
   let isVerified = false
 
-  if (user?.user) {
+  if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("organization_id, organizations(name, is_verified)")
-      .eq("id", user.user.id)
+      .eq("id", user.id)
       .single()
     orgId = profile?.organization_id
     orgName = (profile?.organizations as any)?.name || orgName
     isVerified = (profile?.organizations as any)?.is_verified || false
   }
 
-  // MVP Fallback
+  // If no org found, show helpful message instead of falling back to first org
   if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name, is_verified").limit(1).single()
-    orgId = fallbackOrg?.id
-    orgName = fallbackOrg?.name || orgName
-    isVerified = fallbackOrg?.is_verified || false
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Organization Not Found</h2>
+        <p className="text-slate-600 max-w-md">Your account is not yet linked to an organization. Please complete the onboarding process.</p>
+        <Link href="/onboarding" className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-500 shadow-lg transition-all active:scale-95">Complete Onboarding</Link>
+      </div>
+    )
   }
 
   // KPIs
