@@ -1,6 +1,22 @@
--- 0. Update Organizations table with missing columns
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS registration_certificate_url TEXT;
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE donations ADD COLUMN IF NOT EXISTS proof_url TEXT;
+
+-- Create storage bucket for donation proofs (Requires 'storage' extension)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('donation-proofs', 'donation-proofs', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- RLS for storage (Allow anyone to upload to the bucket)
+CREATE POLICY "Public can upload donation proofs"
+ON storage.objects FOR INSERT
+TO public
+WITH CHECK (bucket_id = 'donation-proofs');
+
+CREATE POLICY "Anyone can view donation proofs"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'donation-proofs');
 
 -- 1. Organizations: Allow authenticated users to register their NGO
 CREATE POLICY "Authenticated users can register organizations" 

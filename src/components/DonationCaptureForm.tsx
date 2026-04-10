@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle2, Loader2, IndianRupee, Info, AlertCircle } from "lucide-react"
+import { CheckCircle2, Loader2, IndianRupee, Info, AlertCircle, Camera, UploadCloud } from "lucide-react"
+import imageCompression from 'browser-image-compression';
 import { toast } from "sonner"
 
 // --- Validation helpers ---
@@ -92,6 +93,8 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
   const [tip, setTip] = useState<number>(0)
   const [anonymous, setAnonymous] = useState(false)
   const [nameVisibility, setNameVisibility] = useState<"full" | "first_only" | "anonymous">("full")
+  const [proofFile, setProofFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   // Pre-fill user data if logged in
   useEffect(() => {
@@ -145,6 +148,33 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
     const publicName = nameVisibility === "anonymous" ? "Anonymous" :
       nameVisibility === "first_only" ? name.split(" ")[0] : name
 
+    let proofUrl = null
+
+    if (proofFile) {
+      setUploading(true)
+      try {
+        const compressedFile = await imageCompression(proofFile, { maxSizeMB: 0.5, maxWidthOrHeight: 1200 });
+        const fileExt = proofFile.name.split('.').pop();
+        const fileName = `${campaignId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("donation-proofs")
+          .upload(fileName, compressedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("donation-proofs")
+          .getPublicUrl(fileName);
+        
+        proofUrl = publicUrl;
+      } catch (err: any) {
+        console.error("Upload failed:", err);
+        setFormError("Failed to upload the payment screenshot. You can still submit without it.");
+      }
+      setUploading(false)
+    }
+
     const { error } = await supabase.from("donations").insert({
       campaign_id: campaignId,
       donor_id: currentUserId,
@@ -155,6 +185,7 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
       amount: amount,
       platform_tip: tip,
       upi_utr: utr.trim(),
+      proof_url: proofUrl,
       is_anonymous: nameVisibility === "anonymous",
       status: "pending"
     })
@@ -321,6 +352,35 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
                 {!fieldErrors.pan && <FieldHint>Required to claim 50% tax deduction under Section 80G (if NGO is eligible).</FieldHint>}
               </div>
 
+              {/* Screenshot Upload */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold flex items-center gap-2">
+                  <Camera className="h-4 w-4 text-teal-600" />
+                  Upload Payment Screenshot <span className="text-slate-400 text-[10px] font-normal">(Optional but recommended)</span>
+                </Label>
+                <div 
+                  className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center cursor-pointer relative ${proofFile ? 'border-teal-500 bg-teal-50/30' : 'border-slate-200 hover:border-teal-400 bg-slate-50/50'}`}
+                  onClick={() => document.getElementById('proof-upload')?.click()}
+                >
+                  <input 
+                    id="proof-upload" type="file" accept="image/*" className="hidden" 
+                    onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                  />
+                  {proofFile ? (
+                    <div className="text-center">
+                      <div className="text-teal-600 font-bold text-xs truncate max-w-[200px] mb-1">{proofFile.name}</div>
+                      <div className="text-[10px] text-teal-500 font-medium">(Click to change)</div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2">
+                      <UploadCloud className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                      <p className="text-xs text-slate-500 font-medium">Upload GPAY / Paytm screenshot</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Improves verification speed by 2x</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Platform Tip */}
               <div className="pt-1">
                 <Label className="block mb-1.5">Optional Platform Tip</Label>
@@ -347,9 +407,9 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
                 </div>
               )}
 
-              <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <IndianRupee className="h-4 w-4 mr-2" />}
-                Submit Payment Details
+              <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={loading || uploading}>
+                {loading || uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <IndianRupee className="h-4 w-4 mr-2" />}
+                {uploading ? "Uploading proof..." : "Submit Payment Details"}
               </Button>
 
               <p className="text-center text-[10px] text-slate-400">

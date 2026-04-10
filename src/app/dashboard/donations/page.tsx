@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, XCircle, Loader2, RefreshCw, Receipt, Download } from "lucide-react"
+import { CheckCircle2, XCircle, Loader2, RefreshCw, Receipt, Download, Image as ImageIcon, ExternalLink } from "lucide-react"
 import { generate80GReceipt, numToWords } from "@/lib/utils/generateReceipt"
 
 export default function DonationsDashboardPage() {
@@ -191,9 +191,21 @@ export default function DonationsDashboardPage() {
                         <span className="font-bold text-slate-900">₹{donation.amount.toLocaleString('en-IN')}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded font-mono text-xs border border-slate-200 flex items-center justify-center min-w-[120px]">
-                          {donation.upi_utr}
-                        </code>
+                        <div className="flex flex-col items-center gap-2">
+                          <code className="px-2 py-1 bg-slate-100 text-slate-800 rounded font-mono text-xs border border-slate-200 flex items-center justify-center min-w-[120px]">
+                            {donation.upi_utr}
+                          </code>
+                          {donation.proof_url && (
+                             <a 
+                               href={donation.proof_url} 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="inline-flex items-center gap-1.5 text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded hover:bg-teal-100 transition-colors uppercase tracking-wider underline-offset-2 hover:underline"
+                             >
+                               <ImageIcon className="h-3 w-3" /> View Screenshot
+                             </a>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

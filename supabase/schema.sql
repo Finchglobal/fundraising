@@ -93,6 +93,7 @@ CREATE TABLE donations (
     amount NUMERIC NOT NULL,
     platform_tip NUMERIC DEFAULT 0,
     upi_utr TEXT UNIQUE NOT NULL,
+    proof_url TEXT,
     status donation_status DEFAULT 'pending'::donation_status,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
