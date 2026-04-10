@@ -23,9 +23,9 @@ export default function NGOOnboardingPage() {
     registration_number: "",
     upi_id: "",
     description: "",
-    "12a_number": "",
-    "80g_number": "",
-    csr_number: "",
+    registration_12a: "",
+    registration_80g: "",
+    csr_1_registration: "",
   })
 
   // State for success feedback
@@ -69,9 +69,9 @@ export default function NGOOnboardingPage() {
         registration_number: formData.registration_number,
         upi_id: formData.upi_id,
         description: formData.description,
-        "12a_number": formData["12a_number"] || null,
-        "80g_number": formData["80g_number"] || null,
-        csr_number: formData.csr_number || null,
+        registration_12a: formData.registration_12a || null,
+        registration_80g: formData.registration_80g || null,
+        csr_1_registration: formData.csr_1_registration || null,
         is_verified: false 
       }).select().single()
 
@@ -207,20 +207,20 @@ export default function NGOOnboardingPage() {
                   <div className="p-5 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-4 shadow-inner">
                      <h3 className="font-bold text-sm text-teal-900 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> Tax Compliance (Optional but Recommended)</h3>
                      
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
-                          <Input placeholder="e.g. IT/80G/12345" value={formData["80g_number"]} onChange={e => setFormData({...formData, "80g_number": e.target.value})} />
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
-                          <Input placeholder="CSR000123456" value={formData.csr_number} onChange={e => setFormData({...formData, csr_number: e.target.value})} />
-                       </div>
-                     </div>
-                     <div className="space-y-2">
-                        <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
-                        <Input placeholder="e.g. IT/12A/12345" value={formData["12a_number"]} onChange={e => setFormData({...formData, "12a_number": e.target.value})} />
-                     </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
+                           <Input placeholder="e.g. IT/80G/12345" value={formData.registration_80g} onChange={e => setFormData({...formData, registration_80g: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                           <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
+                           <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                         <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
+                         <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
+                      </div>
                   </div>
 
                   <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:bg-slate-50 transition-all group cursor-pointer">

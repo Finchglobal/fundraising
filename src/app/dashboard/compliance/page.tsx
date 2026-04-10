@@ -1,37 +1,92 @@
-import { createClient } from "@/lib/supabase/server"
-import { ShieldCheck, CheckCircle2, AlertCircle, FileText, UploadCloud, RefreshCw } from "lucide-react"
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { ShieldCheck, CheckCircle2, AlertCircle, FileText, RefreshCw, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
-export default async function CSRCompliancePage() {
-  const supabase = await createClient()
+export default function CSRCompliancePage() {
+  const supabase = createClient()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [org, setOrg] = useState<any>(null)
+  const [formData, setFormData] = useState({
+    registration_12a: "",
+    registration_80g: "",
+    csr_1_registration: "",
+    fcra_registration: ""
+  })
 
-  // Simplified MVP auth check
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  useEffect(() => {
+    async function fetchData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  // Fetch organization based on user profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user.id)
-    .single()
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .single()
 
-  const orgId = profile?.organization_id
-  if (!orgId) return (
+      if (profile?.organization_id) {
+        const { data: orgData } = await supabase
+          .from("organizations")
+          .select("*")
+          .eq("id", profile.organization_id)
+          .single()
+
+        if (orgData) {
+          setOrg(orgData)
+          setFormData({
+            registration_12a: orgData.registration_12a || "",
+            registration_80g: orgData.registration_80g || "",
+            csr_1_registration: orgData.csr_1_registration || "",
+            fcra_registration: orgData.fcra_registration || ""
+          })
+        }
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  const handleSave = async () => {
+    setSaving(true)
+    const { error } = await supabase
+      .from("organizations")
+      .update({
+        registration_12a: formData.registration_12a,
+        registration_80g: formData.registration_80g,
+        csr_1_registration: formData.csr_1_registration,
+        fcra_registration: formData.fcra_registration
+      })
+      .eq("id", org.id)
+
+    if (error) {
+      toast.error("Failed to update compliance settings")
+    } else {
+      toast.success("Compliance settings updated successfully")
+      setOrg({ ...org, ...formData })
+    }
+    setSaving(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
+    )
+  }
+
+  if (!org) return (
     <div className="py-20 text-center">
       <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
       <h2 className="text-xl font-bold text-gray-900">No Organization Linked</h2>
       <p className="text-gray-500 mt-2">You need to be part of a verified NGO to view this page.</p>
     </div>
   )
-
-  const { data: org } = await supabase
-    .from("organizations")
-    .select("*")
-    .eq("id", orgId)
-    .single()
-
-  if (!org) return null
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -64,7 +119,8 @@ export default async function CSRCompliancePage() {
           <input 
             type="text" 
             placeholder="e.g. AAATT1234E1234" 
-            defaultValue={org.registration_12a || ""}
+            value={formData.registration_12a}
+            onChange={(e) => setFormData({ ...formData, registration_12a: e.target.value })}
             className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium"
           />
         </div>
@@ -82,7 +138,8 @@ export default async function CSRCompliancePage() {
           <input 
             type="text" 
             placeholder="e.g. AAATT1234E1234" 
-            defaultValue={org.registration_80g || ""}
+            value={formData.registration_80g}
+            onChange={(e) => setFormData({ ...formData, registration_80g: e.target.value })}
             className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium"
           />
         </div>
@@ -100,7 +157,8 @@ export default async function CSRCompliancePage() {
           <input 
              type="text"
              placeholder="e.g. CSR00012345"
-             defaultValue={org.csr_1_registration || ""}
+             value={formData.csr_1_registration}
+             onChange={(e) => setFormData({ ...formData, csr_1_registration: e.target.value })}
              className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium" 
           />
         </div>
@@ -118,15 +176,21 @@ export default async function CSRCompliancePage() {
           <input 
              type="text"
              placeholder="e.g. 123450000"
-             defaultValue={org.fcra_registration || ""}
+             value={formData.fcra_registration}
+             onChange={(e) => setFormData({ ...formData, fcra_registration: e.target.value })}
              className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium" 
           />
         </div>
       </div>
 
       <div className="flex justify-end pt-4 border-t border-slate-200">
-        <Button className="bg-teal-600 hover:bg-teal-500 text-white font-bold w-full sm:w-auto shadow-lg shadow-teal-500/20">
-           <RefreshCw className="h-4 w-4 mr-2" /> Save Compliance Settings
+        <Button 
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-teal-600 hover:bg-teal-500 text-white font-bold w-full sm:w-auto shadow-lg shadow-teal-500/20"
+        >
+           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />} 
+           Save Compliance Settings
         </Button>
       </div>
 

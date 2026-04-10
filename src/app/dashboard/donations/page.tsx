@@ -100,7 +100,7 @@ export default function DonationsDashboardPage() {
       ngoContext: {
         name: orgData?.name || "Verified NGO Partner",
         address: orgData?.address || "India",
-        pan: orgData?.pan || "PENDING PAN",
+        pan: orgData?.pan_number || "PENDING PAN",
         registration_detail: orgData?.registration_number || "PENDING REG"
       }
     })
