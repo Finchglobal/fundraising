@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Heart, ShieldCheck, IndianRupee, Clock, ArrowRight, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import DonorReceiptButton from "@/components/donor/DonorReceiptButton"
 
 export default async function DonorDashboard() {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export default async function DonorDashboard() {
   // Fetch cumulative stats
   const { data: donations } = await supabase
     .from("donations")
-    .select("amount, status, campaign_id, campaigns(title, organization_id, organizations(name))")
+    .select("*, campaigns(title, organization_id, organizations(*))")
     .eq("donor_id", user.id)
 
   const verifiedDonations = donations?.filter(d => d.status === "verified") || []
@@ -85,9 +86,12 @@ export default async function DonorDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-black text-gray-900">₹{Number(d.amount).toLocaleString()}</p>
-                    <p className={`text-[10px] font-bold uppercase tracking-widest ${d.status === 'verified' ? 'text-green-600' : 'text-blue-600'}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest ${d.status === 'verified' ? 'text-green-600' : 'text-blue-600'} mb-1`}>
                       {d.status}
                     </p>
+                    {d.status === 'verified' && (
+                      <DonorReceiptButton donation={d} />
+                    )}
                   </div>
                 </div>
               ))

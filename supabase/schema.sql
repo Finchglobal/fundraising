@@ -19,6 +19,8 @@ CREATE TABLE organizations (
     registration_number TEXT,
     upi_id TEXT,
     logo_url TEXT,
+    registration_certificate_url TEXT,
+    address TEXT,
     is_verified BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -112,20 +114,37 @@ ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_share_assets ENABLE ROW LEVEL SECURITY;
 
--- Profiles: Users can read own profile
+-- Profiles: Users can read and update own profile
 CREATE POLICY "Users can view own profile" 
 ON profiles FOR SELECT 
 USING (auth.uid() = id);
 
--- Organizations: Anyone can view
+CREATE POLICY "Users can update own profile" 
+ON profiles FOR UPDATE
+USING (auth.uid() = id);
+
+-- Organizations: Anyone can view, Authenticated users can register
 CREATE POLICY "Anyone can view organizations" 
 ON organizations FOR SELECT 
 USING (true);
 
--- Beneficiary Applications: NGO Admins can view own
+CREATE POLICY "Authenticated users can register organizations" 
+ON organizations FOR INSERT 
+TO authenticated
+WITH CHECK (true);
+
+-- Beneficiary Applications: NGO Admins can view and insert own
 CREATE POLICY "NGO Admins view own applications" 
 ON beneficiary_applications FOR SELECT 
 USING (
+  organization_id IN (
+    SELECT organization_id FROM profiles WHERE id = auth.uid() AND role = 'ngo_admin'
+  )
+);
+
+CREATE POLICY "NGO Admins can insert beneficiary applications" 
+ON beneficiary_applications FOR INSERT 
+WITH CHECK (
   organization_id IN (
     SELECT organization_id FROM profiles WHERE id = auth.uid() AND role = 'ngo_admin'
   )
@@ -224,12 +243,13 @@ CREATE TABLE invoices (
 
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 
+-- Invoices: NGO Admins can view and manage their own
 CREATE POLICY "Platform Admins can view all invoices" 
 ON invoices FOR SELECT 
 USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super_admin');
 
-CREATE POLICY "NGO Admins can view own invoices" 
-ON invoices FOR SELECT 
+CREATE POLICY "NGO Admins can manage own invoices" 
+ON invoices FOR ALL
 USING (
   organization_id IN (
     SELECT organization_id FROM profiles WHERE id = auth.uid() AND role = 'ngo_admin'
