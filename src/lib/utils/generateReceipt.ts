@@ -1,12 +1,10 @@
 import jsPDF from "jspdf"
-import "jspdf-autotable"
+import autoTable from "jspdf-autotable"
 
-// Extending jsPDF type to include autoTable which is injected globally
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF
-    lastAutoTable: { finalY: number }
-  }
+// Type definition for autoTable usage
+export interface jsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => jsPDF
+  lastAutoTable: { finalY: number }
 }
 
 interface ReceiptData {
@@ -81,8 +79,8 @@ export const generate80GReceipt = (data: ReceiptData) => {
     doc.text(`Email: ${data.donorEmail}`, data.donorPan ? 80 : 14, 94)
   }
 
-  // 5. Payment Details Box (using jspdf-autotable)
-  doc.autoTable({
+  // 5. Payment Details Box (using jspdf-autotable correctly as a function)
+  autoTable(doc, {
     startY: 105,
     head: [['Amount', 'Payment Mode', 'Reference / UTR', 'Campaign Supported']],
     body: [
@@ -95,7 +93,7 @@ export const generate80GReceipt = (data: ReceiptData) => {
   })
 
   // 6. Words & Disclaimer
-  const finalY = doc.lastAutoTable.finalY || 135
+  const finalY = (doc as any).lastAutoTable?.finalY || 135
   
   doc.setFont("helvetica", "bold")
   doc.text(`Sum of Rupees: ${data.amountWords} Only`, 14, finalY + 15)
