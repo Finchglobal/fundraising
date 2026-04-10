@@ -29,13 +29,21 @@ export default async function DashboardHub() {
     isVerified = (profile?.organizations as any)?.is_verified || false
   }
 
-  // If no org found, show helpful message instead of falling back to first org
+  // Fallback for MVP Presentation if no org linked to profile
+  if (!orgId) {
+    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name, is_verified").limit(1).single()
+    orgId = fallbackOrg?.id
+    orgName = fallbackOrg?.name || orgName
+    isVerified = fallbackOrg?.is_verified || false
+  }
+
+  // If truly no org found in DB
   if (!orgId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Organization Not Found</h2>
-        <p className="text-slate-600 max-w-md">Your account is not yet linked to an organization. Please complete the onboarding process.</p>
-        <Link href="/onboarding" className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-500 shadow-lg transition-all active:scale-95">Complete Onboarding</Link>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">No Organizations Found</h2>
+        <p className="text-slate-600 max-w-md">There are no organizations registered in the system yet.</p>
+        <Link href="/onboarding" className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-500 shadow-lg transition-all active:scale-95">Register First NGO</Link>
       </div>
     )
   }

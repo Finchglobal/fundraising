@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { AlertCircle, FileSpreadsheet, Download, ReceiptIndianRupee, CreditCard, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { InvoiceGenerator } from "@/components/InvoiceGenerator"
 
 export default async function PlatformInvoicesPage() {
   const supabase = await createClient()
@@ -15,12 +16,19 @@ export default async function PlatformInvoicesPage() {
     .eq("id", user.id)
     .single()
 
-  const orgId = profile?.organization_id
+  let orgId = profile?.organization_id
+
+  // Fallback for MVP Presentation if no org is specifically linked to profile (e.g. for Platform Admins)
+  if (!orgId) {
+    const { data: fallbackOrg } = await supabase.from("organizations").select("id").limit(1).single()
+    orgId = fallbackOrg?.id
+  }
+
   if (!orgId) return (
     <div className="py-20 text-center">
       <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-      <h2 className="text-xl font-bold text-slate-900">No Organization Linked</h2>
-      <p className="text-slate-500 mt-2">You need to be part of a verified NGO to view this page.</p>
+      <h2 className="text-xl font-bold text-slate-900">No Organization Found</h2>
+      <p className="text-slate-500 mt-2">Could not find any verified organizations to display.</p>
     </div>
   )
 
@@ -58,8 +66,12 @@ export default async function PlatformInvoicesPage() {
 
         <div className="bg-teal-50/50 p-6 rounded-2xl border border-teal-100 flex flex-col justify-center">
           <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-2">Current Balance</p>
-          <div className="text-4xl font-black text-slate-900 mb-1">₹0.00</div>
-          <p className="text-xs text-teal-800 font-medium">All dues cleared</p>
+          <div className="text-4xl font-black text-slate-900 mb-1">
+            ₹{invoices?.filter(i => i.status !== 'paid').reduce((sum, i) => sum + Number(i.total_amount), 0).toLocaleString('en-IN') || "0.00"}
+          </div>
+          <p className="text-xs text-teal-800 font-medium font-mono">
+            {invoices?.some(i => i.status !== 'paid') ? "Immediate action required" : "All dues cleared"}
+          </p>
         </div>
       </div>
 
@@ -116,10 +128,7 @@ export default async function PlatformInvoicesPage() {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center text-slate-500">
-            <p className="font-semibold">No invoices generated yet.</p>
-            <p className="text-sm mt-1">Invoices are automatically generated at the end of every active month.</p>
-          </div>
+          <InvoiceGenerator orgId={orgId} />
         )}
       </div>
 

@@ -31,8 +31,17 @@ export default function DonationsDashboardPage() {
       .eq("id", user.id)
       .single()
 
-    const currentOrgId = profile?.organization_id
+    let currentOrgId = profile?.organization_id
     if (profile?.organizations) setOrgData(profile.organizations)
+
+    // Fallback for Demo
+    if (!currentOrgId) {
+      const { data: fallbackOrg } = await supabase.from("organizations").select("*").limit(1).single()
+      if (fallbackOrg) {
+        currentOrgId = fallbackOrg.id
+        setOrgData(fallbackOrg)
+      }
+    }
 
     if (!currentOrgId) {
       setLoading(false)
