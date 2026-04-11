@@ -22,6 +22,13 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
     return notFound()
   }
 
+  const getEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+  }
+
   // Fetch active and completed campaigns for this NGO
   const { data: campaigns } = await supabase
     .from("campaigns")
@@ -76,6 +83,21 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow">
+        
+        {org.youtube_url && getEmbedUrl(org.youtube_url) && (
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Our Impact in Action</h2>
+            <div className="w-full max-w-4xl rounded-2xl overflow-hidden shadow-xl bg-slate-900 border border-slate-200">
+              <iframe 
+                src={getEmbedUrl(org.youtube_url)!} 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen 
+                className="w-full h-full min-h-[300px] md:min-h-[500px] aspect-video"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="mb-8 border-b border-slate-200 pb-4">
           <h2 className="text-2xl font-bold text-slate-900">Active Campaigns</h2>
         </div>

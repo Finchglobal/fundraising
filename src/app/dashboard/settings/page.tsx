@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Save, Building2, Link as LinkIcon, Image as ImageIcon } from "lucide-react"
+import { Loader2, Save, Building2, Link as LinkIcon, Image as ImageIcon, Youtube } from "lucide-react"
 import { toast } from "sonner"
 
 export default function SettingsPage() {
@@ -19,7 +19,8 @@ export default function SettingsPage() {
     description: "",
     logo_url: "",
     address: "",
-    upi_id: ""
+    upi_id: "",
+    youtube_url: ""
   })
 
   useEffect(() => {
@@ -41,7 +42,8 @@ export default function SettingsPage() {
           description: org.description || "",
           logo_url: org.logo_url || "",
           address: org.address || "",
-          upi_id: org.upi_id || ""
+          upi_id: org.upi_id || "",
+          youtube_url: org.youtube_url || ""
         })
       }
       setLoading(false)
@@ -61,7 +63,8 @@ export default function SettingsPage() {
         description: formData.description,
         logo_url: formData.logo_url,
         address: formData.address,
-        upi_id: formData.upi_id
+        upi_id: formData.upi_id,
+        youtube_url: formData.youtube_url
       })
       .eq("id", orgId)
 
@@ -156,6 +159,20 @@ export default function SettingsPage() {
                 onChange={(e) => setFormData({...formData, address: e.target.value})} 
                 placeholder="HQ Address"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Featured YouTube Video / Reel URL</Label>
+              <div className="relative">
+                <Youtube className="absolute left-3 top-3 h-4 w-4 text-red-500" />
+                <Input 
+                  value={formData.youtube_url} 
+                  onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} 
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="pl-9"
+                />
+              </div>
+              <p className="text-xs text-slate-500">This will be embedded prominently on your public NGO profile page.</p>
             </div>
 
             <div className="pt-4 flex justify-end">

@@ -33,6 +33,13 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
     return notFound()
   }
 
+  const getEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+  }
+
   const { data: donations } = await supabase
     .from("donations")
     .select("donor_name, amount, is_anonymous, created_at, status")
@@ -88,9 +95,23 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               {campaign.title}
             </h1>
             
-            <div className="prose prose-slate prose-lg max-w-none text-slate-700">
+            <div className="prose prose-slate prose-lg max-w-none text-slate-700 mb-8">
               <p className="whitespace-pre-wrap leading-relaxed">{campaign.story}</p>
             </div>
+
+            {/* Embedded Campaign Video */}
+            {campaign.video_url && getEmbedUrl(campaign.video_url) && (
+              <div className="mb-12">
+                <div className="w-full rounded-2xl overflow-hidden shadow-lg bg-slate-900 border border-slate-200">
+                  <iframe 
+                    src={getEmbedUrl(campaign.video_url)!} 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen 
+                    className="w-full h-full min-h-[300px] md:min-h-[450px] aspect-video"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Proofs / Documents Placeholder */}
             <div className="mt-12 p-6 bg-white border border-slate-200 rounded-xl">

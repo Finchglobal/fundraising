@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { ShieldCheck, LayoutDashboard, History, Heart, LogOut, Search } from "lucide-react"
+import { ShieldCheck, LayoutDashboard, History, Heart, LogOut, Search, UserCircle } from "lucide-react"
 
 export default async function DonorLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -32,8 +32,8 @@ export default async function DonorLayout({ children }: { children: React.ReactN
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-green-950 text-green-100 flex flex-col border-r border-green-900 flex-shrink-0">
         <div className="p-6 border-b border-green-900 flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-green-400" />
-          <span className="font-bold text-lg text-white">Donor Portal</span>
+           <ShieldCheck className="h-6 w-6 text-green-400" />
+           <span className="font-bold text-lg text-white">Donor Portal</span>
         </div>
         
         <div className="p-6 pb-2">
@@ -47,6 +47,9 @@ export default async function DonorLayout({ children }: { children: React.ReactN
           </Link>
           <Link href="/donor/history" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
             <History className="h-5 w-5 text-green-400" /> Donation History
+          </Link>
+          <Link href="/donor/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
+            <UserCircle className="h-5 w-5 text-green-400" /> Profile Settings
           </Link>
           <Link href="/#campaigns" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
             <Search className="h-5 w-5 text-green-400" /> Explore Causes
