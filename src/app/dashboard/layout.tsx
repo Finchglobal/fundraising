@@ -52,6 +52,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/dashboard/donations" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
             <ReceiptIndianRupee className="h-5 w-5 text-teal-500" /> Verify UTRs
           </Link>
+          <Link href="/dashboard/donors" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <UsersRound className="h-5 w-5 text-teal-500" /> Donor CRM
+          </Link>
           <Link href="/dashboard/share" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
             <Share2 className="h-5 w-5 text-teal-500" /> AI Share Studio
           </Link>
