@@ -15,6 +15,7 @@ export default function NGOOnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
@@ -26,10 +27,23 @@ export default function NGOOnboardingPage() {
     registration_12a: "",
     registration_80g: "",
     csr_1_registration: "",
+    registration_certificate_url: "",
   })
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        toast.error("Please log in or create an account first to register an NGO.")
+        router.push("/login")
+      } else {
+        setCheckingAuth(false)
+      }
+    })
+  }, [router, supabase.auth])
 
   // State for success feedback
   const [isSuccess, setIsSuccess] = useState(false)
+  const [uploadingDoc, setUploadingDoc] = useState(false)
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {}
@@ -72,6 +86,7 @@ export default function NGOOnboardingPage() {
         registration_12a: formData.registration_12a || null,
         registration_80g: formData.registration_80g || null,
         csr_1_registration: formData.csr_1_registration || null,
+        registration_certificate_url: formData.registration_certificate_url || null,
         is_verified: false 
       }).select().single()
 
@@ -98,6 +113,41 @@ export default function NGOOnboardingPage() {
     } catch (err: any) {
       toast.error("An unexpected error occurred.")
       setLoading(false)
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file.")
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size should be less than 5MB.")
+      return
+    }
+
+    setUploadingDoc(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      const filePath = `certificates/${fileName}`
+
+      const { data, error } = await supabase.storage.from("documents").upload(filePath, file)
+
+      if (error) {
+        throw error
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(filePath)
+      setFormData({ ...formData, registration_certificate_url: publicUrl })
+      toast.success("Document uploaded successfully")
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message })
+    } finally {
+      setUploadingDoc(false)
     }
   }
 
@@ -223,12 +273,23 @@ export default function NGOOnboardingPage() {
                       </div>
                   </div>
 
-                  <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:bg-slate-50 transition-all group cursor-pointer">
+                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:bg-slate-50 transition-all group cursor-pointer">
+                     <input 
+                        type="file" 
+                        accept=".pdf" 
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                        disabled={uploadingDoc}
+                     />
                      <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                        <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />
+                        {uploadingDoc ? <Loader2 className="h-5 w-5 text-teal-600 animate-spin" /> : <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />}
                      </div>
-                     <p className="text-sm font-bold text-slate-700">Registration Certificate (PDF)</p>
-                     <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Select file or drag and drop</p>
+                     <p className="text-sm font-bold text-slate-700">
+                        {formData.registration_certificate_url ? "Certificate Uploaded!" : "Registration Certificate (PDF)"}
+                     </p>
+                     <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">
+                        {formData.registration_certificate_url ? "Click to replace file" : "Select file or drag and drop"}
+                     </p>
                   </div>
 
                   <div className="flex gap-4">

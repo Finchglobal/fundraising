@@ -19,17 +19,20 @@ TO public
 USING (bucket_id = 'donation-proofs');
 
 -- 1. Organizations: Allow authenticated users to register their NGO
+DROP POLICY IF EXISTS "Authenticated users can register organizations" ON organizations;
 CREATE POLICY "Authenticated users can register organizations" 
 ON organizations FOR INSERT 
 TO authenticated
 WITH CHECK (true);
 
 -- 2. Profiles: Allow owners to update their own organization_id and role
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" 
 ON profiles FOR UPDATE
 USING (auth.uid() = id);
 
 -- 3. Beneficiary Applications: Allow NGO Admins to insert
+DROP POLICY IF EXISTS "NGO Admins can insert beneficiary applications" ON beneficiary_applications;
 CREATE POLICY "NGO Admins can insert beneficiary applications" 
 ON beneficiary_applications FOR INSERT 
 WITH CHECK (
@@ -39,6 +42,7 @@ WITH CHECK (
 );
 
 -- 4. Invoices: Allow NGO Admins to generate and manage their own invoices
+DROP POLICY IF EXISTS "NGO Admins can manage own invoices" ON invoices;
 CREATE POLICY "NGO Admins can manage own invoices" 
 ON invoices FOR ALL
 USING (
@@ -51,6 +55,7 @@ USING (
 -- Already exists in schema.sql: "NGO Admins can manage own campaigns" FOR ALL
 
 -- 6. Creator Referrals: Allow anyone to view (Already exists), but maybe we need insert for referral tracking?
+DROP POLICY IF EXISTS "Anyone can record referrals" ON creator_referrals;
 CREATE POLICY "Anyone can record referrals" 
 ON creator_referrals FOR INSERT 
 WITH CHECK (true);

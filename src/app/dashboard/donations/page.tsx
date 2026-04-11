@@ -71,7 +71,7 @@ export default function DonationsDashboardPage() {
     if (!error) {
       const { data: campaign } = await supabase.from("campaigns").select("raised_amount").eq("id", campaignId).single()
       if (campaign) {
-         await supabase.from("campaigns").update({ raised_amount: (campaign.raised_amount || 0) + amount }).eq("id", campaignId)
+         await supabase.from("campaigns").update({ raised_amount: Number(campaign.raised_amount || 0) + Number(amount) }).eq("id", campaignId)
       }
       setDonations(prev => prev.map(d => d.id === id ? { ...d, status: "verified" } : d))
     }
@@ -188,7 +188,7 @@ export default function DonationsDashboardPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="font-bold text-slate-900">₹{donation.amount.toLocaleString('en-IN')}</span>
+                        <span className="font-bold text-slate-900">₹{Number(donation.amount).toLocaleString('en-IN')}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex flex-col items-center gap-2">

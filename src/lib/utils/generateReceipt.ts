@@ -84,7 +84,7 @@ export const generate80GReceipt = (data: ReceiptData) => {
     startY: 105,
     head: [['Amount', 'Payment Mode', 'Reference / UTR', 'Campaign Supported']],
     body: [
-      [`Rs. ${data.amount.toLocaleString('en-IN')}/-`, data.paymentMode, data.utr, data.campaignName]
+      [`Rs. ${Number(data.amount).toLocaleString('en-IN')}/-`, data.paymentMode, data.utr, data.campaignName]
     ],
     theme: 'grid',
     headStyles: { fillColor: [241, 245, 249], textColor: [15, 23, 42], fontStyle: 'bold' },
