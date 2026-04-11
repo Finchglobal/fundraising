@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Save, Building2, Link as LinkIcon, Image as ImageIcon, Youtube } from "lucide-react"
+import { Loader2, Save, Building2, Link as LinkIcon, Image as ImageIcon, Video } from "lucide-react"
 import { toast } from "sonner"
 
 export default function SettingsPage() {
@@ -164,7 +164,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <Label>Featured YouTube Video / Reel URL</Label>
               <div className="relative">
-                <Youtube className="absolute left-3 top-3 h-4 w-4 text-red-500" />
+                <Video className="absolute left-3 top-3 h-4 w-4 text-red-500" />
                 <Input 
                   value={formData.youtube_url} 
                   onChange={(e) => setFormData({...formData, youtube_url: e.target.value})} 

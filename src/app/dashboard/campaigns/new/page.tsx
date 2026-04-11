@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Loader2, Send, Save, IndianRupee, Youtube } from "lucide-react"
+import { Search, Loader2, Send, Save, IndianRupee, Video } from "lucide-react"
 
 export default function CampaignWizard() {
   const router = useRouter()
@@ -152,7 +152,7 @@ export default function CampaignWizard() {
                 <div className="space-y-2">
                   <Label htmlFor="videoUrl">Impact Video URL (YouTube / Reel)</Label>
                   <div className="relative">
-                    <Youtube className="absolute left-3 top-3 h-4 w-4 text-red-500" />
+                    <Video className="absolute left-3 top-3 h-4 w-4 text-red-500" />
                     <Input 
                       id="videoUrl" 
                       placeholder="https://youtu.be/..." 
