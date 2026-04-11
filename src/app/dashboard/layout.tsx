@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2, FileSpreadsheet, ShieldCheck } from "lucide-react"
+import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2, FileSpreadsheet, ShieldCheck, Building2 } from "lucide-react"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -60,6 +60,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </Link>
           <Link href="/dashboard/invoices" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
             <FileSpreadsheet className="h-5 w-5 text-teal-500" /> Platform Invoices
+          </Link>
+          <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+            <Building2 className="h-5 w-5 text-teal-500" /> Profile Settings
           </Link>
         </nav>
 
