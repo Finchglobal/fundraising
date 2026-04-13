@@ -28,6 +28,13 @@ export default function NGOOnboardingPage() {
     registration_80g: "",
     csr_1_registration: "",
     registration_certificate_url: "",
+    registration_certificate_name: "",
+    registration_12a_url: "",
+    registration_12a_name: "",
+    registration_80g_url: "",
+    registration_80g_name: "",
+    csr_1_url: "",
+    csr_1_name: "",
   })
 
   useEffect(() => {
@@ -87,6 +94,9 @@ export default function NGOOnboardingPage() {
         registration_80g: formData.registration_80g || null,
         csr_1_registration: formData.csr_1_registration || null,
         registration_certificate_url: formData.registration_certificate_url || null,
+        registration_12a_url: formData.registration_12a_url || null,
+        registration_80g_url: formData.registration_80g_url || null,
+        csr_1_url: formData.csr_1_url || null,
         is_verified: false 
       }).select().single()
 
@@ -116,7 +126,7 @@ export default function NGOOnboardingPage() {
     }
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldPrefix: string) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -142,8 +152,12 @@ export default function NGOOnboardingPage() {
       }
 
       const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(filePath)
-      setFormData({ ...formData, registration_certificate_url: publicUrl })
-      toast.success("Document uploaded successfully")
+      setFormData({ 
+        ...formData, 
+        [`${fieldPrefix}_url`]: publicUrl,
+        [`${fieldPrefix}_name`]: file.name
+      })
+      toast.success(`${file.name} uploaded successfully`)
     } catch (err: any) {
       toast.error("Upload failed", { description: err.message })
     } finally {
@@ -254,42 +268,126 @@ export default function NGOOnboardingPage() {
                      {errors.upi_id && <p className="text-[10px] text-red-500 font-bold uppercase mt-1">{errors.upi_id}</p>}
                   </div>
                   
-                  <div className="p-5 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-4 shadow-inner">
+                  <div className="p-5 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-6 shadow-inner">
                      <h3 className="font-bold text-sm text-teal-900 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> Tax Compliance (Optional but Recommended)</h3>
                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                           <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
-                           <Input placeholder="e.g. IT/80G/12345" value={formData.registration_80g} onChange={e => setFormData({...formData, registration_80g: e.target.value})} />
+                      <div className="grid grid-cols-1 gap-6">
+                        {/* 80G Section */}
+                        <div className="space-y-3">
+                           <div className="flex justify-between items-end gap-4">
+                             <div className="flex-grow space-y-2">
+                               <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
+                               <Input placeholder="e.g. IT/80G/12345" value={formData.registration_80g} onChange={e => setFormData({...formData, registration_80g: e.target.value})} />
+                             </div>
+                             <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
+                               <Input 
+                                 type="file" 
+                                 accept=".pdf" 
+                                 onChange={(e) => handleFileUpload(e, "registration_80g")}
+                                 className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                               />
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.registration_80g_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
+                                 {formData.registration_80g_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
+                                 {formData.registration_80g_url ? 'Uploaded' : 'Add PDF'}
+                               </Button>
+                             </div>
+                           </div>
+                           {formData.registration_80g_name && (
+                             <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
+                               <FileText className="h-3 w-3 text-teal-600" />
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.registration_80g_name}</span>
+                               <a href={formData.registration_80g_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                             </div>
+                           )}
                         </div>
-                        <div className="space-y-2">
-                           <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
-                           <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
+
+                        {/* 12A Section */}
+                        <div className="space-y-3">
+                           <div className="flex justify-between items-end gap-4">
+                             <div className="flex-grow space-y-2">
+                               <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
+                               <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
+                             </div>
+                             <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
+                               <Input 
+                                 type="file" 
+                                 accept=".pdf" 
+                                 onChange={(e) => handleFileUpload(e, "registration_12a")}
+                                 className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                               />
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.registration_12a_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
+                                 {formData.registration_12a_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
+                                 {formData.registration_12a_url ? 'Uploaded' : 'Add PDF'}
+                               </Button>
+                             </div>
+                           </div>
+                           {formData.registration_12a_name && (
+                             <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
+                               <FileText className="h-3 w-3 text-teal-600" />
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.registration_12a_name}</span>
+                               <a href={formData.registration_12a_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                             </div>
+                           )}
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                         <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
-                         <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
+
+                        {/* CSR-1 Section */}
+                        <div className="space-y-3">
+                           <div className="flex justify-between items-end gap-4">
+                             <div className="flex-grow space-y-2">
+                               <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
+                               <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
+                             </div>
+                             <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
+                               <Input 
+                                 type="file" 
+                                 accept=".pdf" 
+                                 onChange={(e) => handleFileUpload(e, "csr_1")}
+                                 className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                               />
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.csr_1_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
+                                 {formData.csr_1_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
+                                 {formData.csr_1_url ? 'Uploaded' : 'Add PDF'}
+                               </Button>
+                             </div>
+                           </div>
+                           {formData.csr_1_name && (
+                             <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
+                               <FileText className="h-3 w-3 text-teal-600" />
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.csr_1_name}</span>
+                               <a href={formData.csr_1_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                             </div>
+                           )}
+                        </div>
                       </div>
                   </div>
 
-                  <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:bg-slate-50 transition-all group cursor-pointer">
-                     <input 
-                        type="file" 
-                        accept=".pdf" 
-                        onChange={handleFileUpload}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                        disabled={uploadingDoc}
-                     />
-                     <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                        {uploadingDoc ? <Loader2 className="h-5 w-5 text-teal-600 animate-spin" /> : <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />}
-                     </div>
-                     <p className="text-sm font-bold text-slate-700">
-                        {formData.registration_certificate_url ? "Certificate Uploaded!" : "Registration Certificate (PDF)"}
-                     </p>
-                     <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">
-                        {formData.registration_certificate_url ? "Click to replace file" : "Select file or drag and drop"}
-                     </p>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 font-bold">Main Registration Document <span className="text-red-500">*</span></Label>
+                    <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-slate-50 transition-all group cursor-pointer overflow-hidden">
+                       <input 
+                          type="file" 
+                          accept=".pdf" 
+                          onChange={(e) => handleFileUpload(e, "registration_certificate")}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-20"
+                          disabled={uploadingDoc}
+                       />
+                       <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                          {uploadingDoc ? <Loader2 className="h-5 w-5 text-teal-600 animate-spin" /> : <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />}
+                       </div>
+                       <p className="text-sm font-bold text-slate-700">
+                          {formData.registration_certificate_url ? "Document Ready!" : "Upload Trust Deed / Society Reg Certificate (PDF)"}
+                       </p>
+                       <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">
+                          {formData.registration_certificate_name ? `Current: ${formData.registration_certificate_name}` : "Select file or drag and drop"}
+                       </p>
+                       {formData.registration_certificate_url && (
+                         <div className="mt-3 relative z-30">
+                           <a href={formData.registration_certificate_url} target="_blank" rel="noreferrer" className="text-xs text-teal-600 font-bold hover:underline">
+                             Preview Certificate
+                           </a>
+                         </div>
+                       )}
+                    </div>
                   </div>
 
                   <div className="flex gap-4">
