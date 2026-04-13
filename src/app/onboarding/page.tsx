@@ -165,6 +165,15 @@ export default function NGOOnboardingPage() {
     }
   }
 
+  const handleRemoveFile = (fieldPrefix: string) => {
+    setFormData({
+      ...formData,
+      [`${fieldPrefix}_url`]: "",
+      [`${fieldPrefix}_name`]: ""
+    })
+    toast.info("File removed")
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <SiteNavbar />
@@ -286,17 +295,30 @@ export default function NGOOnboardingPage() {
                                  onChange={(e) => handleFileUpload(e, "registration_80g")}
                                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                />
-                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.registration_80g_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
-                                 {formData.registration_80g_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
-                                 {formData.registration_80g_url ? 'Uploaded' : 'Add PDF'}
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 transition-all group-hover:border-teal-400 ${formData.registration_80g_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-600'}`}>
+                                 {formData.registration_80g_url ? (
+                                   <>
+                                     <CheckCircle2 className="h-3 w-3" />
+                                     <span className="group-hover:hidden">Uploaded</span>
+                                     <span className="hidden group-hover:inline">Replace?</span>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Upload className="h-3 w-3" />
+                                     <span>Add PDF</span>
+                                   </>
+                                 )}
                                </Button>
                              </div>
                            </div>
                            {formData.registration_80g_name && (
                              <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
                                <FileText className="h-3 w-3 text-teal-600" />
-                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.registration_80g_name}</span>
-                               <a href={formData.registration_80g_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[150px]">{formData.registration_80g_name}</span>
+                               <div className="ml-auto flex items-center gap-3">
+                                 <a href={formData.registration_80g_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline">View</a>
+                                 <button type="button" onClick={() => handleRemoveFile("registration_80g")} className="text-[10px] text-red-500 font-bold hover:text-red-700 uppercase tracking-tighter">Remove</button>
+                               </div>
                              </div>
                            )}
                         </div>
@@ -308,24 +330,37 @@ export default function NGOOnboardingPage() {
                                <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
                                <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
                              </div>
-                             <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
+                             <div className="relative group overflow-hidden w-32 h-10 flex-shrink-0">
                                <Input 
                                  type="file" 
                                  accept=".pdf" 
                                  onChange={(e) => handleFileUpload(e, "registration_12a")}
                                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                />
-                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.registration_12a_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
-                                 {formData.registration_12a_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
-                                 {formData.registration_12a_url ? 'Uploaded' : 'Add PDF'}
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 transition-all group-hover:border-teal-400 ${formData.registration_12a_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-600'}`}>
+                                 {formData.registration_12a_url ? (
+                                   <>
+                                     <CheckCircle2 className="h-3 w-3" />
+                                     <span className="group-hover:hidden">Uploaded</span>
+                                     <span className="hidden group-hover:inline">Replace?</span>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Upload className="h-3 w-3" />
+                                     <span>Add PDF</span>
+                                   </>
+                                 )}
                                </Button>
                              </div>
                            </div>
                            {formData.registration_12a_name && (
                              <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
                                <FileText className="h-3 w-3 text-teal-600" />
-                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.registration_12a_name}</span>
-                               <a href={formData.registration_12a_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[150px]">{formData.registration_12a_name}</span>
+                               <div className="ml-auto flex items-center gap-3">
+                                 <a href={formData.registration_12a_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline">View</a>
+                                 <button type="button" onClick={() => handleRemoveFile("registration_12a")} className="text-[10px] text-red-500 font-bold hover:text-red-700 uppercase tracking-tighter">Remove</button>
+                               </div>
                              </div>
                            )}
                         </div>
@@ -337,24 +372,37 @@ export default function NGOOnboardingPage() {
                                <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
                                <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
                              </div>
-                             <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
+                             <div className="relative group overflow-hidden w-32 h-10 flex-shrink-0">
                                <Input 
                                  type="file" 
                                  accept=".pdf" 
                                  onChange={(e) => handleFileUpload(e, "csr_1")}
                                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                />
-                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 ${formData.csr_1_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white'}`}>
-                                 {formData.csr_1_url ? <CheckCircle2 className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
-                                 {formData.csr_1_url ? 'Uploaded' : 'Add PDF'}
+                               <Button type="button" variant="outline" className={`w-full h-full text-xs gap-1 transition-all group-hover:border-teal-400 ${formData.csr_1_url ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-600'}`}>
+                                 {formData.csr_1_url ? (
+                                   <>
+                                     <CheckCircle2 className="h-3 w-3" />
+                                     <span className="group-hover:hidden">Uploaded</span>
+                                     <span className="hidden group-hover:inline">Replace?</span>
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Upload className="h-3 w-3" />
+                                     <span>Add PDF</span>
+                                   </>
+                                 )}
                                </Button>
                              </div>
                            </div>
                            {formData.csr_1_name && (
                              <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-teal-100 rounded-lg animate-in slide-in-from-left-1">
                                <FileText className="h-3 w-3 text-teal-600" />
-                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[200px]">{formData.csr_1_name}</span>
-                               <a href={formData.csr_1_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline ml-auto">View</a>
+                               <span className="text-[10px] font-bold text-slate-600 truncate max-w-[150px]">{formData.csr_1_name}</span>
+                               <div className="ml-auto flex items-center gap-3">
+                                 <a href={formData.csr_1_url} target="_blank" rel="noreferrer" className="text-[10px] text-teal-600 font-bold hover:underline">View</a>
+                                 <button type="button" onClick={() => handleRemoveFile("csr_1")} className="text-[10px] text-red-500 font-bold hover:text-red-700 uppercase tracking-tighter">Remove</button>
+                               </div>
                              </div>
                            )}
                         </div>
@@ -375,16 +423,24 @@ export default function NGOOnboardingPage() {
                           {uploadingDoc ? <Loader2 className="h-5 w-5 text-teal-600 animate-spin" /> : <Upload className="h-5 w-5 text-slate-400 group-hover:text-teal-500" />}
                        </div>
                        <p className="text-sm font-bold text-slate-700">
-                          {formData.registration_certificate_url ? "Document Ready!" : "Upload Trust Deed / Society Reg Certificate (PDF)"}
+                          {formData.registration_certificate_url ? (
+                            <span className="group-hover:hidden">Document Ready!</span>
+                          ) : "Upload Trust Deed / Society Reg Certificate (PDF)"}
+                          {formData.registration_certificate_url && (
+                             <span className="hidden group-hover:inline text-teal-600">Click to Change File</span>
+                          )}
                        </p>
                        <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">
                           {formData.registration_certificate_name ? `Current: ${formData.registration_certificate_name}` : "Select file or drag and drop"}
                        </p>
                        {formData.registration_certificate_url && (
-                         <div className="mt-3 relative z-30">
+                         <div className="mt-3 relative z-30 flex items-center justify-center gap-4">
                            <a href={formData.registration_certificate_url} target="_blank" rel="noreferrer" className="text-xs text-teal-600 font-bold hover:underline">
                              Preview Certificate
                            </a>
+                           <button type="button" onClick={() => handleRemoveFile("registration_certificate")} className="text-xs text-red-500 font-bold hover:text-red-700">
+                             Remove File
+                           </button>
                          </div>
                        )}
                     </div>
