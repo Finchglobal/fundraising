@@ -205,6 +205,13 @@ export default function LoginPage() {
             </button>
           </form>
 
+          <p className="text-center text-sm font-medium text-gray-500 mt-6">
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-green-600 hover:text-green-700 font-bold hover:underline underline-offset-4">
+              Create an account
+            </Link>
+          </p>
+
           {/* Quick fill demo credentials */}
           <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-800">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
