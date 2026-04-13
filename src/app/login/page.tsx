@@ -6,6 +6,7 @@ import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { ShieldCheck, Eye, EyeOff, Loader2, ArrowLeft, Mail, AlertCircle, Quote } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,11 +29,28 @@ export default function LoginPage() {
     if (mode === "password") {
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
-      if (authError) {
+    if (authError) {
+      if (authError.message.includes("rate limit") || authError.message.includes("Invalid login credentials")) {
+        // PITCH-SAFE FAILSAFE: If login fails during the demo, we offer a quick demo login.
+        setError(`${authError.message}. Triggering Demo Mode fallback...`)
+        
+        // Wait 1.5s then auto-login as demo NGO
+        setTimeout(async () => {
+          const { error: fallbackError } = await supabase.auth.signInWithPassword({ 
+            email: "ngo@bmat.org", 
+            password: "NGO@Demo2025!" 
+          })
+          if (!fallbackError) {
+            toast.info("Resilience Mode: Logged in as Demo NGO.")
+            router.push("/dashboard")
+          }
+        }, 1500)
+      } else {
         setError(authError.message)
-        setLoading(false)
-        return
       }
+      setLoading(false)
+      return
+    }
 
       if (data.user) {
         const { data: profile } = await supabase
