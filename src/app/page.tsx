@@ -87,10 +87,16 @@ export default async function LandingPage() {
               Donate Now <ArrowRight className="h-5 w-5" />
             </a>
             <Link
-              href="/onboarding"
+              href="/signup"
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl text-lg border border-white/20 transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm"
             >
-              Start a Fundraiser <ArrowRight className="h-5 w-5" />
+              Join as Supporter <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-gray-300 font-bold px-8 py-4 rounded-xl text-lg border border-white/10 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              NGO Onboarding
             </Link>
           </div>
 

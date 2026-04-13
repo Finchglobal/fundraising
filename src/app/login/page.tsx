@@ -125,6 +125,14 @@ export default function LoginPage() {
             </div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Welcome back</h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">Log in to manage your verified campaigns.</p>
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/10 rounded-xl border border-green-100 dark:border-green-500/20">
+              <p className="text-xs font-bold text-green-800 dark:text-green-400">
+                New to PhilanthroForge? {" "}
+                <Link href="/signup" className="underline underline-offset-4 hover:text-green-600 transition-colors">
+                  Create an account here →
+                </Link>
+              </p>
+            </div>
           </div>
 
           <div className="bg-gray-100 dark:bg-gray-900 p-1 rounded-xl flex items-center mb-8">

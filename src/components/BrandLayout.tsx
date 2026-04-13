@@ -18,6 +18,8 @@ const NAV_LINKS = [
     ]
   },
   { label: "Fundraising", href: "/", active: true },
+  { label: "Login", href: "/login" },
+  { label: "Register", href: "/signup" },
   { label: "Let's Talk", href: "https://www.philanthroforge.com/lets-talk", cta: true },
 ]
 
