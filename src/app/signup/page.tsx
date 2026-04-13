@@ -38,7 +38,11 @@ export default function SignupPage() {
     })
 
     if (authError) {
-      setError(authError.message)
+      if (authError.message.includes("rate limit")) {
+        setError("Too many sign-up attempts. Please wait 60 seconds or try a different email.")
+      } else {
+        setError(authError.message)
+      }
       setLoading(false)
       return
     }
