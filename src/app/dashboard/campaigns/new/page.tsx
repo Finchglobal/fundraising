@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Loader2, Send, Save, IndianRupee, Video } from "lucide-react"
+import { Search, Loader2, Send, Save, IndianRupee, Video, Upload, ImageIcon, CheckCircle2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function CampaignWizard() {
   const router = useRouter()
@@ -18,6 +19,8 @@ export default function CampaignWizard() {
   const [title, setTitle] = useState("")
   const [story, setStory] = useState("")
   const [heroImage, setHeroImage] = useState("")
+  const [heroImageName, setHeroImageName] = useState("")
+  const [uploadingHero, setUploadingHero] = useState(false)
   const [videoUrl, setVideoUrl] = useState("")
   const [actualNeed, setActualNeed] = useState<number | "">("")
 
@@ -84,6 +87,41 @@ export default function CampaignWizard() {
     }
   }
 
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file.")
+      return
+    }
+    
+    setUploadingHero(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `campaign-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `campaigns/${fileName}`
+
+      const { data, error } = await supabase.storage.from("documents").upload(filePath, file)
+      if (error) throw error
+
+      const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(filePath)
+      setHeroImage(publicUrl)
+      setHeroImageName(file.name)
+      toast.success("Cover image uploaded!")
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message })
+    } finally {
+      setUploadingHero(false)
+    }
+  }
+
+  const handleRemoveHero = () => {
+    setHeroImage("")
+    setHeroImageName("")
+    toast.info("Image removed")
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -137,15 +175,55 @@ export default function CampaignWizard() {
                   {errors.story && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.story}</p>}
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="heroImage">Cover Image URL (Optional)</Label>
-                  <Input 
-                    id="heroImage" 
-                    placeholder="https://..." 
-                    value={heroImage} 
-                    onChange={e => { setHeroImage(e.target.value); if (errors.heroImage) setErrors(prev => ({...prev, heroImage: ''})) }} 
-                    className={errors.heroImage ? "border-red-400 focus-visible:ring-red-400" : ""}
-                  />
+                <div className="space-y-4">
+                  <Label className="text-slate-700 font-semibold">Campaign Cover Image <span className="text-red-500">*</span></Label>
+                  <div className="relative group w-full h-48 md:h-64 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-slate-50 overflow-hidden hover:border-teal-400 transition-all">
+                    {heroImage ? (
+                      <>
+                        <img src={heroImage} alt="Cover" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                           <Upload className="h-8 w-8 text-white" />
+                           <span className="text-white font-bold text-sm">Replace Cover Image</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-slate-400">
+                        {uploadingHero ? <Loader2 className="h-10 w-10 animate-spin text-teal-600" /> : <ImageIcon className="h-10 w-10" />}
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-slate-600">Click to upload banner</p>
+                          <p className="text-xs uppercase tracking-tighter">1600 x 900 recommended</p>
+                        </div>
+                      </div>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleHeroUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      disabled={uploadingHero}
+                    />
+                  </div>
+                  
+                  {heroImage && (
+                    <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-100 rounded-xl animate-in slide-in-from-top-2">
+                      <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                      <span className="text-xs font-bold text-slate-700 truncate flex-grow">
+                        {heroImageName || "Cover image ready"}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <a href={heroImage} target="_blank" rel="noreferrer" className="text-xs text-teal-600 font-bold hover:underline">View</a>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={handleRemoveHero}
+                          className="h-8 px-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {errors.heroImage && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.heroImage}</p>}
                 </div>
 

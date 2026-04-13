@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle2, Loader2, IndianRupee, Info, AlertCircle, Camera, UploadCloud } from "lucide-react"
+import { CheckCircle2, Loader2, IndianRupee, Info, AlertCircle, Camera, UploadCloud, Trash2, FileText } from "lucide-react"
 import imageCompression from 'browser-image-compression';
 import { toast } from "sonner"
 
@@ -359,20 +359,29 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
                   Upload Payment Screenshot <span className="text-slate-400 text-[10px] font-normal">(Optional but recommended)</span>
                 </Label>
                 <div 
-                  className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center cursor-pointer relative ${proofFile ? 'border-teal-500 bg-teal-50/30' : 'border-slate-200 hover:border-teal-400 bg-slate-50/50'}`}
-                  onClick={() => document.getElementById('proof-upload')?.click()}
+                  className={`border-2 border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center relative ${proofFile ? 'border-teal-500 bg-teal-50/30' : 'border-slate-200 hover:border-teal-400 bg-slate-50/50'}`}
                 >
                   <input 
-                    id="proof-upload" type="file" accept="image/*" className="hidden" 
+                    id="proof-upload" type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" 
                     onChange={(e) => setProofFile(e.target.files?.[0] || null)}
                   />
                   {proofFile ? (
-                    <div className="text-center">
-                      <div className="text-teal-600 font-bold text-xs truncate max-w-[200px] mb-1">{proofFile.name}</div>
-                      <div className="text-[10px] text-teal-500 font-medium">(Click to change)</div>
+                    <div className="text-center w-full relative z-20">
+                      <div className="flex items-center justify-center gap-2 mb-1 px-4 py-2 bg-white rounded-lg border border-teal-100 shadow-sm animate-in zoom-in-95">
+                         <FileText className="h-4 w-4 text-teal-600 shrink-0" />
+                         <span className="text-teal-700 font-bold text-xs truncate max-w-[180px]">{proofFile.name}</span>
+                         <button 
+                           type="button" 
+                           onClick={(e) => { e.stopPropagation(); setProofFile(null); }}
+                           className="ml-auto text-red-500 hover:text-red-700 p-1"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </button>
+                      </div>
+                      <p className="text-[10px] text-teal-500 font-medium">Click box to replace screenshot</p>
                     </div>
                   ) : (
-                    <div className="text-center py-2">
+                    <div className="text-center py-2 relative z-20 pointer-events-none">
                       <UploadCloud className="h-8 w-8 text-slate-400 mx-auto mb-2" />
                       <p className="text-xs text-slate-500 font-medium">Upload GPAY / Paytm screenshot</p>
                       <p className="text-[10px] text-slate-400 mt-1">Improves verification speed by 2x</p>
