@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import CopyUpiButton from "@/components/CopyUpiButton"
+import Link from "next/link"
 
 export default async function CampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -19,6 +20,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
     .select(`
       *,
       organizations (
+        id,
         name,
         description,
         is_verified,
@@ -113,19 +115,24 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               </div>
             )}
 
-            {/* Proofs / Documents Placeholder */}
-            <div className="mt-12 p-6 bg-white border border-slate-200 rounded-xl">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                <ShieldCheck className="text-teal-600 h-5 w-5" /> Verified Documentation
-              </h3>
-              <p className="text-sm text-slate-600 mb-4">
-                This NGO has provided medical estimates and beneficiary details to Philanthroforge. 
-                Funds are deployed directly to the verified causes.
-              </p>
-              <Button variant="outline" className="text-teal-600 border-teal-200 hover:bg-teal-50">
-                View Proof Documents
-              </Button>
-            </div>
+            {/* NGO Trust Card — links to public profile */}
+            <Link href={`/organizations/${(campaign.organizations as any)?.id}`} className="block mt-12 p-5 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:shadow-md transition-all group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
+                    <img src={(campaign.organizations as any)?.logo_url} alt="NGO" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-bold text-slate-900 text-sm">{(campaign.organizations as any)?.name}</h3>
+                      {(campaign.organizations as any)?.is_verified && <ShieldCheck className="h-4 w-4 text-teal-600" />}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">Verified organization · View full profile →</p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">View Profile →</span>
+              </div>
+            </Link>
 
             {/* Impact Timeline */}
             {updates && updates.length > 0 && (

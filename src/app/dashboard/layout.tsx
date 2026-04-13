@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2, FileSpreadsheet, ShieldCheck, Building2 } from "lucide-react"
+import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2, FileSpreadsheet, ShieldCheck, Building2, BookUser, ExternalLink } from "lucide-react"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -14,8 +14,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let orgName = "Demo NGO Admin"
 
   if (user?.user) {
-    const { data: profile } = await supabase.from("profiles").select("organization_id").eq("id", user.user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("organization_id, organizations(id, name)")
+      .eq("id", user.user.id)
+      .single()
     orgId = profile?.organization_id
+    const org = profile?.organizations as any
+    if (org?.name) orgName = org.name
   }
 
   // Fallback for MVP Presentation if not strictly logged in
@@ -53,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <ReceiptIndianRupee className="h-5 w-5 text-teal-500" /> Verify UTRs
           </Link>
           <Link href="/dashboard/donors" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-            <UsersRound className="h-5 w-5 text-teal-500" /> Donor CRM
+            <BookUser className="h-5 w-5 text-teal-500" /> Donor CRM
           </Link>
           <Link href="/dashboard/share" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
             <Share2 className="h-5 w-5 text-teal-500" /> AI Share Studio
@@ -69,7 +75,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 space-y-1">
+           {orgId && (
+             <Link href={`/organizations/${orgId}`} target="_blank" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-sm">
+               <ExternalLink className="h-4 w-4" /> View Public Profile
+             </Link>
+           )}
            <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
              <LogOut className="h-4 w-4" /> Exit to Public Site
            </Link>
