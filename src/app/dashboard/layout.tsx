@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { HeartPulse, LayoutDashboard, Send, UsersRound, ReceiptIndianRupee, LogOut, Share2, FileSpreadsheet, ShieldCheck, Building2, BookUser, ExternalLink } from "lucide-react"
+import { LogoutLink } from "@/components/LogoutLink"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -81,9 +82,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                <ExternalLink className="h-4 w-4" /> View Public Profile
              </Link>
            )}
-           <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-             <LogOut className="h-4 w-4" /> Exit to Public Site
-           </Link>
+           <LogoutLink />
         </div>
       </aside>
 

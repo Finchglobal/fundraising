@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { ShieldCheck, LayoutDashboard, Building2, LogOut } from "lucide-react"
+import { LogoutLink } from "@/components/LogoutLink"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -42,9 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
 
         <div className="p-4 border-t border-slate-900">
-           <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors">
-             <LogOut className="h-4 w-4" /> Go to Public Site
-           </Link>
+           <LogoutLink className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors w-full text-left" />
         </div>
       </aside>
 
