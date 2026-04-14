@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import { ShieldCheck, CheckCircle2, Activity } from "lucide-react"
+import { ShieldCheck, CheckCircle2, Activity, Zap, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
@@ -25,7 +25,9 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
         description,
         is_verified,
         upi_id,
-        logo_url
+        logo_url,
+        registration_80g,
+        registration_12a
       )
     `)
     .eq("id", id)
@@ -200,6 +202,20 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                     style={{ width: `${progress}%` }} 
                   />
                 </div>
+
+                {campaign.organizations?.registration_80g && (
+                  <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                    <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                      <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                        <Zap className="h-5 w-5 text-blue-600 fill-blue-100" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs font-black text-blue-800 uppercase tracking-tight">Tax Deduction Available</div>
+                        <div className="text-[10px] text-blue-600 font-bold leading-tight">Claim 50% deduction under Section 80G</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center mb-6">
                   <div className="bg-white p-3 inline-block rounded-xl shadow-sm mb-4 border border-slate-100">

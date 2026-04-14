@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp } from "lucide-react"
+import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp, Zap } from "lucide-react"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { LiveActivityTicker } from "@/components/LiveActivityTicker"
 import { PitchSimulationTool } from "@/components/PitchSimulationTool"
@@ -19,7 +19,7 @@ export default async function LandingPage() {
       raised_amount,
       story,
       organization_id,
-      organizations ( name, is_verified )
+      organizations ( name, is_verified, registration_80g )
     `)
     .eq("status", "published")
     .eq("is_featured", true)
@@ -35,7 +35,7 @@ export default async function LandingPage() {
       raised_amount,
       story,
       organization_id,
-      organizations ( name, is_verified )
+      organizations ( name, is_verified, registration_80g )
     `)
     .eq("status", "published")
     .order("raised_amount", { ascending: false })
@@ -156,8 +156,13 @@ export default async function LandingPage() {
                       className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                    <div className="absolute top-6 left-6 flex gap-2">
+                     <div className="absolute top-6 left-6 flex gap-2">
                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Most Urgent</span>
+                       {(featuredCampaigns[0].organizations as any)?.registration_80g && (
+                         <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                           <Zap className="h-3 w-3" /> Tax Benefits (80G)
+                         </span>
+                       )}
                     </div>
                   </div>
                   <div className="p-8 mt-auto relative z-10">
@@ -264,11 +269,18 @@ export default async function LandingPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      {campaign.organizations?.is_verified && (
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-green-700 flex items-center gap-1 shadow-sm">
-                          <ShieldCheck className="h-3 w-3" /> Verified
-                        </div>
-                      )}
+                      <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 px-0.5">
+                        {campaign.organizations?.is_verified && (
+                          <div className="bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[9px] font-black text-green-700 flex items-center gap-1 shadow-sm uppercase tracking-tighter">
+                            <ShieldCheck className="h-2.5 w-2.5" /> Verified
+                          </div>
+                        )}
+                        {campaign.organizations?.registration_80g && (
+                          <div className="bg-blue-600/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-[9px] font-black text-white flex items-center gap-1 shadow-sm uppercase tracking-tighter">
+                            <Zap className="h-2.5 w-2.5 fill-current" /> Tax Benefits
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <CardContent className="p-5 flex flex-col flex-grow">
                       <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
