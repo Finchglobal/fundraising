@@ -212,19 +212,19 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                         )
                       })}
                     </div>
+                    </div>
                   </div>
-                )}
                 )}
               </div>
             )}
             
             {/* Native Share Actions Below Media */}
-            <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-3 mt-8 border-t border-slate-100 pt-6">
               <NativeShare 
                 title={campaign.title} 
                 text={`I'm supporting this campaign on PhilanthroForge. Please help:`} 
                 url={`https://philanthroforge.com/campaigns/${campaign.id}`}
-                className="flex-1 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold shadow-sm"
+                className="w-full py-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-lg font-bold shadow-sm"
               />
             </div>
 
