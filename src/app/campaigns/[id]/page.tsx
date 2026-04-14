@@ -92,15 +92,15 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
           </div>
         </Link>
 
-        <div className="flex flex-col lg:flex-row gap-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           {/* Left Column: Story & Details */}
-          <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-8">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-8 break-words [overflow-wrap:anywhere]">
               {campaign.title}
             </h1>
             
-            <div className="prose prose-slate prose-lg max-w-none text-slate-700 mb-8">
-              <p className="whitespace-pre-wrap leading-relaxed">{campaign.story}</p>
+            <div className="prose prose-slate prose-lg max-w-none text-slate-700 mb-10">
+              <p className="whitespace-pre-wrap leading-relaxed break-words [overflow-wrap:anywhere]">{campaign.story}</p>
             </div>
 
             {/* Embedded Campaign Video */}
@@ -117,31 +117,60 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               </div>
             )}
 
-            {/* Extended Media Gallery */}
+            {/* Categorized Media Gallery */}
             {campaign.media_gallery && Array.isArray(campaign.media_gallery) && campaign.media_gallery.length > 0 && (
-              <div className="mb-12 space-y-6">
-                <h3 className="font-bold text-xl flex items-center gap-2">
-                  Campaign Gallery
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {campaign.media_gallery.filter((m: any) => m.url !== campaign.video_url).map((media: any) => {
-                    const isVideo = ['video', 'reel', 'short'].includes(media.type);
-                    return (
-                      <div key={media.id} className="w-full rounded-2xl overflow-hidden shadow-sm bg-slate-100 border border-slate-200 aspect-video relative group">
-                        {isVideo && getEmbedUrl(media.url) ? (
+              <div className="mb-14 space-y-10">
+                {/* Images */}
+                {campaign.media_gallery.filter((m: any) => m.type === 'image').length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Photo Gallery</h3>
+                    <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                      {campaign.media_gallery.filter((m: any) => m.type === 'image').map((media: any) => (
+                        <div key={media.id} className="snap-center shrink-0 w-72 sm:w-80 h-56 rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-100 hover:shadow-md transition-shadow">
+                          <img src={media.url} alt="Campaign Media" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Standard Horizontal Videos */}
+                {campaign.media_gallery.filter((m: any) => m.type === 'video' && m.url !== campaign.video_url).length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Featured Videos</h3>
+                    <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                      {campaign.media_gallery.filter((m: any) => m.type === 'video' && m.url !== campaign.video_url).map((media: any) => (
+                        <div key={media.id} className="snap-center shrink-0 w-80 sm:w-96 md:w-[450px] aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900 hover:shadow-md transition-shadow">
                           <iframe 
                             src={getEmbedUrl(media.url)!}
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                             allowFullScreen 
                             className="w-full h-full"
                           />
-                        ) : media.type === 'image' ? (
-                          <img src={media.url} alt="Campaign Media" className="w-full h-full object-cover" />
-                        ) : null}
-                      </div>
-                    )
-                  })}
-                </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Shorts & Reels */}
+                {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Shorts & Reels</h3>
+                    <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                      {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).map((media: any) => (
+                        <div key={media.id} className="snap-center shrink-0 w-52 sm:w-60 aspect-[9/16] rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900 hover:shadow-md transition-shadow">
+                          <iframe 
+                            src={getEmbedUrl(media.url)!}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen 
+                            className="w-full h-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -216,8 +245,8 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Right Column: Sticky Goal & Payment (Desktop) */}
-          <div className="w-full lg:w-96 relative">
-            <div className="sticky top-24 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+          <div className="w-full lg:w-[400px] xl:w-[420px] shrink-0 min-w-[320px] relative">
+            <div className="sticky top-24 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
               <div className="p-6 md:p-8">
                 <div className="flex items-center justify-between text-slate-900 mb-2">
                   <span className="text-3xl font-extrabold tracking-tight">₹{raised.toLocaleString('en-IN')}</span>

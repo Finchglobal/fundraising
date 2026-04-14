@@ -137,3 +137,14 @@
     font-family: var(--font-poppins), var(--font-montserrat), system-ui, sans-serif;
   }
 }
+
+/* Hide scrollbar for carousels */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
