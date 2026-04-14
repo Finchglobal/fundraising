@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { MapPin, Link as LinkIcon, Sparkles, AlertCircle } from "lucide-react"
+import { IconBrandInstagram, IconBrandYoutube, IconBrandX } from "@tabler/icons-react"
 import { NativeShare } from "@/components/ui/NativeShare"
 
 export default async function AmbassadorPublicProfile({ params }: { params: Promise<{ username: string }> }) {
@@ -44,17 +45,17 @@ export default async function AmbassadorPublicProfile({ params }: { params: Prom
           <div className="flex items-center justify-center gap-4 text-slate-500 mb-8">
             {profile.social_links?.instagram && (
               <a href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">
-                <Instagram className="h-6 w-6" />
+                <IconBrandInstagram className="h-6 w-6" />
               </a>
             )}
             {profile.social_links?.youtube && (
               <a href={profile.social_links.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
-                <Youtube className="h-6 w-6" />
+                <IconBrandYoutube className="h-6 w-6" />
               </a>
             )}
             {profile.social_links?.twitter && (
               <a href={`https://twitter.com/${profile.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
-                <Twitter className="h-6 w-6" />
+                <IconBrandX className="h-6 w-6" />
               </a>
             )}
           </div>
