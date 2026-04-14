@@ -39,9 +39,22 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
 
   const getEmbedUrl = (url: string) => {
     if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+    
+    // YouTube (Standard & Shorts)
+    const ytRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+    const ytMatch = url.match(ytRegExp);
+    if (ytMatch && ytMatch[2].length === 11) {
+      return `https://www.youtube.com/embed/${ytMatch[2]}`;
+    }
+
+    // Instagram (Reels & Posts)
+    const igRegExp = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:reel|p)\/([a-zA-Z0-9_-]+)/i;
+    const igMatch = url.match(igRegExp);
+    if (igMatch && igMatch[1]) {
+      return `https://www.instagram.com/p/${igMatch[1]}/embed`;
+    }
+
+    return url; // Fallback to raw URL
   }
 
   const { data: donations } = await supabase
