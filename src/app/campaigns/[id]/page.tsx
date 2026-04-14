@@ -179,8 +179,11 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                     <h3 className="font-bold text-lg mb-4 text-slate-800">Photo Gallery</h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {campaign.media_gallery.filter((m: any) => m.type === 'image').map((media: any) => (
-                        <div key={media.id} className="snap-center shrink-0 w-72 sm:w-80 h-56 rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-100 hover:shadow-md transition-shadow">
-                          <img src={media.url} alt="Campaign Media" className="w-full h-full object-cover" />
+                        <div key={media.id} className="snap-center shrink-0 w-72 sm:w-80 flex flex-col gap-3">
+                          <div className="h-56 rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-100 hover:shadow-md transition-shadow">
+                            <img src={media.url} alt="Campaign Media" className="w-full h-full object-cover" />
+                          </div>
+                          <ShareButton campaignId={campaign.id} campaignTitle={campaign.title} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-sm font-bold" />
                         </div>
                       ))}
                     </div>
@@ -193,13 +196,16 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                     <h3 className="font-bold text-lg mb-4 text-slate-800">Featured Videos</h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {campaign.media_gallery.filter((m: any) => m.type === 'video' && m.url !== campaign.video_url).map((media: any) => (
-                        <div key={media.id} className="snap-center shrink-0 w-80 sm:w-96 md:w-[450px] aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900 hover:shadow-md transition-shadow">
-                          <iframe 
-                            src={getEmbedUrl(media.url)!}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowFullScreen 
-                            className="w-full h-full"
-                          />
+                        <div key={media.id} className="snap-center shrink-0 w-80 sm:w-96 md:w-[450px] flex flex-col gap-3">
+                          <div className="aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900 hover:shadow-md transition-shadow">
+                            <iframe 
+                              src={getEmbedUrl(media.url)!}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                              allowFullScreen 
+                              className="w-full h-full"
+                            />
+                          </div>
+                          <ShareButton campaignId={campaign.id} campaignTitle={campaign.title} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-sm font-bold" />
                         </div>
                       ))}
                     </div>
@@ -216,13 +222,16 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                         const iframeUrl = isYT ? `${getEmbedUrl(media.url)}&rel=0&showinfo=0&modestbranding=1` : getEmbedUrl(media.url)
 
                         return (
-                          <div key={idx} className="w-[140px] md:w-[220px] aspect-[9/16] shrink-0 snap-start bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm group">
-                            <iframe
-                              src={iframeUrl!}
-                              className="w-full h-full object-cover"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
+                          <div key={idx} className="w-[140px] md:w-[220px] shrink-0 snap-start flex flex-col gap-3 group">
+                            <div className="aspect-[9/16] bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                              <iframe
+                                src={iframeUrl!}
+                                className="w-full h-full object-cover"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                            <ShareButton campaignId={campaign.id} campaignTitle={campaign.title} className="w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-sm font-bold" />
                           </div>
                         )
                       })}
