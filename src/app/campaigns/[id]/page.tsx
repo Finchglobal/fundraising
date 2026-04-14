@@ -227,7 +227,6 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                         )
                       })}
                     </div>
-                    </div>
                   </div>
                 )}
               </div>
