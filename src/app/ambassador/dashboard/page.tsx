@@ -4,6 +4,7 @@ import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, Users, TrendingUp, Copy, ExternalLink, Trophy, Crown } from "lucide-react"
 import Link from "next/link"
+import { NativeShare } from "@/components/ui/NativeShare"
 
 export default async function AmbassadorDashboard() {
   const supabase = await createClient()
@@ -52,13 +53,19 @@ export default async function AmbassadorDashboard() {
               Your tracking username: <strong className="text-indigo-600">@{profile.ambassador_username}</strong>
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link 
               href={`/ambassador/${profile.ambassador_username}`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              <ExternalLink className="h-4 w-4" /> View Public Profile
+              <ExternalLink className="h-4 w-4" /> View Public
             </Link>
+            <NativeShare 
+              title="My PhilanthroForge Impact Profile"
+              text={`Check out my impact and support my active campaigns!`}
+              url={`https://philanthroforge.com/ambassador/${profile.ambassador_username}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-indigo-700 transition-colors"
+            />
             <Link
               href="/leaderboard"
               className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg text-sm font-bold shadow-sm hover:bg-indigo-100 transition-colors"
@@ -117,15 +124,23 @@ export default async function AmbassadorDashboard() {
               <div className="p-4 flex flex-col flex-grow">
                 <h3 className="font-bold text-sm text-slate-900 mb-2 line-clamp-2">{c.title}</h3>
                 <div className="mt-auto space-y-2">
-                  <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 font-mono truncate">
+                  <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 font-mono truncate select-all">
                     philanthroforge.com/campaigns/{c.id}?ref={profile.ambassador_username}
                   </div>
-                  <Link 
-                    href={`/campaigns/${c.id}`}
-                    className="flex justify-center w-full py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800"
-                  >
-                    Go to Campaign
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link 
+                      href={`/campaigns/${c.id}`}
+                      className="flex-1 flex justify-center py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200"
+                    >
+                      View
+                    </Link>
+                    <NativeShare 
+                      title={c.title}
+                      text={`I'm supporting "${c.title}" on PhilanthroForge. Please help:`}
+                      url={`https://philanthroforge.com/campaigns/${c.id}?ref=${profile.ambassador_username}`}
+                      className="flex-1 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

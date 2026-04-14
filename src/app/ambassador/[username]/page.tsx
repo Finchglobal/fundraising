@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { MapPin, Link as LinkIcon, Instagram, Youtube, Twitter, Sparkles, AlertCircle } from "lucide-react"
+import { NativeShare } from "@/components/ui/NativeShare"
 
 export default async function AmbassadorPublicProfile({ params }: { params: Promise<{ username: string }> }) {
   const supabase = await createClient()
@@ -40,7 +41,7 @@ export default async function AmbassadorPublicProfile({ params }: { params: Prom
             <Sparkles className="h-5 w-5" /> Verified Impact Ambassador
           </p>
 
-          <div className="flex items-center justify-center gap-4 text-slate-500">
+          <div className="flex items-center justify-center gap-4 text-slate-500 mb-8">
             {profile.social_links?.instagram && (
               <a href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">
                 <Instagram className="h-6 w-6" />
@@ -56,6 +57,15 @@ export default async function AmbassadorPublicProfile({ params }: { params: Prom
                 <Twitter className="h-6 w-6" />
               </a>
             )}
+          </div>
+          
+          <div className="flex justify-center">
+             <NativeShare 
+                title={`${profile.full_name || username}'s Impact Profile`}
+                text={`Check out the impact I've made on PhilanthroForge! Support my campaigns here:`}
+                url={`https://philanthroforge.com/ambassador/${username}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-lg shadow-indigo-600/30 transition-all"
+             />
           </div>
         </div>
       </div>
