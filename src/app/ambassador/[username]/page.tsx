@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
-import { MapPin, Link as LinkIcon, Instagram, Youtube, Twitter, Sparkles, AlertCircle } from "lucide-react"
+import { MapPin, Link as LinkIcon, Sparkles, AlertCircle } from "lucide-react"
 import { NativeShare } from "@/components/ui/NativeShare"
 
 export default async function AmbassadorPublicProfile({ params }: { params: Promise<{ username: string }> }) {
