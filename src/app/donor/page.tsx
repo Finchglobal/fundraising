@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
-import { Heart, ShieldCheck, IndianRupee, Clock, ArrowRight, TrendingUp } from "lucide-react"
+import { Heart, ShieldCheck, IndianRupee, Clock, ArrowRight, TrendingUp, Sparkles } from "lucide-react"
 import Link from "next/link"
 import DonorReceiptButton from "@/components/donor/DonorReceiptButton"
+import { ShareButton } from "@/components/ui/ShareButton"
 
 export default async function DonorDashboard() {
   const supabase = await createClient()
@@ -84,13 +85,18 @@ export default async function DonorDashboard() {
                       <p className="text-xs text-gray-500 font-medium">To: {d.campaigns?.organizations?.name}</p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right space-y-1">
                     <p className="font-black text-gray-900">₹{Number(d.amount).toLocaleString()}</p>
-                    <p className={`text-[10px] font-bold uppercase tracking-widest ${d.status === 'verified' ? 'text-green-600' : 'text-blue-600'} mb-1`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-widest ${d.status === 'verified' ? 'text-green-600' : 'text-blue-600'}`}>
                       {d.status}
                     </p>
-                    {d.status === 'verified' && (
-                      <DonorReceiptButton donation={d} />
+                    {d.status === 'verified' && <DonorReceiptButton donation={d} />}
+                    {d.campaigns?.id && (
+                      <ShareButton
+                        campaignId={d.campaigns.id}
+                        campaignTitle={d.campaigns.title}
+                        className="text-xs text-indigo-500 hover:text-indigo-700 flex items-center gap-1 justify-end font-bold"
+                      />
                     )}
                   </div>
                 </div>
@@ -134,6 +140,21 @@ export default async function DonorDashboard() {
                    <div className="h-full bg-green-500 rounded-full w-[65%] shadow-sm"></div>
                 </div>
              </div>
+          </div>
+          <div className="bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-5 w-5 text-indigo-600" />
+              <h3 className="font-bold text-indigo-900">Become an Ambassador</h3>
+            </div>
+            <p className="text-sm text-indigo-700 leading-relaxed mb-4">
+              Share campaigns you love and track exactly how many people donate because of you.
+            </p>
+            <Link 
+              href="/ambassador/onboarding"
+              className="block text-center w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm shadow-indigo-500/20 transition-all"
+            >
+              Get Started →
+            </Link>
           </div>
         </div>
       </div>
