@@ -3,6 +3,7 @@ import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import { FloatingWhatsApp } from "@/components/ui/FloatingWhatsApp";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguageProvider } from "@/components/LanguageSwitcher";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -44,7 +45,9 @@ export default function RootLayout({
       className={`${montserrat.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-montserrat dark:bg-gray-950 dark:text-white">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         <Toaster position="top-center" richColors />
         <FloatingWhatsApp phoneNumber="919999999999" message="Hi PhilanthroForge, I need some help with fundraising." />
       </body>

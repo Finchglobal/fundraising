@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
+import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 
 const NAV_LINKS = [
   { label: "Home", href: "https://www.philanthroforge.com" },
@@ -112,21 +113,31 @@ export function SiteNavbar() {
           })}
         </div>
 
-        {/* Mobile Hamburger Toggle */}
-        <button
-          className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded hover:bg-gray-100 transition-colors"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "rotate-45 translate-y-2" : ""}`} />
-          <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "opacity-0" : ""}`} />
-          <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "-rotate-45 -translate-y-2" : ""}`} />
-        </button>
+        {/* Language Switcher + Mobile Toggle */}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
+          <button
+            className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 rounded hover:bg-gray-100 transition-colors"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "rotate-45 translate-y-2" : ""}`} />
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "opacity-0" : ""}`} />
+            <span className={`block w-6 h-0.5 bg-gray-800 transition-all duration-300 ${open ? "-rotate-45 -translate-y-2" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Dropdown Menu */}
       {open && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 pb-6 pt-2 flex flex-col gap-1 shadow-lg max-h-[80vh] overflow-y-auto">
+        {/* Mobile Language Switcher */}
+        <div className="px-4 pt-3 pb-1">
+          <LanguageSwitcher />
+        </div>
+
           {NAV_LINKS.map(link => {
             if (link.cta) {
               return (

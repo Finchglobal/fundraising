@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp, Zap } from "lucide-react"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { LiveActivityTicker } from "@/components/LiveActivityTicker"
-import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -118,15 +117,6 @@ export default async function LandingPage() {
 
       <LiveActivityTicker />
       
-      {/* Simulation Tool for Pitch Demo */}
-      <section className="bg-slate-50 py-8 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4">
-          <PitchSimulationTool 
-            orgId={featuredCampaigns?.[0]?.organization_id || ""} 
-            campaigns={featuredCampaigns || []} 
-          />
-        </div>
-      </section>
 
       {/* ── CURATED SELECTIONS ───────────────────────────── */}
       {featuredCampaigns && featuredCampaigns.length > 0 && (

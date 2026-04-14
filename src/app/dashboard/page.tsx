@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee, Plus, FileSpreadsheet, Sparkles, ArrowRight, ShieldCheck, Pencil } from "lucide-react"
 import Link from "next/link"
-import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 
 export default async function DashboardHub() {
   const supabase = await createClient()
@@ -164,9 +163,6 @@ export default async function DashboardHub() {
             ))}
           </div>
 
-          <div className="mt-8">
-            <PitchSimulationTool orgId={orgId} campaigns={campaigns || []} />
-          </div>
 
           {/* Platform Fee Nudge */}
           {totalRaised > 0 && (

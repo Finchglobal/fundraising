@@ -10,13 +10,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ShieldCheck, Loader2, Upload, FileText, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
+import { useLang, type Lang } from "@/components/LanguageSwitcher"
 
 export default function NGOOnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { lang, setLang } = useLang()
   const [loading, setLoading] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)   // step 0 = language welcome
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     name: "",
@@ -180,22 +182,71 @@ export default function NGOOnboardingPage() {
       
       <main className="flex-grow flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-2xl">
-          {/* Progress Indicator */}
-          <div className="mb-8 flex justify-between items-center px-2">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex items-center gap-2">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                  step === s ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/20' : 
-                  step > s ? 'bg-teal-100 text-teal-700' : 'bg-slate-200 text-slate-500'
-                }`}>
-                  {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
+          {/* Progress Indicator — only show steps 1–3 */}
+          {step > 0 && (
+            <div className="mb-8 flex justify-between items-center px-2">
+              {[1, 2, 3].map((s) => (
+                <div key={s} className="flex items-center gap-2">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                    step === s ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/20' : 
+                    step > s ? 'bg-teal-100 text-teal-700' : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
+                  </div>
+                  {s < 3 && <div className={`h-0.5 w-12 sm:w-20 rounded ${step > s ? 'bg-teal-600' : 'bg-slate-200'}`} />}
                 </div>
-                {s < 3 && <div className={`h-0.5 w-12 sm:w-20 rounded ${step > s ? 'bg-teal-600' : 'bg-slate-200'}`} />}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <Card className="border-slate-200 shadow-xl overflow-hidden rounded-2xl">
+            {/* ── Step 0: Language Welcome ─────────────────── */}
+            {step === 0 && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <CardHeader className="bg-gradient-to-br from-teal-50 to-blue-50 border-b border-teal-100 text-center pb-8">
+                  <div className="text-4xl mb-3">🙏</div>
+                  <CardTitle className="text-2xl font-extrabold text-slate-900">Welcome to PhilanthroForge</CardTitle>
+                  <CardDescription className="text-base text-slate-600 mt-2">
+                    Register your NGO in just a few steps.<br />
+                    <span className="text-sm text-slate-500">Apni bhasha chunein / अपनी भाषा चुनें</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-8 pb-10 space-y-6">
+                  <div>
+                    <p className="text-sm font-bold text-slate-700 text-center mb-4">Choose your preferred language / भाषा चुनें</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: "en" as Lang, emoji: "🇬🇧", title: "English", sub: "International" },
+                        { value: "hinglish" as Lang, emoji: "🤝", title: "Hinglish", sub: "Aasaan Hindi-English" },
+                        { value: "hi" as Lang, emoji: "🇮🇳", title: "हिंदी", sub: "पूर्ण हिंदी" },
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setLang(opt.value)}
+                          className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all text-center ${
+                            lang === opt.value
+                              ? "border-teal-500 bg-teal-50 shadow-md shadow-teal-100"
+                              : "border-slate-200 bg-white hover:border-teal-300 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span className="text-3xl">{opt.emoji}</span>
+                          <span className="font-bold text-slate-800 text-sm">{opt.title}</span>
+                          <span className="text-[10px] text-slate-500">{opt.sub}</span>
+                          {lang === opt.value && <CheckCircle2 className="h-4 w-4 text-teal-600" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => { setStep(1); window.scrollTo(0, 0) }}
+                    className="w-full bg-teal-600 hover:bg-teal-500 rounded-xl h-12 text-base font-bold shadow-lg shadow-teal-500/10"
+                  >
+                    {lang === "hi" ? "आगे बढ़ें →" : lang === "hinglish" ? "Aage Badho →" : "Get Started →"}
+                  </Button>
+                  <p className="text-center text-xs text-slate-400">You can change the language anytime from the navigation bar.</p>
+                </CardContent>
+              </div>
+            )}
             {step === 1 && (
               <form onSubmit={handleNextStep} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CardHeader className="bg-slate-50 border-b border-slate-100">
