@@ -8,12 +8,20 @@ import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import CopyUpiButton from "@/components/CopyUpiButton"
 import Link from "next/link"
 
-export default async function CampaignPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CampaignPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ ref?: string }> }) {
   const supabase = await createClient()
 
   // Ensure params.id is resolved for Next.js 15
   const paramData = await params
   const { id } = paramData
+  const queryParams = await searchParams
+  const ref = queryParams?.ref
+  let referrerId = null;
+
+  if (ref) {
+    const { data: refData } = await supabase.from('profiles').select('id').eq('ambassador_username', ref).single();
+    if (refData) referrerId = refData.id;
+  }
 
   const { data: campaign, error } = await supabase
     .from("campaigns")
@@ -302,7 +310,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                   <p className="text-sm text-center text-slate-600">
                      Already made the payment through your UPI app?
                   </p>
-                  <DonationCaptureForm campaignId={campaign.id} />
+                  <DonationCaptureForm campaignId={campaign.id} referrerId={referrerId} />
                 </div>
               </div>
               <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-center gap-2 text-sm text-slate-500 font-medium">

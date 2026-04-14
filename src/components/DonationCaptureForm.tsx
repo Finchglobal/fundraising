@@ -74,7 +74,7 @@ function FieldError({ error }: { error?: string | null }) {
   )
 }
 
-export default function DonationCaptureForm({ campaignId, triggerClassName }: { campaignId: string, triggerClassName?: string }) {
+export default function DonationCaptureForm({ campaignId, triggerClassName, referrerId }: { campaignId: string, triggerClassName?: string, referrerId?: string | null }) {
   const supabase = createClient()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -187,6 +187,7 @@ export default function DonationCaptureForm({ campaignId, triggerClassName }: { 
       upi_utr: utr.trim(),
       proof_url: proofUrl,
       is_anonymous: nameVisibility === "anonymous",
+      referrer_id: referrerId || null,
       status: "pending"
     })
 

@@ -31,6 +31,9 @@ CREATE TABLE profiles (
     full_name TEXT,
     role user_role DEFAULT 'donor'::user_role,
     organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+    is_ambassador BOOLEAN DEFAULT false,
+    ambassador_username TEXT UNIQUE,
+    social_links JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -95,6 +98,7 @@ CREATE TABLE donations (
     platform_tip NUMERIC DEFAULT 0,
     upi_utr TEXT UNIQUE NOT NULL,
     proof_url TEXT,
+    referrer_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
     status donation_status DEFAULT 'pending'::donation_status,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -120,6 +124,10 @@ ALTER TABLE ai_share_assets ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" 
 ON profiles FOR SELECT 
 USING (auth.uid() = id);
+
+CREATE POLICY "Anyone can view ambassador profiles" 
+ON profiles FOR SELECT 
+USING (is_ambassador = true);
 
 CREATE POLICY "Users can update own profile" 
 ON profiles FOR UPDATE
