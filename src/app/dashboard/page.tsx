@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee, Plus, FileSpreadsheet, Sparkles, ArrowRight, ShieldCheck } from "lucide-react"
+import { TrendingUp, Activity, UsersRound, ReceiptIndianRupee, Plus, FileSpreadsheet, Sparkles, ArrowRight, ShieldCheck, Pencil } from "lucide-react"
 import Link from "next/link"
 import { PitchSimulationTool } from "@/components/PitchSimulationTool"
 
@@ -205,34 +205,42 @@ export default async function DashboardHub() {
               {recentCampaigns.map(c => {
                 const progress = Math.min(((c.raised_amount || 0) / c.public_goal) * 100, 100)
                 return (
-                  <Link key={c.id} href={`/campaigns/${c.id}`} target="_blank">
-                    <div className="flex gap-4 bg-white border border-slate-200 rounded-xl p-4 hover:border-teal-300 hover:shadow-sm transition-all group">
+                  <div key={c.id} className="flex gap-4 bg-white border border-slate-200 rounded-xl p-4 hover:border-teal-300 hover:shadow-sm transition-all group relative">
+                    <Link href={`/campaigns/${c.id}`} target="_blank" className="shrink-0">
                       <img
                         src={c.hero_image_url || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=400&q=60"}
                         alt={c.title}
                         className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                       />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-semibold text-slate-900 line-clamp-1 group-hover:text-teal-700 transition-colors">{c.title}</p>
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                            c.status === "published" ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
-                          }`}>
-                            {c.status}
-                          </span>
+                    </Link>
+                    <div className="flex-1 min-w-0 pr-12 relative">
+                      <div className="flex items-start justify-between gap-2">
+                        <Link href={`/campaigns/${c.id}`} target="_blank" className="font-semibold text-slate-900 line-clamp-1 hover:text-teal-700 transition-colors">
+                          {c.title}
+                        </Link>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                          c.status === "published" ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
+                        }`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                          <span className="font-semibold text-slate-700">₹{(c.raised_amount || 0).toLocaleString("en-IN")} raised</span>
+                          <span>of ₹{c.public_goal.toLocaleString("en-IN")}</span>
                         </div>
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs text-slate-500 mb-1">
-                            <span className="font-semibold text-slate-700">₹{(c.raised_amount || 0).toLocaleString("en-IN")} raised</span>
-                            <span>of ₹{c.public_goal.toLocaleString("en-IN")}</span>
-                          </div>
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />
-                          </div>
+                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />
                         </div>
                       </div>
+                      
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link href={`/dashboard/campaigns/${c.id}/edit`} className="p-2 bg-slate-100 text-slate-600 hover:bg-teal-600 hover:text-white rounded-lg transition-all" title="Edit Fundraiser">
+                           <Pencil className="h-4 w-4" />
+                        </Link>
+                       </div>
                     </div>
-                  </Link>
+                  </div>
                 )
               })}
             </div>

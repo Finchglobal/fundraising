@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Search, Loader2, Send, Save, IndianRupee, Video, Upload, ImageIcon, CheckCircle2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { MediaManager, MediaItem } from "@/components/MediaManager"
 
 export default function CampaignWizard() {
   const router = useRouter()
@@ -21,7 +22,7 @@ export default function CampaignWizard() {
   const [heroImage, setHeroImage] = useState("")
   const [heroImageName, setHeroImageName] = useState("")
   const [uploadingHero, setUploadingHero] = useState(false)
-  const [videoUrl, setVideoUrl] = useState("")
+  const [mediaGallery, setMediaGallery] = useState<MediaItem[]>([])
   const [actualNeed, setActualNeed] = useState<number | "">("")
 
   // Philanthroforge 2% SaaS buffer calculation
@@ -70,7 +71,8 @@ export default function CampaignWizard() {
       title,
       story,
       hero_image_url: heroImage || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
-      video_url: videoUrl,
+      video_url: mediaGallery.find(m => m.type === 'video' || m.type === 'short' || m.type === 'reel')?.url || "",
+      media_gallery: mediaGallery,
       actual_need: Number(actualNeed),
       platform_buffer: bufferAmount,
       public_goal: publicGoal,
@@ -227,19 +229,11 @@ export default function CampaignWizard() {
                   {errors.heroImage && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.heroImage}</p>}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="videoUrl">Impact Video URL (YouTube / Reel)</Label>
-                  <div className="relative">
-                    <Video className="absolute left-3 top-3 h-4 w-4 text-red-500" />
-                    <Input 
-                      id="videoUrl" 
-                      placeholder="https://youtu.be/..." 
-                      value={videoUrl} 
-                      onChange={e => setVideoUrl(e.target.value)} 
-                      className="pl-9"
-                    />
+                <div className="space-y-4">
+                  <Label className="text-slate-700 font-semibold">Media Gallery <span className="text-slate-400 font-normal text-xs ml-2">(Videos, Shorts, Reels & Images)</span></Label>
+                  <div className="rounded-xl">
+                    <MediaManager media={mediaGallery} onChange={setMediaGallery} />
                   </div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Embeds a playable video directly in the campaign page</p>
                 </div>
 
                 <div className="pt-4 flex flex-col sm:flex-row gap-4">

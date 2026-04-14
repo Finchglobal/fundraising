@@ -79,18 +79,18 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* NGO Info */}
-        <div className="flex items-center gap-4 -mt-16 relative z-10 mb-8">
-          <img src={campaign.organizations?.logo_url} className="h-20 w-20 rounded-full border-4 border-white shadow-md bg-white object-cover" alt="NGO Logo"/>
+        <Link href={`/organizations/${(campaign.organizations as any)?.id}`} className="group flex items-center gap-4 -mt-16 relative z-10 mb-8 w-fit">
+          <img src={campaign.organizations?.logo_url} className="h-20 w-20 rounded-full border-4 border-white shadow-md bg-white object-cover group-hover:scale-105 transition-transform" alt="NGO Logo"/>
           <div className="pt-8">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-slate-900">{campaign.organizations?.name}</h2>
+              <h2 className="text-xl font-bold text-slate-900 group-hover:text-teal-600 transition-colors">{campaign.organizations?.name}</h2>
               {campaign.organizations?.is_verified && (
                 <ShieldCheck className="h-5 w-5 text-teal-600" />
               )}
             </div>
-            <p className="text-sm text-slate-500">Organizing this campaign</p>
+            <p className="text-sm text-slate-500">Organizing this campaign · View Profile</p>
           </div>
-        </div>
+        </Link>
 
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Left Column: Story & Details */}
@@ -113,6 +113,34 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                     allowFullScreen 
                     className="w-full h-full min-h-[300px] md:min-h-[450px] aspect-video"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Extended Media Gallery */}
+            {campaign.media_gallery && Array.isArray(campaign.media_gallery) && campaign.media_gallery.length > 0 && (
+              <div className="mb-12 space-y-6">
+                <h3 className="font-bold text-xl flex items-center gap-2">
+                  Campaign Gallery
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {campaign.media_gallery.filter((m: any) => m.url !== campaign.video_url).map((media: any) => {
+                    const isVideo = ['video', 'reel', 'short'].includes(media.type);
+                    return (
+                      <div key={media.id} className="w-full rounded-2xl overflow-hidden shadow-sm bg-slate-100 border border-slate-200 aspect-video relative group">
+                        {isVideo && getEmbedUrl(media.url) ? (
+                          <iframe 
+                            src={getEmbedUrl(media.url)!}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen 
+                            className="w-full h-full"
+                          />
+                        ) : media.type === 'image' ? (
+                          <img src={media.url} alt="Campaign Media" className="w-full h-full object-cover" />
+                        ) : null}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

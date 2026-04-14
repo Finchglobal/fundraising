@@ -77,6 +77,7 @@ CREATE TABLE campaigns (
     platform_buffer NUMERIC NOT NULL,
     public_goal NUMERIC NOT NULL,
     raised_amount NUMERIC DEFAULT 0,
+    media_gallery JSONB DEFAULT '[]'::jsonb,
     status campaign_status DEFAULT 'draft'::campaign_status,
     is_featured BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
