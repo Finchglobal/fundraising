@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import CopyUpiButton from "@/components/CopyUpiButton"
-import { NativeShare } from "@/components/ui/NativeShare"
+import { ShareButton } from "@/components/ui/ShareButton"
 import { TranslatedText } from "@/components/TranslatedText"
 import Link from "next/link"
 
@@ -142,16 +142,31 @@ export default async function CampaignPage({ params, searchParams }: { params: P
             </div>
 
             {/* Embedded Campaign Video */}
-            {campaign.video_url && getEmbedUrl(campaign.video_url) && (
-              <div className="mb-12">
+            {campaign.video_url && getEmbedUrl(campaign.video_url) ? (
+              <div className="mb-8">
                 <div className="w-full rounded-2xl overflow-hidden shadow-lg bg-slate-900 border border-slate-200">
                   <iframe 
-                    src={getEmbedUrl(campaign.video_url)!} 
+                    src={getEmbedUrl(campaign.video_url)! + "&rel=0&showinfo=0&modestbranding=1"} 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowFullScreen 
                     className="w-full h-full min-h-[300px] md:min-h-[450px] aspect-video"
                   />
                 </div>
+                <div className="flex items-center gap-3 mt-4">
+                  <ShareButton 
+                    campaignId={campaign.id}
+                    campaignTitle={campaign.title}
+                    className="w-full py-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-lg font-bold shadow-sm"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 mb-8">
+                <ShareButton 
+                  campaignId={campaign.id}
+                  campaignTitle={campaign.title}
+                  className="w-full py-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-lg font-bold shadow-sm"
+                />
               </div>
             )}
 
@@ -220,10 +235,9 @@ export default async function CampaignPage({ params, searchParams }: { params: P
             
             {/* Native Share Actions Below Media */}
             <div className="flex items-center gap-3 mt-8 border-t border-slate-100 pt-6">
-              <NativeShare 
-                title={campaign.title} 
-                text={`I'm supporting this campaign on PhilanthroForge. Please help:`} 
-                url={`https://philanthroforge.com/campaigns/${campaign.id}`}
+              <ShareButton 
+                campaignId={campaign.id}
+                campaignTitle={campaign.title}
                 className="w-full py-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-lg font-bold shadow-sm"
               />
             </div>

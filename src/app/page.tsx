@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp, Zap } from "lucide-react"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { LiveActivityTicker } from "@/components/LiveActivityTicker"
+import { ShareButton } from "@/components/ui/ShareButton"
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -305,6 +306,13 @@ export default async function LandingPage() {
                           <span className="text-xs font-bold text-green-700 group-hover:gap-2 flex items-center gap-1 transition-all">
                             Give now <ArrowRight className="h-3 w-3" />
                           </span>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-100" onClick={e => e.preventDefault()}>
+                          <ShareButton
+                            campaignId={campaign.id}
+                            campaignTitle={campaign.title}
+                            className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-sm font-bold"
+                          />
                         </div>
                       </div>
                     </CardContent>
