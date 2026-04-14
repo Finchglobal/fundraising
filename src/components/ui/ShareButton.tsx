@@ -48,14 +48,31 @@ export function ShareButton({ campaignId, campaignTitle, className = "" }: Share
     checkStatus()
   }, [])
 
-  const performShare = async () => {
-    const shareText = `I'm supporting "${campaignTitle}" on PhilanthroForge. Please help:`
+  const performShare = async (forceUntracked = false) => {
+    let shareText = `I'm supporting "${campaignTitle}" on PhilanthroForge. Please help:`
+    
+    // AI Generated Captions for Tracked Ambassadors
+    if (isAmbassador && !forceUntracked) {
+      const aiCaptions = [
+        `I'm giving trust-first on PhilanthroForge. Join me in backing "${campaignTitle}":`,
+        `Impact requires action. I just backed this verified NGO campaign for "${campaignTitle}":`,
+        `Transparency matters. Help me fund this urgent cause via PhilanthroForge - "${campaignTitle}":`,
+        `Every rupee goes directly to the cause. I'm supporting "${campaignTitle}"—join my impact circle here:`,
+        `Real impact, verified by experts. Let's make a difference together for "${campaignTitle}":`
+      ]
+      shareText = aiCaptions[Math.floor(Math.random() * aiCaptions.length)]
+    }
+
+    const shareUrl = (isAmbassador && !forceUntracked && ambassadorUsername) 
+      ? `${baseUrl}?ref=${ambassadorUsername}` 
+      : baseUrl
+
     if (navigator.share) {
       try {
-        await navigator.share({ title: campaignTitle, text: shareText, url: finalUrl })
+        await navigator.share({ title: campaignTitle, text: shareText, url: shareUrl })
       } catch (e) { /* user cancelled */ }
     } else {
-      await navigator.clipboard.writeText(`${shareText} ${finalUrl}`)
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`)
       setCopied(true)
       toast.success("Link copied to clipboard!")
       setTimeout(() => setCopied(false), 2000)
@@ -67,10 +84,8 @@ export function ShareButton({ campaignId, campaignTitle, className = "" }: Share
     e.stopPropagation()
     if (isAmbassador) {
       performShare()
-    } else if (isAuth) {
-      setShowPromo(true)
     } else {
-      performShare()
+      setShowPromo(true) // Always prompt guests and regular users to upgrade
     }
   }
 
@@ -114,51 +129,75 @@ export function ShareButton({ campaignId, campaignTitle, className = "" }: Share
       </button>
 
       <Dialog open={showPromo} onOpenChange={setShowPromo}>
-        <DialogContent className="sm:max-w-md" onClick={e => e.stopPropagation()}>
-          <DialogHeader>
-            <div className="mx-auto w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-3">
+        <DialogContent className="sm:max-w-md p-6" onClick={e => e.stopPropagation()}>
+          <DialogHeader className="mb-2">
+            <div className="mx-auto w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3">
               <Sparkles className="h-6 w-6" />
             </div>
             <DialogTitle className="text-center text-xl font-black text-slate-900">
-              Track your impact!
+              Amplify Your Impact
             </DialogTitle>
-            <DialogDescription className="text-center text-slate-600 pt-2">
-              Become an <strong className="text-indigo-600">Impact Ambassador</strong> to get a custom tracking link and see exactly how many people donate because of <em>you</em>.
+            <DialogDescription className="text-center text-slate-600 pt-2 font-medium">
+              Join the <strong className="text-indigo-600 font-bold">Impact Ambassador</strong> program to get a custom trackable link and see exactly how many donations you inspire, with AI-driven captions!
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700">Your unique tracking username</label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 bg-slate-50 text-slate-400 text-xs font-medium">
-                  ?ref=
-                </span>
-                <Input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                  className="rounded-l-none h-10"
-                  placeholder="yourname"
-                  onClick={e => e.stopPropagation()}
-                />
+          <div className="space-y-4">
+            {/* Primary Action: Become Ambassador */}
+            <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-3">
+              <h4 className="text-sm font-bold text-slate-900">Level up your sharing</h4>
+              {isAuth ? (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Choose your unique tracking handle</label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 bg-white text-slate-400 text-xs font-medium">
+                        ?ref=
+                      </span>
+                      <Input
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                        className="rounded-l-none h-10 border-slate-200"
+                        placeholder="yourname"
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={(e) => { e.stopPropagation(); handleOneClickUpgrade() }}
+                    disabled={upgrading || username.length < 3}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 h-10 shadow-sm transition-all text-sm"
+                  >
+                    {upgrading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activate Ambassador Link"}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); window.location.href = `/signup?redirect=/campaigns/${campaignId}` }}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 h-10 shadow-sm transition-all text-sm gap-2"
+                >
+                  Create free account to activate <Sparkles className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Secondary Action: Standard Share */}
+            <div className="relative pt-2">
+              <div className="absolute inset-0 items-center flex">
+                <span className="w-full border-t border-slate-100" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-400 font-bold tracking-widest">Or</span>
               </div>
             </div>
-            <Button
-              onClick={(e) => { e.stopPropagation(); handleOneClickUpgrade() }}
-              disabled={upgrading || username.length < 3}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 h-11 shadow-md shadow-indigo-500/20"
-            >
-              {upgrading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Activate & Share"}
-            </Button>
-          </div>
 
-          <div className="text-center">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowPromo(false); performShare() }}
-              className="text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2 transition-colors"
+            <Button
+              variant="outline"
+              onClick={(e) => { e.stopPropagation(); setShowPromo(false); performShare(true) }}
+              className="w-full h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-bold shadow-sm bg-white"
             >
-              No thanks, share normally
-            </button>
+              Share Normally (Untracked)
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
