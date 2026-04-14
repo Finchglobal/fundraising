@@ -251,8 +251,9 @@ export default async function LandingPage() {
               const progressColor = progress >= 75 ? "bg-green-500" : progress >= 40 ? "bg-yellow-500" : "bg-blue-500"
               
               return (
-                <Link href={`/campaigns/${campaign.id}`} key={campaign.id} className="group">
-                  <Card className="h-full overflow-hidden border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 rounded-2xl">
+                <div key={campaign.id} className="group relative">
+                  <Card className="h-full overflow-hidden border-gray-100 shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1.5 transition-all duration-300 rounded-2xl flex flex-col">
+                    <Link href={`/campaigns/${campaign.id}`} className="absolute inset-0 z-10" aria-label={`View ${campaign.title}`} />
                     <div className="relative h-52 w-full overflow-hidden bg-gray-100">
                       <img 
                         src={campaign.hero_image_url} 
@@ -307,7 +308,7 @@ export default async function LandingPage() {
                             Give now <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100" onClick={e => e.preventDefault()}>
+                        <div className="mt-3 pt-3 border-t border-gray-100 relative z-20">
                           <ShareButton
                             campaignId={campaign.id}
                             campaignTitle={campaign.title}
@@ -317,7 +318,7 @@ export default async function LandingPage() {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               )
             })}
             
