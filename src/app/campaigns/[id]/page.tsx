@@ -126,7 +126,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 <ShieldCheck className="h-5 w-5 text-teal-600" />
               )}
             </div>
-            <p className="text-sm text-slate-500">Organizing this campaign · View Profile</p>
+            <p className="text-sm text-slate-500"><TranslatedText tKey="organising_campaign" /> · <TranslatedText tKey="view_profile" /></p>
           </div>
         </Link>
 
@@ -176,7 +176,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 {/* Images */}
                 {campaign.media_gallery.filter((m: any) => m.type === 'image').length > 0 && (
                   <div>
-                    <h3 className="font-bold text-lg mb-4 text-slate-800">Photo Gallery</h3>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800"><TranslatedText tKey="photo_gallery" /></h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {campaign.media_gallery.filter((m: any) => m.type === 'image').map((media: any) => (
                         <div key={media.id} className="snap-center shrink-0 w-72 sm:w-80 flex flex-col gap-3">
@@ -193,7 +193,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 {/* Standard Horizontal Videos */}
                 {campaign.media_gallery.filter((m: any) => m.type === 'video' && m.url !== campaign.video_url).length > 0 && (
                   <div>
-                    <h3 className="font-bold text-lg mb-4 text-slate-800">Featured Videos</h3>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800"><TranslatedText tKey="featured_videos" /></h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {campaign.media_gallery.filter((m: any) => m.type === 'video' && m.url !== campaign.video_url).map((media: any) => (
                         <div key={media.id} className="snap-center shrink-0 w-80 sm:w-96 md:w-[450px] flex flex-col gap-3">
@@ -215,7 +215,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 {/* Shorts & Reels */}
                 {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).length > 0 && (
                   <div>
-                    <h3 className="font-bold text-lg mb-4 text-slate-800">Shorts & Reels</h3>
+                    <h3 className="font-bold text-lg mb-4 text-slate-800"><TranslatedText tKey="shorts_reels" /></h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).map((media: any, idx: number) => {
                         const isYT = media.url.includes("youtube.com") || media.url.includes("youtu.be") || media.embed_url?.includes("youtube")
@@ -295,7 +295,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
 
             {/* Recent Donations */}
             <div className="mt-12">
-              <h3 className="font-bold text-xl mb-6">Recent Supporters</h3>
+              <h3 className="font-bold text-xl mb-6"><TranslatedText tKey="recent_supporters" /></h3>
               <div className="space-y-4">
                 {donations?.map((d: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-lg shadow-sm">
@@ -304,7 +304,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                         {d.is_anonymous ? "A" : d.donor_name.charAt(0)}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900">{d.is_anonymous ? "Anonymous" : d.donor_name}</div>
+                        <div className="font-semibold text-slate-900">{d.is_anonymous ? <TranslatedText tKey="anonymous" /> : d.donor_name}</div>
                         <div className="text-xs text-slate-500">{new Date(d.created_at).toLocaleDateString()}</div>
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                   </div>
                 ))}
                 {(!donations || donations.length === 0) && (
-                  <p className="text-slate-500 text-sm">Be the first to donate to this cause!</p>
+                  <p className="text-slate-500 text-sm"><TranslatedText tKey="first_to_donate" /></p>
                 )}
               </div>
             </div>
@@ -343,8 +343,8 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                         <Zap className="h-5 w-5 text-blue-600 fill-blue-100" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-xs font-black text-blue-800 uppercase tracking-tight">Tax Deduction Available</div>
-                        <div className="text-[10px] text-blue-600 font-bold leading-tight">Claim 50% deduction under Section 80G</div>
+                        <div className="text-xs font-black text-blue-800 uppercase tracking-tight"><TranslatedText tKey="tax_deduction" /></div>
+                        <div className="text-[10px] text-blue-600 font-bold leading-tight"><TranslatedText tKey="claim_deduction" /></div>
                       </div>
                     </div>
                   </div>
@@ -372,7 +372,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 </div>
               </div>
               <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-center gap-2 text-sm text-slate-500 font-medium">
-                <ShieldCheck className="h-4 w-4" /> Secure, Zero-Fee UPI Transfer
+                <ShieldCheck className="h-4 w-4" /> <TranslatedText tKey="zero_fee" />
               </div>
             </div>
           </div>

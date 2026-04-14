@@ -5,6 +5,7 @@ import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp,
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { LiveActivityTicker } from "@/components/LiveActivityTicker"
 import { ShareButton } from "@/components/ui/ShareButton"
+import { TranslatedText } from "@/components/TranslatedText"
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -130,7 +131,7 @@ export default async function LandingPage() {
               <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 text-[10px] font-black tracking-widest uppercase text-green-700 bg-green-100 rounded-full border border-green-200">
                 <Trophy className="h-3 w-3" /> Editor's Choice
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight mb-4">Curated Selections</h2>
+              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight mb-4"><TranslatedText tKey="curated_selections" /></h2>
               <p className="text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed">
                 Hand-picked campaigns that represent our most urgent needs and highest-impact community projects.
               </p>
@@ -210,7 +211,7 @@ export default async function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-bold tracking-widest uppercase text-green-600 mb-3">Simple by design</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900">How it works</h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900"><TranslatedText tKey="how_it_works" /></h2>
           </div>
           <div className="grid sm:grid-cols-3 gap-8 text-center">
             {[
@@ -234,12 +235,12 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-4">
             <div>
-              <p className="text-xs font-bold tracking-widest uppercase text-green-600 mb-2">Live right now</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">Active Campaigns</h2>
+              <p className="text-xs font-bold tracking-widest uppercase text-green-600 mb-2"><TranslatedText tKey="live_right_now" /></p>
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900"><TranslatedText tKey="active_campaigns" /></h2>
               <p className="text-gray-500 mt-2">Every campaign below is live-verified. Your donation goes straight to the cause.</p>
             </div>
             <Link href="/leaderboard" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-full transition-colors">
-              <Trophy className="h-4 w-4" /> View Leaderboard
+              <Trophy className="h-4 w-4" /> <TranslatedText tKey="view_leaderboard" />
             </Link>
           </div>
 
@@ -302,10 +303,10 @@ export default async function LandingPage() {
 
                         <div className="mt-4 flex items-center justify-between">
                           <span className="text-xs text-gray-400 flex items-center gap-1">
-                            <Users className="h-3 w-3" /> Donate via UPI
+                            <Users className="h-3 w-3" /> <TranslatedText tKey="donate_upi" />
                           </span>
                           <span className="text-xs font-bold text-green-700 group-hover:gap-2 flex items-center gap-1 transition-all">
-                            Give now <ArrowRight className="h-3 w-3" />
+                            <TranslatedText tKey="give_now" /> <ArrowRight className="h-3 w-3" />
                           </span>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-100 relative z-20">
