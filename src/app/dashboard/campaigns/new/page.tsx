@@ -305,6 +305,5 @@ export default function CampaignWizard() {
         </div>
       </div>
     </div>
-   </div>
   )
 }
