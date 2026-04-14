@@ -17,9 +17,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (user?.user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("organization_id, organizations(id, name)")
+      .select("role, organization_id, organizations(id, name)")
       .eq("id", user.user.id)
       .single()
+    
+    if (profile?.role === 'donor') {
+      redirect("/donor")
+    }
+
     orgId = profile?.organization_id
     const org = profile?.organizations as any
     if (org?.name) orgName = org.name

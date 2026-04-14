@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import DonationCaptureForm from "@/components/DonationCaptureForm"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import CopyUpiButton from "@/components/CopyUpiButton"
+import { NativeShare } from "@/components/ui/NativeShare"
+import { TranslatedText } from "@/components/TranslatedText"
 import Link from "next/link"
 
 export default async function CampaignPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ ref?: string }> }) {
@@ -41,8 +43,23 @@ export default async function CampaignPage({ params, searchParams }: { params: P
     .eq("id", id)
     .single()
 
-  if (error || !campaign) {
-    return notFound()
+  if (error || !campaign) return notFound()
+
+  // Ensure unverified campaigns are only visible to their NGO or an Admin. 
+  // For MVP, if it is not published, we check if the user is the owner.
+  if (campaign.status !== 'published') {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return notFound()
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', session.user.id)
+      .single()
+      
+    if (profile?.organization_id !== campaign.organization_id) {
+      return notFound()
+    }
   }
 
   const getEmbedUrl = (url: string) => {
@@ -179,21 +196,37 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                   <div>
                     <h3 className="font-bold text-lg mb-4 text-slate-800">Shorts & Reels</h3>
                     <div className="flex overflow-x-auto snap-x gap-4 pb-4 scrollbar-hide py-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                      {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).map((media: any) => (
-                        <div key={media.id} className="snap-center shrink-0 w-52 sm:w-60 aspect-[9/16] rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900 hover:shadow-md transition-shadow">
-                          <iframe 
-                            src={getEmbedUrl(media.url)!}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowFullScreen 
-                            className="w-full h-full"
-                          />
-                        </div>
-                      ))}
+                      {campaign.media_gallery.filter((m: any) => ['short', 'reel'].includes(m.type) && m.url !== campaign.video_url).map((media: any, idx: number) => {
+                        const isYT = media.url.includes("youtube.com") || media.url.includes("youtu.be") || media.embed_url?.includes("youtube")
+                        const iframeUrl = isYT ? `${getEmbedUrl(media.url)}&rel=0&showinfo=0&modestbranding=1` : getEmbedUrl(media.url)
+
+                        return (
+                          <div key={idx} className="w-[140px] md:w-[220px] aspect-[9/16] shrink-0 snap-start bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm group">
+                            <iframe
+                              src={iframeUrl!}
+                              className="w-full h-full object-cover"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
+                )}
               </div>
             )}
+            
+            {/* Native Share Actions Below Media */}
+            <div className="flex items-center gap-3 mt-4">
+              <NativeShare 
+                title={campaign.title} 
+                text={`I'm supporting this campaign on PhilanthroForge. Please help:`} 
+                url={`https://philanthroforge.com/campaigns/${campaign.id}`}
+                className="flex-1 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold shadow-sm"
+              />
+            </div>
 
             {/* NGO Trust Card — links to public profile */}
             <Link href={`/organizations/${(campaign.organizations as any)?.id}`} className="block mt-12 p-5 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:shadow-md transition-all group">
@@ -307,8 +340,11 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-sm text-center text-slate-600">
-                     Already made the payment through your UPI app?
+                  <h2 className="text-xl font-black text-slate-900 leading-tight">
+                    <TranslatedText tKey="donate_upi" />
+                  </h2>
+                  <p className="text-sm text-slate-600 mt-1">
+                    <TranslatedText tKey="scan_pay" />
                   </p>
                   <DonationCaptureForm campaignId={campaign.id} referrerId={referrerId} />
                 </div>
