@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { Trophy, Sparkles, TrendingUp, Medal } from "lucide-react"
 import Link from "next/link"
+import { TranslatedText } from "@/components/TranslatedText"
 
 export default async function LeaderboardPage() {
   const supabase = await createClient()
@@ -41,16 +42,14 @@ export default async function LeaderboardPage() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center relative z-10">
           <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-6" />
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Impact Leaderboard</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight"><TranslatedText tKey="impact_leaderboard" /></h1>
           <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
-            Celebrating the top Impact Ambassadors who are using their voice to forge a better future. 
-          </p>
+            <TranslatedText tKey="leaderboard_desc" />          </p>
           <Link
             href="/ambassador/onboarding"
             className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
           >
-            <Sparkles className="h-5 w-5" /> Become an Ambassador
-          </Link>
+            <Sparkles className="h-5 w-5" /> <TranslatedText tKey="become_ambassador" />          </Link>
         </div>
       </div>
 
@@ -61,9 +60,8 @@ export default async function LeaderboardPage() {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 border-b border-slate-200 p-6">
               <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                <Medal className="h-6 w-6 text-yellow-500" /> Most Funds Raised
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">Ambassadors who drove the highest monetary impact.</p>
+                <Medal className="h-6 w-6 text-yellow-500" /> <TranslatedText tKey="most_funds_raised" />              </h2>
+              <p className="text-sm text-slate-500 mt-1"><TranslatedText tKey="funds_raised_desc" /></p>
             </div>
             <div className="p-0">
               {topByFunds.length > 0 ? topByFunds.map((leader, i) => (
@@ -80,7 +78,7 @@ export default async function LeaderboardPage() {
                   </div>
                 </Link>
               )) : (
-                <div className="p-8 text-center text-slate-400 font-medium">No impact recorded yet!</div>
+                <div className="p-8 text-center text-slate-400 font-medium"><TranslatedText tKey="no_impact_yet" /></div>
               )}
             </div>
           </div>
@@ -89,9 +87,8 @@ export default async function LeaderboardPage() {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 border-b border-slate-200 p-6">
               <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                <TrendingUp className="h-6 w-6 text-emerald-500" /> Donors Mobilized
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">Ambassadors who inspired the highest number of people to give.</p>
+                <TrendingUp className="h-6 w-6 text-emerald-500" /> <TranslatedText tKey="donors_mobilized" />              </h2>
+              <p className="text-sm text-slate-500 mt-1"><TranslatedText tKey="donors_mobilized_desc" /></p>
             </div>
             <div className="p-0">
               {topByDonors.length > 0 ? topByDonors.map((leader, i) => (
@@ -104,11 +101,10 @@ export default async function LeaderboardPage() {
                     <div className="text-xs text-slate-500 truncate">@{leader.username}</div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="font-black text-slate-900">{leader.donorsMobilized} <span className="text-xs font-normal text-slate-500">donors</span></div>
-                  </div>
+                    <div className="font-black text-slate-900">{leader.donorsMobilized} <span className="text-xs font-normal text-slate-500"><TranslatedText tKey="donors_label" /></span></div>                  </div>
                 </Link>
               )) : (
-                <div className="p-8 text-center text-slate-400 font-medium">No impact recorded yet!</div>
+                <div className="p-8 text-center text-slate-400 font-medium"><TranslatedText tKey="no_impact_yet" /></div>
               )}
             </div>
           </div>

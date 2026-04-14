@@ -262,7 +262,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                       <h3 className="font-bold text-slate-900 text-sm">{(campaign.organizations as any)?.name}</h3>
                       {(campaign.organizations as any)?.is_verified && <ShieldCheck className="h-4 w-4 text-teal-600" />}
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">Verified organization · View full profile →</p>
+                    <p className="text-xs text-slate-500 mt-0.5"><TranslatedText tKey="verified" /> organization · <TranslatedText tKey="view_profile" /> →</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">View Profile →</span>
@@ -273,7 +273,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
             {updates && updates.length > 0 && (
               <div className="mt-12">
                 <h3 className="font-bold text-xl mb-6 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-600" /> Impact Timeline
+                  <Activity className="h-5 w-5 text-green-600" /> <TranslatedText tKey="impact_timeline" />
                 </h3>
                 <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
                   {updates.map((update: any) => (
@@ -326,7 +326,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
               <div className="p-6 md:p-8">
                 <div className="flex items-center justify-between text-slate-900 mb-2">
                   <span className="text-3xl font-extrabold tracking-tight">₹{raised.toLocaleString('en-IN')}</span>
-                  <span className="text-sm text-slate-500 font-medium">Goal: ₹{goal.toLocaleString('en-IN')}</span>
+                  <span className="text-sm text-slate-500 font-medium"><TranslatedText tKey="goal" />: ₹{goal.toLocaleString('en-IN')}</span>
                 </div>
                 
                 <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden mb-8">
@@ -354,7 +354,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
                   <div className="bg-white p-3 inline-block rounded-xl shadow-sm mb-4 border border-slate-100">
                     <img src={qrUrl} alt="UPI QR Code" className="w-40 h-40 object-contain mx-auto" />
                   </div>
-                  <p className="font-bold text-slate-800 mb-1">Scan to Pay via Any UPI App</p>
+                  <p className="font-bold text-slate-800 mb-1"><TranslatedText tKey="scan_pay" /></p>
                   <p className="text-xs text-slate-500 mb-3 break-all font-mono bg-slate-100 p-2 rounded border border-slate-200">
                     {upiId}
                   </p>
@@ -382,8 +382,8 @@ export default async function CampaignPage({ params, searchParams }: { params: P
       {/* Sticky Bottom Bar (Mobile Only) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-3 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="font-bold text-slate-900">₹{raised.toLocaleString('en-IN')} raised</span>
-          <span className="text-sm text-slate-400">of ₹{goal.toLocaleString('en-IN')}</span>
+          <span className="font-bold text-slate-900">₹{raised.toLocaleString('en-IN')} <TranslatedText tKey="raised" /></span>
+          <span className="text-sm text-slate-400"><TranslatedText tKey="of_goal" /> ₹{goal.toLocaleString('en-IN')}</span>
         </div>
         <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mb-3">
           <div className="h-full bg-teal-500 rounded-full" style={{ width: `${progress}%` }} />

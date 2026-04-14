@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ShieldCheck, Building2, FileCheck, MapPin, ArrowRight, Zap, Heart, Users, Trophy, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
+import { TranslatedText } from "@/components/TranslatedText"
 
 export default async function NGOProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -29,11 +30,11 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
   const totalDonors = activeCampaigns.length > 0 ? Math.floor(totalRaised / 1200) : 0
 
   const trustBadges = [
-    org.registration_80g && { icon: Zap, label: "80G Tax Benefit", sub: "50% tax deduction for donors", color: "text-blue-600 bg-blue-50 border-blue-100" },
-    org.registration_12a && { icon: CheckCircle2, label: "12A Registered", sub: "Income tax exemption", color: "text-purple-600 bg-purple-50 border-purple-100" },
-    org.csr_1_registration && { icon: Trophy, label: "CSR-1 Eligible", sub: "Accepts corporate CSR funds", color: "text-amber-600 bg-amber-50 border-amber-100" },
-    org.is_verified && { icon: ShieldCheck, label: "PhilanthroForge Verified", sub: "Identity & bank verified", color: "text-teal-600 bg-teal-50 border-teal-100" },
-  ].filter(Boolean) as { icon: any; label: string; sub: string; color: string }[]
+    org.registration_80g && { icon: Zap, tLabel: "tax_benefit_80g", tSub: "tax_benefit_80g_desc", color: "text-blue-600 bg-blue-50 border-blue-100" },
+    org.registration_12a && { icon: CheckCircle2, tLabel: "reg_12a", tSub: "reg_12a_desc", color: "text-purple-600 bg-purple-50 border-purple-100" },
+    org.csr_1_registration && { icon: Trophy, tLabel: "csr_eligible", tSub: "csr_eligible_desc", color: "text-amber-600 bg-amber-50 border-amber-100" },
+    org.is_verified && { icon: ShieldCheck, tLabel: "pf_verified", tSub: "pf_verified_desc", color: "text-teal-600 bg-teal-50 border-teal-100" },
+  ].filter(Boolean) as { icon: any; tLabel: string; tSub: string; color: string }[]
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -60,7 +61,7 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{org.name}</h1>
                 {org.is_verified && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-teal-500/20 text-teal-300 rounded-full border border-teal-500/30">
-                    <ShieldCheck className="h-3.5 w-3.5" /> Verified NGO
+                    <ShieldCheck className="h-3.5 w-3.5" /> <TranslatedText tKey="verified_ngo" />
                   </span>
                 )}
               </div>
@@ -74,13 +75,13 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                 {org.registration_number && (
                   <div className="flex items-center gap-1.5">
                     <FileCheck className="h-4 w-4 text-slate-500" />
-                    <span>Reg: {org.registration_number}</span>
+                    <span><TranslatedText tKey="reg_label" />: {org.registration_number}</span>
                   </div>
                 )}
                 {org.pan_number && (
                   <div className="flex items-center gap-1.5">
                     <Building2 className="h-4 w-4 text-slate-500" />
-                    <span>PAN: {org.pan_number?.replace(/.(?=.{4})/g, "*")}</span>
+                    <span><TranslatedText tKey="pan_label_short" />: {org.pan_number?.replace(/.(?=.{4})/g, "*")}</span>
                   </div>
                 )}
                 {org.address && (
@@ -94,14 +95,14 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
               {/* KPIs */}
               <div className="flex flex-wrap justify-center md:justify-start gap-5">
                 {[
-                  { value: `₹${totalRaised.toLocaleString("en-IN")}`, label: "Total Raised" },
-                  { value: activeCampaigns.length, label: "Active Campaigns" },
-                  { value: completedCampaigns.length, label: "Campaigns Completed" },
-                  { value: `${totalDonors}+`, label: "Donors Supported" },
+                  { value: `₹${totalRaised.toLocaleString("en-IN")}`, tKey: "total_raised_label" },
+                  { value: activeCampaigns.length, tKey: "active_campaigns" },
+                  { value: completedCampaigns.length, tKey: "campaigns_completed" },
+                  { value: `${totalDonors}+`, tKey: "donors_supported" },
                 ].map(s => (
-                  <div key={s.label} className="text-center md:text-left">
+                  <div key={s.tKey} className="text-center md:text-left">
                     <div className="text-2xl font-extrabold text-white">{s.value}</div>
-                    <div className="text-xs text-slate-400 tracking-wide">{s.label}</div>
+                    <div className="text-xs text-slate-400 tracking-wide"><TranslatedText tKey={s.tKey} /></div>
                   </div>
                 ))}
               </div>
@@ -119,8 +120,8 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                 <div key={badge.label} className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${badge.color} transition-all hover:-translate-y-0.5 hover:shadow-sm`}>
                   <badge.icon className="h-4 w-4 shrink-0" />
                   <div>
-                    <div className="text-xs font-bold leading-tight">{badge.label}</div>
-                    <div className="text-[10px] opacity-70 font-medium">{badge.sub}</div>
+                    <div className="text-xs font-bold leading-tight"><TranslatedText tKey={badge.tLabel} /></div>
+                    <div className="text-[10px] opacity-70 font-medium"><TranslatedText tKey={badge.tSub} /></div>
                   </div>
                 </div>
               ))}
@@ -135,11 +136,11 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
         <div className="mb-14">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-1">Live Right Now</p>
-              <h2 className="text-2xl font-extrabold text-slate-900">Active Campaigns</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-teal-600 mb-1"><TranslatedText tKey="live_right_now" /></p>
+              <h2 className="text-2xl font-extrabold text-slate-900"><TranslatedText tKey="active_campaigns" /></h2>
             </div>
             {activeCampaigns.length > 0 && (
-              <span className="text-sm text-slate-400">{activeCampaigns.length} campaign{activeCampaigns.length !== 1 ? "s" : ""} live</span>
+              <span className="text-sm text-slate-400">{activeCampaigns.length} <TranslatedText tKey="active_campaigns" /> live</span>
             )}
           </div>
 
@@ -168,8 +169,7 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                         {org.is_verified && (
                           <div className="absolute top-3 right-3">
                             <span className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full text-[9px] font-black text-teal-700 flex items-center gap-1">
-                              <ShieldCheck className="h-2.5 w-2.5" /> Verified
-                            </span>
+                              <ShieldCheck className="h-2.5 w-2.5" /> <TranslatedText tKey="verified" />                            </span>
                           </div>
                         )}
                       </div>
@@ -182,17 +182,15 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                         )}
                         <div className="mt-auto">
                           <div className="flex justify-between text-sm mb-2">
-                            <span className="font-bold text-slate-900">₹{(campaign.raised_amount || 0).toLocaleString("en-IN")} raised</span>
-                            <span className="text-slate-400">{Math.round(progress)}%</span>
+                            <span className="font-bold text-slate-900">₹{(campaign.raised_amount || 0).toLocaleString("en-IN")} <TranslatedText tKey="raised" /></span>                            <span className="text-slate-400">{Math.round(progress)}%</span>
                           </div>
                           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-4">
                             <div className={`h-full ${progressColor} rounded-full transition-all duration-700`} style={{ width: `${progress}%` }} />
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-400">of ₹{campaign.public_goal.toLocaleString("en-IN")}</span>
+                            <span className="text-xs text-slate-400"><TranslatedText tKey="of_goal" /> ₹{campaign.public_goal.toLocaleString("en-IN")}</span>
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-teal-600">
-                              Give Now <ArrowRight className="h-3 w-3" />
-                            </span>
+                              <TranslatedText tKey="give_now" /> <ArrowRight className="h-3 w-3" />                            </span>
                           </div>
                         </div>
                       </div>
@@ -204,8 +202,8 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
           ) : (
             <div className="py-16 text-center bg-white rounded-2xl border border-dashed border-slate-200">
               <Heart className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-              <p className="font-semibold text-slate-500">No active campaigns at the moment</p>
-              <p className="text-sm text-slate-400 mt-1">Check back soon — this organisation is preparing new campaigns.</p>
+              <p className="font-semibold text-slate-500"><TranslatedText tKey="no_active_campaigns" /></p>
+              <p className="text-sm text-slate-400 mt-1"><TranslatedText tKey="check_back_soon" /></p>
             </div>
           )}
         </div>
@@ -214,8 +212,8 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
         {completedCampaigns.length > 0 && (
           <div>
             <div className="mb-8">
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Impact History</p>
-              <h2 className="text-2xl font-extrabold text-slate-900">Past Impact</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1"><TranslatedText tKey="impact_history" /></p>
+              <h2 className="text-2xl font-extrabold text-slate-900"><TranslatedText tKey="past_impact" /></h2>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {completedCampaigns.map((campaign: any) => (
@@ -226,9 +224,9 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
                       <h4 className="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-teal-700 transition-colors">{campaign.title}</h4>
                       <div className="flex items-center gap-1 mt-1">
                         <CheckCircle2 className="h-3 w-3 text-teal-500 flex-shrink-0" />
-                        <span className="text-xs text-teal-700 font-semibold">Successfully Funded</span>
+                        <span className="text-xs text-teal-700 font-semibold"><TranslatedText tKey="successfully_funded" /></span>
                       </div>
-                      <span className="text-xs text-slate-400 mt-0.5 block">₹{campaign.raised_amount?.toLocaleString("en-IN")} raised</span>
+                      <span className="text-xs text-slate-400 mt-0.5 block">₹{campaign.raised_amount?.toLocaleString("en-IN")} <TranslatedText tKey="raised" /></span>
                     </div>
                   </div>
                 </Link>

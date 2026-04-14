@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Heart, Globe, ShieldCheck } from "lucide-react"
+import { Heart } from "lucide-react"
+import { useLang } from "@/components/LanguageSwitcher"
 
 export function LiveActivityTicker() {
   const supabase = createClient()
+  const { t } = useLang()
   const [activities, setActivities] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -63,11 +65,11 @@ export function LiveActivityTicker() {
               <Heart className="h-3 w-3 text-teal-400 fill-teal-400" />
             </div>
             <span className="text-white font-medium">
-              {activity.is_anonymous ? "Someone" : activity.donor_name}
+              {activity.is_anonymous ? t("ticker_someone") : activity.donor_name}
             </span>
-            <span className="text-slate-400">donated</span>
+            <span className="text-slate-400">{t("ticker_donated")}</span>
             <span className="text-teal-400 font-bold">₹{activity.amount.toLocaleString('en-IN')}</span>
-            <span className="text-slate-400">to</span>
+            <span className="text-slate-400">{t("ticker_to")}</span>
             <span className="text-white/80 italic line-clamp-1 max-w-[150px]">
               {activity.campaigns?.title}
             </span>

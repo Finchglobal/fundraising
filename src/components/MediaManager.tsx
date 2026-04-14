@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { GripVertical, Plus, Trash2, Film, Image as ImageIcon, Video, Play, ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { useLang } from "@/components/LanguageSwitcher"
 
 export type MediaType = 'image' | 'video' | 'reel' | 'short'
 
@@ -20,16 +21,16 @@ interface MediaManagerProps {
   onChange: (media: MediaItem[]) => void
 }
 
-const CATEGORIES: { value: MediaType; label: string; icon: any; color: string }[] = [
-  { value: 'image', label: 'Images', icon: ImageIcon, color: 'text-blue-500' },
-  { value: 'video', label: 'Videos', icon: Video, color: 'text-teal-500' },
-  { value: 'reel', label: 'Reels', icon: Film, color: 'text-pink-500' },
-  { value: 'short', label: 'Shorts', icon: Play, color: 'text-red-500' },
-]
-
 export function MediaManager({ media, onChange }: MediaManagerProps) {
+  const { t } = useLang()
   const [newUrl, setNewUrl] = useState("")
-  const [selectedType, setSelectedType] = useState<MediaType>('video')
+  
+  const categories = useMemo(() => [
+    { value: 'image', label: t("media_type_images"), icon: ImageIcon, color: 'text-blue-500' },
+    { value: 'video', label: t("media_type_videos"), icon: Video, color: 'text-teal-500' },
+    { value: 'reel', label: t("media_type_reels"), icon: Film, color: 'text-pink-500' },
+    { value: 'short', label: t("media_type_shorts"), icon: Play, color: 'text-red-500' },
+  ] as const, [t])
 
   const autoDetectType = (url: string): MediaType => {
     if (url.includes('youtube.com/shorts') || url.includes('youtu.be/shorts')) return 'short'
@@ -78,32 +79,32 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 p-5 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Media to Gallery
+          <Plus className="h-4 w-4" /> {t("media_add_title")}
         </h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <Input 
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
-              placeholder="Paste YouTube, Reel, Short or Image URL..."
-              className="bg-white pl-4 pr-10 h-11"
+              placeholder={t("media_input_placeholder")}
+              className="bg-white pl-4 pr-20 h-11"
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAdd())}
             />
-            <div className="absolute right-3 top-3">
-               <span className="text-[10px] font-black uppercase text-slate-400">Auto-Detect</span>
+            <div className="absolute right-3 top-3.5">
+               <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">{t("media_auto_detect")}</span>
             </div>
           </div>
           <Button 
             type="button"
             onClick={handleAdd}
-            className="h-11 px-6 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl"
+            className="h-11 px-6 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-lg shadow-teal-500/10 transition-all active:scale-95"
           >
-            Add Item
+            {t("media_btn_add")}
           </Button>
         </div>
         <div className="flex flex-wrap gap-2">
-           {CATEGORIES.map(cat => (
-             <div key={cat.value} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-100 rounded-full shadow-sm">
+           {categories.map(cat => (
+             <div key={cat.value} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-100 rounded-full shadow-sm hover:border-slate-200 transition-colors">
                 <cat.icon className={`h-3.5 w-3.5 ${cat.color}`} />
                 <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">{cat.label}</span>
              </div>
@@ -122,12 +123,12 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
               {media.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                   <Film className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-400">Empty Gallery</p>
-                  <p className="text-xs text-slate-400">Add YouTube links or images to engage your donors.</p>
+                  <p className="text-sm font-bold text-slate-500">{t("media_empty_title")}</p>
+                  <p className="text-[11px] text-slate-400 font-medium px-4">{t("media_empty_desc")}</p>
                 </div>
               ) : (
                 media.map((item, index) => {
-                  const Category = CATEGORIES.find(c => c.value === item.type) || CATEGORIES[1]
+                  const Category = categories.find(c => c.value === item.type) || categories[1]
                   return (
                     <Draggable key={item.id} draggableId={item.id} index={index}>
                       {(provided, snapshot) => (
@@ -135,10 +136,10 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={`flex items-center gap-4 bg-white border rounded-xl p-3 group transition-all ${
-                            snapshot.isDragging ? 'shadow-xl border-teal-400 scale-[1.02]' : 'border-slate-200 shadow-sm hover:border-slate-300'
+                            snapshot.isDragging ? 'shadow-xl border-teal-400 scale-[1.02] z-50' : 'border-slate-200 shadow-sm hover:border-slate-300'
                           }`}
                         >
-                          <div {...provided.dragHandleProps} className="text-slate-400 hover:text-slate-600">
+                          <div {...provided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing">
                              <GripVertical className="h-5 w-5" />
                           </div>
                           
@@ -151,13 +152,13 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${Category.color} bg-current/10 border border-current/20`}>
                                  {Category.label}
                                </span>
-                               <span className="text-xs text-slate-400 font-mono truncate max-w-[150px]">{item.id}</span>
+                               <span className="text-[10px] text-slate-400 font-mono truncate opacity-60">ID: {item.id}</span>
                              </div>
                              <p className="text-sm font-medium text-slate-900 truncate mt-0.5">{item.url}</p>
                           </div>
 
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a href={item.url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-teal-600">
+                          <div className="flex items-center gap-2 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href={item.url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-teal-600 transition-colors">
                                <ExternalLink className="h-4 w-4" />
                             </a>
                             <Button 
@@ -184,7 +185,7 @@ export function MediaManager({ media, onChange }: MediaManagerProps) {
       
       {media.length > 0 && (
          <p className="text-[11px] text-slate-400 text-center font-medium italic">
-           Tip: Drag items using the handle on the left to organize the display order in the public gallery.
+           {t("media_drag_tip")}
          </p>
       )}
     </div>

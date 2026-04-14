@@ -11,12 +11,14 @@ import { Search, Loader2, Send, Save, IndianRupee, Video, Upload, ImageIcon, Che
 import { toast } from "sonner"
 import { MediaManager, MediaItem } from "@/components/MediaManager"
 import Link from "next/link"
+import { useLang } from "@/components/LanguageSwitcher"
 
 export default function EditCampaignPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
   const supabase = createClient()
+  const { t } = useLang()
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -136,7 +138,7 @@ export default function EditCampaignPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mb-4" />
-         <p className="text-slate-500 font-medium">Fetching campaign details...</p>
+         <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Fetching campaign details...</p>
       </div>
     )
   }
@@ -144,27 +146,27 @@ export default function EditCampaignPage() {
   return (
     <div className="max-w-4xl mx-auto pb-20">
       <div className="mb-8 flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-           <ArrowLeft className="h-5 w-5 text-slate-600" />
+        <Link href="/dashboard" className="h-10 w-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:border-gray-900 transition-all text-gray-400 hover:text-gray-900 shadow-sm">
+           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Edit Fundraiser</h1>
-          <p className="text-slate-600">Update your campaign story, goal, or manage your impact media gallery.</p>
+          <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">{t("campaign_edit_title")}</h1>
+          <p className="text-gray-500 font-medium">{t("mgmt_desc")}</p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           {/* Main Content Card */}
-          <Card className="border-slate-200 shadow-sm overflow-hidden">
-            <CardHeader className="bg-slate-50 border-b border-slate-100">
-              <CardTitle>Core Details</CardTitle>
+          <Card className="border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="bg-gray-50/50 border-b border-gray-50">
+              <CardTitle className="text-lg font-bold text-gray-900">{t("campaign_form_basic")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="title">Campaign Title</Label>
-                    <span className={`text-[10px] font-bold ${title.length < 10 ? 'text-red-400' : 'text-slate-400 uppercase tracking-wider'}`}>
+                    <Label htmlFor="title" className="font-bold text-gray-700">{t("campaign_form_title")}</Label>
+                    <span className={`text-[10px] font-black ${title.length < 10 ? 'text-red-400' : 'text-gray-400 uppercase tracking-widest'}`}>
                       {title.length}/100
                     </span>
                   </div>
@@ -173,41 +175,41 @@ export default function EditCampaignPage() {
                     value={title} 
                     maxLength={100}
                     onChange={e => { setTitle(e.target.value); if (errors.title) setErrors(prev => ({...prev, title: ''})) }} 
-                    className={errors.title ? "border-red-400" : ""}
+                    className={`h-11 rounded-xl focus:ring-teal-500 focus:border-teal-500 font-medium ${errors.title ? "border-red-400 bg-red-50/10 focus:ring-red-400" : "border-gray-200"}`}
                   />
-                  {errors.title && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.title}</p>}
+                  {errors.title && <p className="text-[10px] text-red-500 font-black uppercase tracking-tight">{errors.title}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor="story">The Story</Label>
-                    <span className={`text-[10px] font-bold ${story.length < 100 ? 'text-red-400' : 'text-slate-400 uppercase tracking-wider'}`}>
-                      {story.length} chars
+                    <Label htmlFor="story" className="font-bold text-gray-700">{t("campaign_form_desc")}</Label>
+                    <span className={`text-[10px] font-black ${story.length < 100 ? 'text-red-400' : 'text-gray-400 uppercase tracking-widest'}`}>
+                      {story.length} {t("characters")}
                     </span>
                   </div>
                   <textarea 
                     id="story" 
-                    className={`flex min-h-[200px] w-full rounded-md border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-                      errors.story ? "border-red-400" : "border-slate-200"
+                    className={`flex min-h-[220px] w-full rounded-xl border bg-white px-3 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 transition-all ${
+                      errors.story ? "border-red-400 bg-red-50/10" : "border-gray-200"
                     }`}
                     value={story} 
                     onChange={e => { setStory(e.target.value); if (errors.story) setErrors(prev => ({...prev, story: ''})) }} 
                   />
-                  {errors.story && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.story}</p>}
+                  {errors.story && <p className="text-[10px] text-red-500 font-black uppercase tracking-tight">{errors.story}</p>}
                 </div>
             </CardContent>
           </Card>
 
           {/* Media Gallery Card */}
-          <Card className="border-slate-200 shadow-sm overflow-hidden">
-            <CardHeader className="bg-indigo-50/50 border-b border-indigo-100">
-               <CardTitle className="text-indigo-900 flex items-center gap-2">
-                 <Video className="h-5 w-5" /> Media Gallery
+          <Card className="border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="bg-teal-50/30 border-b border-teal-50">
+               <CardTitle className="text-teal-950 text-lg font-bold flex items-center gap-2">
+                 <Video className="h-5 w-5" /> {t("media_add_title")}
                </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-               <p className="text-sm text-slate-500 mb-6">
-                 Add YouTube videos, Instagram Reels, or images. These will be categorized and displayed as horizontal galleries on your public page.
+               <p className="text-xs font-medium text-gray-500 mb-6 leading-relaxed">
+                 {t("media_empty_desc")} These items will be displayed as an interactive slider on your crowdfunding page.
                </p>
                <MediaManager media={mediaGallery} onChange={setMediaGallery} />
             </CardContent>
@@ -216,16 +218,16 @@ export default function EditCampaignPage() {
 
         {/* Sidebar: Hero & Goal */}
         <div className="md:col-span-1 space-y-6">
-          <Card className="border-slate-200">
-            <CardHeader className="py-4">
-              <CardTitle className="text-sm uppercase tracking-wider text-slate-500">Cover Image</CardTitle>
+          <Card className="border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="py-4 bg-gray-50/50">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t("campaign_form_hero")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-               <div className="relative group aspect-video rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
+            <CardContent className="pt-4 space-y-4">
+               <div className="relative group aspect-video rounded-xl border-2 border-dashed border-gray-100 overflow-hidden bg-gray-50/50 hover:border-teal-400 transition-all">
                   {heroImage ? (
                     <img src={heroImage} alt="Cover" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-300">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-300">
                        <ImageIcon className="h-10 w-10" />
                     </div>
                   )}
@@ -235,51 +237,51 @@ export default function EditCampaignPage() {
                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                     <div className="text-white font-bold text-xs flex flex-col items-center gap-2">
+                     <div className="text-white font-black text-[10px] uppercase tracking-widest flex flex-col items-center gap-2">
                         {uploadingHero ? <Loader2 className="h-6 w-6 animate-spin" /> : <Upload className="h-6 w-6" />}
                         <span>Change Cover</span>
                      </div>
                   </div>
                </div>
-               <p className="text-[10px] text-slate-400 text-center">Recommended: 1600x900px</p>
+               <p className="text-[10px] text-gray-400 font-bold text-center uppercase tracking-tighter">Recommended: 1600x900px</p>
             </CardContent>
           </Card>
 
-          <Card className="border-teal-100 shadow-md">
-            <CardHeader className="bg-teal-50/50 py-4">
-               <CardTitle className="text-teal-900 text-sm flex items-center gap-2">
-                 <IndianRupee className="h-4 w-4" /> Goal Management
+          <Card className="border-teal-100 shadow-xl shadow-teal-500/5 rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="bg-teal-50/30 py-4 border-b border-teal-50">
+               <CardTitle className="text-teal-900 text-sm font-bold flex items-center gap-2">
+                 <IndianRupee className="h-4 w-4" /> {t("campaign_form_goal")}
                </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-               <div className="space-y-1">
-                 <Label className="text-xs text-slate-500">Beneficiary Need (₹)</Label>
+               <div className="space-y-2">
+                 <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Beneficiary Need (₹)</Label>
                  <Input 
                    type="number"
                    value={actualNeed}
                    onChange={e => { setActualNeed(e.target.value ? Number(e.target.value) : ""); if (errors.actualNeed) setErrors(prev => ({...prev, actualNeed: ''})) }}
-                   className="font-bold text-lg"
+                   className={`h-11 font-black text-lg rounded-xl border-gray-200 focus:ring-teal-500 ${errors.actualNeed ? "border-red-400 bg-red-50/10 focus:ring-red-400" : ""}`}
                  />
                </div>
                
-               <div className="p-3 bg-slate-50 rounded-lg text-xs space-y-2">
+               <div className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 text-[10px] font-bold text-gray-500 uppercase tracking-tight space-y-4">
                   <div className="flex justify-between">
-                    <span>Platform Fee (2%)</span>
-                    <span className="font-bold">₹{bufferAmount.toLocaleString()}</span>
+                    <span>Platform Support (2%)</span>
+                    <span className="text-gray-900">₹{bufferAmount.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-slate-200 pt-2 text-slate-900">
-                    <span className="font-bold">Public Goal</span>
-                    <span className="font-extrabold text-teal-600 text-base">₹{publicGoal.toLocaleString()}</span>
+                  <div className="flex justify-between border-t border-gray-100 pt-3 items-center">
+                    <span className="font-black text-gray-400 text-[9px] tracking-widest underline decoration-teal-500 underline-offset-4 decoration-2">Public Goal</span>
+                    <span className="font-black text-teal-600 text-xl">₹{publicGoal.toLocaleString()}</span>
                   </div>
                </div>
                
                <Button 
                  onClick={handleSave}
-                 className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold h-12 shadow-lg shadow-teal-500/10"
+                 className="w-full bg-teal-600 hover:bg-teal-500 text-white font-black uppercase tracking-[2px] h-12 shadow-lg shadow-teal-500/10 active:scale-[0.98] transition-all"
                  disabled={saving}
                >
                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                 Save All Changes
+                 {t("campaign_form_save")}
                </Button>
             </CardContent>
           </Card>

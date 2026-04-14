@@ -8,10 +8,12 @@ import { ShieldCheck, User, Building2, Eye, EyeOff, Loader2, ArrowLeft, Mail, Al
 import Link from "next/link"
 import { toast } from "sonner"
 import { adminSignUp } from "./actions"
+import { useLang } from "@/components/LanguageSwitcher"
 
 export default function SignupPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
 
   const [role, setRole] = useState<"donor" | "ngo_admin">("donor")
   const [fullName, setFullName] = useState("")
@@ -98,8 +100,8 @@ export default function SignupPage() {
           
           <div className="max-w-xl pb-10">
             <h1 className="text-4xl lg:text-5xl font-black mb-6 leading-tight tracking-tight">
-              Start Your Journey<br />
-              <span className="text-green-400">of Impact Today.</span>
+              {t("journey_impact")}<br />
+              <span className="text-green-400">{t("of_impact_today")}</span>
             </h1>
             <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl">
               <Quote className="h-8 w-8 text-green-400 mb-4 opacity-50" />
@@ -123,7 +125,7 @@ export default function SignupPage() {
       {/* Right split: Signup form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20 xl:px-24 bg-white dark:bg-gray-950 relative">
         <Link href="/" className="absolute top-8 right-8 flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to site
+          <ArrowLeft className="h-4 w-4" /> {t("back_to_site")}
         </Link>
 
         <div className="mx-auto w-full max-w-sm mt-12 md:mt-0">
@@ -131,8 +133,8 @@ export default function SignupPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500/10 dark:bg-green-500/20 rounded-xl mb-6">
               <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Create an account</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">Join our community of verified transparency.</p>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{t("signup_create_account")}</h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">{t("signup_tagline")}</p>
           </div>
 
           <div className="bg-gray-100 dark:bg-gray-900 p-1 rounded-xl flex items-center mb-8">
@@ -140,14 +142,12 @@ export default function SignupPage() {
               onClick={() => setRole("donor")}
               className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${role === "donor" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              <User className="h-4 w-4 text-green-500" /> Donor
-            </button>
+              <User className="h-4 w-4 text-green-500" /> {t("role_donor")}            </button>
             <button 
               onClick={() => setRole("ngo_admin")}
               className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${role === "ngo_admin" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              <Building2 className="h-4 w-4 text-teal-500" /> NGO Admin
-            </button>
+              <Building2 className="h-4 w-4 text-teal-500" /> {t("role_ngo_admin")}            </button>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5">
@@ -159,7 +159,7 @@ export default function SignupPage() {
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Full Name</label>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">{t("full_name")}</label>
               <input
                 type="text"
                 value={fullName}
@@ -171,7 +171,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Email Address</label>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">{t("email_address_label")}</label>
               <input
                 type="email"
                 value={email}
@@ -183,7 +183,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Create Password</label>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">{t("password_label_create")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -210,17 +210,17 @@ export default function SignupPage() {
               className="w-full bg-green-500 hover:bg-green-400 active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 text-white font-bold py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-green-500/25 mt-2"
             >
               {loading ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Creating Account...</>
+                <><Loader2 className="h-4 w-4 animate-spin" /> ...</>
               ) : (
-                "Get Started"
+                t("get_started")
               )}
             </button>
           </form>
 
           <p className="text-center text-sm font-medium text-gray-500 mt-10">
-            Already have an account?{" "}
+            {t("already_account")}{" "}
             <Link href="/login" className="text-green-600 hover:text-green-700 font-bold hover:underline underline-offset-4">
-              Sign In
+              {t("sign_in")}
             </Link>
           </p>
         </div>

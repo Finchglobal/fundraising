@@ -15,8 +15,7 @@ import { useLang, type Lang } from "@/components/LanguageSwitcher"
 export default function NGOOnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
-  const { lang, setLang } = useLang()
-  const [loading, setLoading] = useState(false)
+  const { lang, setLang, t } = useLang()
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [step, setStep] = useState(0)   // step 0 = language welcome
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -42,31 +41,32 @@ export default function NGOOnboardingPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        toast.error("Please log in or create an account first to register an NGO.")
+        toast.error(t("onboarding_val_auth"))
         router.push("/login")
       } else {
         setCheckingAuth(false)
       }
     })
-  }, [router, supabase.auth])
+  }, [router, supabase.auth, t])
 
   // State for success feedback
+  const [loading, setLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [uploadingDoc, setUploadingDoc] = useState(false)
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.name || formData.name.length < 3) newErrors.name = "Entity name must be at least 3 characters."
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number.toUpperCase())) newErrors.pan_number = "Invalid PAN format (e.g., AAATT1234T)."
-    if (!formData.registration_number) newErrors.registration_number = "Registration ID is required."
-    if (!formData.description || formData.description.length < 50) newErrors.description = "Please provide a more detailed mission statement (min 50 chars)."
+    if (!formData.name || formData.name.length < 3) newErrors.name = t("onboarding_val_entity_name")
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.pan_number.toUpperCase())) newErrors.pan_number = t("onboarding_val_pan_format")
+    if (!formData.registration_number) newErrors.registration_number = t("onboarding_val_reg_id")
+    if (!formData.description || formData.description.length < 50) newErrors.description = t("onboarding_val_mission")
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.upi_id || !formData.upi_id.includes("@")) newErrors.upi_id = "Invalid UPI ID. Must contain @ (e.g., ngo@bank)."
+    if (!formData.upi_id || !formData.upi_id.includes("@")) newErrors.upi_id = t("onboarding_val_upi")
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -103,7 +103,7 @@ export default function NGOOnboardingPage() {
       }).select().single()
 
       if (orgError) {
-        toast.error("Registration failed.", { description: orgError.message })
+        toast.error(t("onboarding_val_failed"), { description: orgError.message })
         setLoading(false)
         return
       }
@@ -116,14 +116,14 @@ export default function NGOOnboardingPage() {
           role: 'ngo_admin' 
         }).eq("id", user.id)
         
-        toast.success("Organization registered successfully!")
+        toast.success(t("onboarding_success_reg"))
       }
 
       setLoading(false)
       setStep(3)
       window.scrollTo(0, 0)
     } catch (err: any) {
-      toast.error("An unexpected error occurred.")
+      toast.error(t("error_unexpected"))
       setLoading(false)
     }
   }
@@ -133,11 +133,11 @@ export default function NGOOnboardingPage() {
     if (!file) return
 
     if (file.type !== "application/pdf") {
-      toast.error("Please upload a PDF file.")
+      toast.error(t("onboarding_val_pdf"))
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB.")
+      toast.error(t("onboarding_val_file_size"))
       return
     }
 
@@ -173,7 +173,7 @@ export default function NGOOnboardingPage() {
       [`${fieldPrefix}_url`]: "",
       [`${fieldPrefix}_name`]: ""
     })
-    toast.info("File removed")
+    toast.info(t("remove_file"))
   }
 
   return (
@@ -205,10 +205,10 @@ export default function NGOOnboardingPage() {
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CardHeader className="bg-gradient-to-br from-teal-50 to-blue-50 border-b border-teal-100 text-center pb-8">
                   <div className="text-4xl mb-3">🙏</div>
-                  <CardTitle className="text-2xl font-extrabold text-slate-900">Welcome to PhilanthroForge</CardTitle>
+                  <CardTitle className="text-2xl font-extrabold text-slate-900">{t("onboarding_title")}</CardTitle>
                   <CardDescription className="text-base text-slate-600 mt-2">
-                    Register your NGO in just a few steps.<br />
-                    <span className="text-sm text-slate-500">Apni bhasha chunein / अपनी भाषा चुनें</span>
+                    {t("onboarding_desc")}<br />
+                    <span className="text-sm text-slate-500">{t("onboarding_choose_lang")}</span>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-8 pb-10 space-y-6">
@@ -241,7 +241,7 @@ export default function NGOOnboardingPage() {
                     onClick={() => { setStep(1); window.scrollTo(0, 0) }}
                     className="w-full bg-teal-600 hover:bg-teal-500 rounded-xl h-12 text-base font-bold shadow-lg shadow-teal-500/10"
                   >
-                    {lang === "hi" ? "आगे बढ़ें →" : lang === "hinglish" ? "Aage Badho →" : "Get Started →"}
+                    {t("get_started")} →
                   </Button>
                   <p className="text-center text-xs text-slate-400">You can change the language anytime from the navigation bar.</p>
                 </CardContent>
@@ -250,14 +250,14 @@ export default function NGOOnboardingPage() {
             {step === 1 && (
               <form onSubmit={handleNextStep} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CardHeader className="bg-slate-50 border-b border-slate-100">
-                  <CardTitle className="text-xl font-bold text-slate-900">Step 1: Core Organization Details</CardTitle>
-                  <CardDescription>We strictly onboard registered trusts, societies and Section 8 companies.</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-900">{t("onboarding_step1_title")}</CardTitle>
+                  <CardDescription>{t("onboarding_step1_desc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                     <Label className="text-slate-700 font-semibold">Legal Entity Name <span className="text-red-500">*</span></Label>
+                     <Label className="text-slate-700 font-semibold">{t("onboarding_legal_name")} <span className="text-red-500">*</span></Label>
                      <Input 
-                       placeholder="As per PAN card" 
+                       placeholder={t("onboarding_legal_name_placeholder")} 
                        value={formData.name} 
                        onChange={e => { setFormData({...formData, name: e.target.value}); if(errors.name) setErrors(prev => ({...prev, name: ''})) }} 
                        className={errors.name ? "border-red-400 focus-visible:ring-red-400" : ""}
@@ -266,7 +266,7 @@ export default function NGOOnboardingPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                       <Label className="text-slate-700 font-semibold">Organization PAN <span className="text-red-500">*</span></Label>
+                       <Label className="text-slate-700 font-semibold">{t("onboarding_pan")} <span className="text-red-500">*</span></Label>
                        <Input 
                          placeholder="e.g. AAATT1234T" 
                          className={`uppercase ${errors.pan_number ? "border-red-400 focus-visible:ring-red-400" : ""}`} 
@@ -277,9 +277,9 @@ export default function NGOOnboardingPage() {
                        {errors.pan_number && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.pan_number}</p>}
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-slate-700 font-semibold">Registration ID <span className="text-red-500">*</span></Label>
+                       <Label className="text-slate-700 font-semibold">{t("onboarding_reg_id")} <span className="text-red-500">*</span></Label>
                        <Input 
-                         placeholder="Trust/Society Reg No." 
+                         placeholder={t("onboarding_reg_id_placeholder")} 
                          value={formData.registration_number} 
                          onChange={e => { setFormData({...formData, registration_number: e.target.value}); if(errors.registration_number) setErrors(prev => ({...prev, registration_number: ''})) }} 
                          className={errors.registration_number ? "border-red-400 focus-visible:ring-red-400" : ""}
@@ -289,7 +289,7 @@ export default function NGOOnboardingPage() {
                   </div>
                   <div className="space-y-2">
                      <div className="flex justify-between items-center">
-                       <Label className="text-slate-700 font-semibold">Mission Statement <span className="text-red-500">*</span></Label>
+                       <Label className="text-slate-700 font-semibold">{t("onboarding_mission")} <span className="text-red-500">*</span></Label>
                        <span className={`text-[10px] font-bold ${formData.description.length < 50 ? 'text-red-400' : 'text-slate-400 uppercase tracking-wider'}`}>
                          {formData.description.length}/50 min
                        </span>
@@ -298,13 +298,13 @@ export default function NGOOnboardingPage() {
                        className={`flex min-h-[100px] w-full rounded-md border bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                          errors.description ? "border-red-400" : "border-slate-200"
                        }`} 
-                       placeholder="What is your organization's primary objective?" 
+                       placeholder={t("onboarding_mission_placeholder")} 
                        value={formData.description} 
                        onChange={e => { setFormData({...formData, description: e.target.value}); if(errors.description) setErrors(prev => ({...prev, description: ''})) }} 
                      />
                      {errors.description && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.description}</p>}
                   </div>
-                  <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-500 rounded-xl h-11 shadow-lg shadow-teal-500/10">Continue to Step 2</Button>
+                  <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-500 rounded-xl h-11 shadow-lg shadow-teal-500/10">{t("view_all")} → {t("onboarding_step2_title")}</Button>
                 </CardContent>
               </form>
             )}
@@ -312,12 +312,12 @@ export default function NGOOnboardingPage() {
             {step === 2 && (
               <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-right-2 duration-300">
                 <CardHeader className="bg-slate-50 border-b border-slate-100">
-                  <CardTitle className="text-xl font-bold text-slate-900">Step 2: Financial & Compliance</CardTitle>
-                  <CardDescription>Zero platform fees by routing donations directly to your bank account.</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-900">{t("onboarding_step2_title")}</CardTitle>
+                  <CardDescription>{t("onboarding_step2_desc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                     <Label className="text-slate-700 font-semibold">Official UPI ID <span className="text-red-500">*</span></Label>
+                     <Label className="text-slate-700 font-semibold">{t("onboarding_upi_id")} <span className="text-red-500">*</span></Label>
                      <Input 
                        placeholder="ngo@bank" 
                        value={formData.upi_id} 
@@ -329,15 +329,15 @@ export default function NGOOnboardingPage() {
                   </div>
                   
                   <div className="p-5 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-6 shadow-inner">
-                     <h3 className="font-bold text-sm text-teal-900 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> Tax Compliance (Optional but Recommended)</h3>
+                     <h3 className="font-bold text-sm text-teal-900 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-teal-600"/> {t("onboarding_tax_compliance")}</h3>
                      
                       <div className="grid grid-cols-1 gap-6">
                         {/* 80G Section */}
-                        <div className="space-y-3">
-                           <div className="flex justify-between items-end gap-4">
-                             <div className="flex-grow space-y-2">
-                               <Label className="text-slate-700 font-semibold">80G Certificate No.</Label>
-                               <Input placeholder="e.g. IT/80G/12345" value={formData.registration_80g} onChange={e => setFormData({...formData, registration_80g: e.target.value})} />
+                         <div className="space-y-3">
+                            <div className="flex justify-between items-end gap-4">
+                              <div className="flex-grow space-y-2">
+                                <Label className="text-slate-700 font-semibold">{t("onboarding_80g_label")}</Label>
+                                <Input placeholder="e.g. IT/80G/12345" value={formData.registration_80g} onChange={e => setFormData({...formData, registration_80g: e.target.value})} />
                              </div>
                              <div className="relative overflow-hidden w-32 h-10 flex-shrink-0">
                                <Input 
@@ -375,11 +375,11 @@ export default function NGOOnboardingPage() {
                         </div>
 
                         {/* 12A Section */}
-                        <div className="space-y-3">
-                           <div className="flex justify-between items-end gap-4">
-                             <div className="flex-grow space-y-2">
-                               <Label className="text-slate-700 font-semibold">12A Certificate No.</Label>
-                               <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
+                         <div className="space-y-3">
+                            <div className="flex justify-between items-end gap-4">
+                              <div className="flex-grow space-y-2">
+                                <Label className="text-slate-700 font-semibold">{t("onboarding_12a_label")}</Label>
+                                <Input placeholder="e.g. IT/12A/12345" value={formData.registration_12a} onChange={e => setFormData({...formData, registration_12a: e.target.value})} />
                              </div>
                              <div className="relative group overflow-hidden w-32 h-10 flex-shrink-0">
                                <Input 
@@ -417,11 +417,11 @@ export default function NGOOnboardingPage() {
                         </div>
 
                         {/* CSR-1 Section */}
-                        <div className="space-y-3">
-                           <div className="flex justify-between items-end gap-4">
-                             <div className="flex-grow space-y-2">
-                               <Label className="text-slate-700 font-semibold">CSR-1 Registration</Label>
-                               <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
+                         <div className="space-y-3">
+                            <div className="flex justify-between items-end gap-4">
+                              <div className="flex-grow space-y-2">
+                                <Label className="text-slate-700 font-semibold">{t("onboarding_csr1_label")}</Label>
+                                <Input placeholder="CSR000123456" value={formData.csr_1_registration} onChange={e => setFormData({...formData, csr_1_registration: e.target.value})} />
                              </div>
                              <div className="relative group overflow-hidden w-32 h-10 flex-shrink-0">
                                <Input 
@@ -461,7 +461,7 @@ export default function NGOOnboardingPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-700 font-bold">Main Registration Document <span className="text-red-500">*</span></Label>
+                    <Label className="text-slate-700 font-bold">{t("onboarding_main_doc")} <span className="text-red-500">*</span></Label>
                     <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-slate-50 transition-all group cursor-pointer overflow-hidden">
                        <input 
                           type="file" 
@@ -475,8 +475,8 @@ export default function NGOOnboardingPage() {
                        </div>
                        <p className="text-sm font-bold text-slate-700">
                           {formData.registration_certificate_url ? (
-                            <span className="group-hover:hidden">Document Ready!</span>
-                          ) : "Upload Trust Deed / Society Reg Certificate (PDF)"}
+                            <span className="group-hover:hidden">{t("verified")}!</span>
+                          ) : t("onboarding_upload_pdf")}
                           {formData.registration_certificate_url && (
                              <span className="hidden group-hover:inline text-teal-600">Click to Change File</span>
                           )}
@@ -498,10 +498,10 @@ export default function NGOOnboardingPage() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Button type="button" variant="outline" className="flex-1 rounded-xl h-11" onClick={() => setStep(1)} disabled={loading}>Back</Button>
+                    <Button type="button" variant="outline" className="flex-1 rounded-xl h-11" onClick={() => setStep(1)} disabled={loading}>{t("back")}</Button>
                     <Button type="submit" className="flex-[2] bg-teal-600 hover:bg-teal-500 rounded-xl h-11 shadow-lg shadow-teal-500/10 transition-all active:scale-[0.98]" disabled={loading}>
                       {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-                      Register Organization
+                      {t("onboarding_apply_ngo")}
                     </Button>
                   </div>
                 </CardContent>
@@ -513,12 +513,12 @@ export default function NGOOnboardingPage() {
                  <div className="h-20 w-20 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-teal-500/10">
                     <CheckCircle2 className="h-10 w-10" />
                  </div>
-                 <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Application Submitted!</h2>
+                 <h2 className="text-2xl font-extrabold text-slate-900 mb-2">{t("onboarding_success_title")}</h2>
                  <p className="text-slate-600 mb-10 max-w-sm leading-relaxed">
-                   Our compliance team will review your registration details and PAN. You will receive an email once your NGO is verified and can start publishing campaigns.
+                   {t("onboarding_success_desc")}
                  </p>
                  <Button onClick={() => router.push("/dashboard")} className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl h-12 px-8 font-bold shadow-lg">
-                   Go to Workspace
+                   {t("onboarding_go_workspace")}
                  </Button>
               </CardContent>
             )}

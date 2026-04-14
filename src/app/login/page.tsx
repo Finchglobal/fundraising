@@ -7,10 +7,12 @@ import { createClient } from "@/lib/supabase/client"
 import { ShieldCheck, Eye, EyeOff, Loader2, ArrowLeft, Mail, AlertCircle, Quote } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useLang } from "@/components/LanguageSwitcher"
 
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
 
   const [mode, setMode] = useState<"password" | "magic-link">("password")
   const [email, setEmail] = useState("")
@@ -133,7 +135,7 @@ export default function LoginPage() {
           <Image src="/logo.svg" alt="PhilanthroForge" width={150} height={50} className="h-8 w-auto dark:invert" />
         </Link>
         <Link href="/" className="absolute top-8 right-8 flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to site
+          <ArrowLeft className="h-4 w-4" /> {t("back_to_site")}
         </Link>
 
         <div className="mx-auto w-full max-w-sm mt-12 md:mt-0">
@@ -141,13 +143,13 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500/10 dark:bg-green-500/20 rounded-xl mb-6">
               <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Welcome back</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">Log in to manage your verified campaigns.</p>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{t("login_heading")}</h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">{t("login_tagline")}</p>
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-500/10 rounded-xl border border-green-100 dark:border-green-500/20">
               <p className="text-xs font-bold text-green-800 dark:text-green-400">
-                New to PhilanthroForge? {" "}
+                {t("no_account")} {" "}
                 <Link href="/signup" className="underline underline-offset-4 hover:text-green-600 transition-colors">
-                  Create an account here →
+                  {t("sign_up_link")} →
                 </Link>
               </p>
             </div>
@@ -158,14 +160,12 @@ export default function LoginPage() {
               onClick={() => { setMode("password"); setError(null); setSuccess(null); }}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${mode === "password" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              Password
-            </button>
+              {t("password_label")}            </button>
             <button 
               onClick={() => { setMode("magic-link"); setError(null); setSuccess(null); }}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${mode === "magic-link" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              Magic Link
-            </button>
+              {t("magic_link")}            </button>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
@@ -184,7 +184,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Email Address</label>
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">{t("email_address_label")}</label>
               <input
                 type="email"
                 value={email}
@@ -197,7 +197,7 @@ export default function LoginPage() {
 
             {mode === "password" && (
               <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-1.5">{t("password_label")}</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -226,15 +226,15 @@ export default function LoginPage() {
               {loading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> {mode === "password" ? "Signing in..." : "Sending Link..."}</>
               ) : (
-                mode === "password" ? "Sign In" : <><Mail className="h-4 w-4" /> Send Magic Link</>
+                mode === "password" ? t("login_btn") : <><Mail className="h-4 w-4" /> {t("magic_link")}</>
               )}
             </button>
           </form>
 
           <p className="text-center text-sm font-medium text-gray-500 mt-6">
-            Don't have an account?{" "}
+            {t("no_account")}{" "}
             <Link href="/signup" className="text-green-600 hover:text-green-700 font-bold hover:underline underline-offset-4">
-              Create an account
+              {t("sign_up_link")}
             </Link>
           </p>
 

@@ -1,18 +1,38 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { createClient } from "@/lib/supabase/client"
 import { ShieldCheck, Clock, AlertCircle, IndianRupee, ArrowLeft, Heart } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useLang } from "@/components/LanguageSwitcher"
 
-export default async function DonationHistoryPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function DonationHistoryPage() {
+  const supabase = createClient()
+  const [user, setUser] = useState<any>(null)
+  const [donations, setDonations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { t } = useLang()
 
+  useEffect(() => {
+    async function fetchData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUser(user)
+
+      const { data: donations } = await supabase
+        .from("donations")
+        .select("*, campaigns(title, organization_id, organizations(name))")
+        .eq("donor_id", user.id)
+        .order("created_at", { ascending: false })
+      
+      setDonations(donations || [])
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  if (loading) return <div className="min-h-[60vh] flex items-center justify-center p-4 font-bold text-slate-400 animate-pulse">Loading History...</div>
   if (!user) return null
-
-  const { data: donations } = await supabase
-    .from("donations")
-    .select("*, campaigns(title, organization_id, organizations(name))")
-    .eq("donor_id", user.id)
-    .order("created_at", { ascending: false })
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -21,8 +41,8 @@ export default async function DonationHistoryPage() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Donation History</h1>
-          <p className="text-gray-500 font-medium font-outfit">Detailed log of your collective impact.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t("history_title")}</h1>
+          <p className="text-gray-500 font-medium font-outfit">{t("history_desc")}</p>
         </div>
       </div>
 
@@ -32,11 +52,11 @@ export default async function DonationHistoryPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Cause / Campaign</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Amount</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t("history_date")}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t("history_cause")}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">{t("history_amount")}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t("history_status")}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">{t("history_actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -80,7 +100,7 @@ export default async function DonationHistoryPage() {
                          href={`/campaigns/${d.campaign_id}`} 
                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green-50 text-green-700 text-xs font-bold hover:bg-green-100 transition-all"
                        >
-                         <Heart className="h-3 w-3" /> Support Again
+                         <Heart className="h-3 w-3" /> {t("history_support_again")}
                        </Link>
                     </td>
                   </tr>
@@ -93,9 +113,9 @@ export default async function DonationHistoryPage() {
              <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
                 <IndianRupee className="h-8 w-8" />
              </div>
-             <p className="text-lg font-bold text-gray-900">No donations found</p>
+             <p className="text-lg font-bold text-gray-900">{t("history_no_donations")}</p>
              <p className="text-gray-500 font-medium max-w-sm mx-auto mt-2">
-               Once you make a contribution, it will appear here for you to track and manage.
+               {t("history_no_donations_desc")}
              </p>
           </div>
         )}
@@ -107,9 +127,9 @@ export default async function DonationHistoryPage() {
            <ShieldCheck className="h-5 w-5" />
         </div>
         <div>
-           <h3 className="text-blue-900 font-bold">Verification Timeline</h3>
+           <h3 className="text-blue-900 font-bold">{t("history_verification_timeline_title")}</h3>
            <p className="text-blue-700/80 text-sm font-medium mt-1 leading-relaxed">
-             NGOs typically verify UTR numbers every 24-48 hours. Once the status changes to <span className="font-bold">Verified</span>, your section 80G receipt (if applicable) will be sent to your registered email.
+             {t("history_verification_timeline_desc")}
            </p>
         </div>
       </div>

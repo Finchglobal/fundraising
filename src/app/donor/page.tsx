@@ -1,20 +1,39 @@
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { createClient } from "@/lib/supabase/client"
 import { Heart, ShieldCheck, IndianRupee, Clock, ArrowRight, TrendingUp, Sparkles } from "lucide-react"
 import Link from "next/link"
 import DonorReceiptButton from "@/components/donor/DonorReceiptButton"
 import { ShareButton } from "@/components/ui/ShareButton"
+import { useEffect, useState } from "react"
+import { useLang } from "@/components/LanguageSwitcher"
 
-export default async function DonorDashboard() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default function DonorDashboard() {
+  const supabase = createClient()
+  const [user, setUser] = useState<any>(null)
+  const [donations, setDonations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { t } = useLang()
 
+  useEffect(() => {
+    async function fetchData() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUser(user)
+
+      const { data: donations } = await supabase
+        .from("donations")
+        .select("*, campaigns(title, organization_id, organizations(*))")
+        .eq("donor_id", user.id)
+      
+      setDonations(donations || [])
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><p className="text-slate-400 font-bold animate-pulse">Loading Impact...</p></div>
   if (!user) return null
-
-  // Fetch cumulative stats
-  const { data: donations } = await supabase
-    .from("donations")
-    .select("*, campaigns(title, organization_id, organizations(*))")
-    .eq("donor_id", user.id)
 
   const verifiedDonations = donations?.filter(d => d.status === "verified") || []
   const totalImpact = verifiedDonations.reduce((acc, d) => acc + (Number(d.amount) || 0), 0)
@@ -24,8 +43,8 @@ export default async function DonorDashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Impact Overview</h1>
-        <p className="text-gray-500 font-medium">Thank you for being part of the change.</p>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t("dashboard_total_impact")}</h1>
+        <p className="text-gray-500 font-medium">{t("thank_you")} {t("of_impact_today")}</p>
       </div>
 
       {/* Impact Grid */}
@@ -35,7 +54,7 @@ export default async function DonorDashboard() {
             <IndianRupee className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Total Impact</p>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t("dashboard_kpi_total_impact")}</p>
             <p className="text-3xl font-black text-gray-900">₹{totalImpact.toLocaleString()}</p>
           </div>
         </div>
@@ -45,7 +64,7 @@ export default async function DonorDashboard() {
             <Heart className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Causes Supported</p>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t("dashboard_kpi_causes_supported")}</p>
             <p className="text-3xl font-black text-gray-900">{uniqueNGOs}</p>
           </div>
         </div>
@@ -55,7 +74,7 @@ export default async function DonorDashboard() {
             <Clock className="h-6 w-6 text-orange-600" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Verification Pending</p>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t("dashboard_kpi_verification_pending")}</p>
             <p className="text-3xl font-black text-gray-900">{pendingCount}</p>
           </div>
         </div>
@@ -66,9 +85,9 @@ export default async function DonorDashboard() {
         {/* Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Recent Contributions</h2>
+            <h2 className="text-xl font-bold">{t("dashboard_recent_contributions")}</h2>
             <Link href="/donor/history" className="text-sm font-bold text-green-600 hover:text-green-700 flex items-center gap-1 group">
-              View All <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              {t("dashboard_view_all")} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -103,9 +122,9 @@ export default async function DonorDashboard() {
               ))
             ) : (
               <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 text-center">
-                <p className="text-gray-400 font-medium mb-4">No activity yet. Start your journey today!</p>
+                <p className="text-gray-400 font-medium mb-4">{t("no_impact_yet")} {t("dashboard_find_cause")}</p>
                 <Link href="/#campaigns" className="inline-flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-500/20 hover:bg-green-400 transition-all">
-                  Find a Cause
+                  {t("dashboard_find_cause")}
                 </Link>
               </div>
             )}
@@ -153,7 +172,7 @@ export default async function DonorDashboard() {
               href="/ambassador/onboarding"
               className="block text-center w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm shadow-indigo-500/20 transition-all"
             >
-              Get Started →
+              {t("get_started")} →
             </Link>
           </div>
         </div>

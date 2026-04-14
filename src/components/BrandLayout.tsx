@@ -4,27 +4,28 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
-import { LanguageSwitcher } from "@/components/LanguageSwitcher"
-
-const NAV_LINKS = [
-  { label: "Home", href: "https://www.philanthroforge.com" },
-  { label: "About", href: "https://www.philanthroforge.com/about" },
-  { label: "Services", href: "https://www.philanthroforge.com/services" },
-  { 
-    label: "Case Studies",
-    subLinks: [
-      { label: "Rewarding Generosity Unlocks New Giving", href: "https://www.philanthroforge.com/case-studies/rewarding-generosity" },
-      { label: "Referral Rewards Turn Supporters Into Fundraisers", href: "https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" },
-      { label: "Integrated ecosystems make complex impact simple", href: "https://www.philanthroforge.com/case-studies/integrated-ecosystems" },
-    ]
-  },
-  { label: "Fundraising", href: "/", active: true },
-  { label: "Login", href: "/login" },
-  { label: "Register", href: "/signup" },
-  { label: "Let's Talk", href: "https://www.philanthroforge.com/lets-talk", cta: true },
-]
+import { LanguageSwitcher, useLang } from "@/components/LanguageSwitcher"
 
 export function SiteNavbar() {
+  const { t } = useLang()
+  const NAV_LINKS = [
+    { label: t("nav_home"), href: "https://www.philanthroforge.com" },
+    { label: t("nav_about"), href: "https://www.philanthroforge.com/about" },
+    { label: t("nav_services"), href: "https://www.philanthroforge.com/services" },
+    { 
+      label: t("nav_case_studies"),
+      subLinks: [
+        { label: t("nav_case_1") || "Rewarding Generosity Unlocks New Giving", href: "https://www.philanthroforge.com/case-studies/rewarding-generosity" },
+        { label: t("nav_case_2") || "Referral Rewards Turn Supporters Into Fundraisers", href: "https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" },
+        { label: t("nav_case_3") || "Integrated ecosystems make complex impact simple", href: "https://www.philanthroforge.com/case-studies/integrated-ecosystems" },
+      ]
+    },
+    { label: t("nav_fundraising"), href: "/", active: true },
+    { label: t("nav_login"), href: "/login" },
+    { label: t("nav_register"), href: "/signup" },
+    { label: t("nav_lets_talk"), href: "https://www.philanthroforge.com/lets-talk", cta: true },
+  ]
+
   const [open, setOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -194,6 +195,7 @@ export function SiteNavbar() {
 }
 
 export function SiteFooter() {
+  const { t } = useLang()
   return (
     <footer style={{ backgroundColor: "#E8D48B" }} className="border-t border-yellow-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
@@ -207,7 +209,7 @@ export function SiteFooter() {
               height={77}
               className="w-48 h-auto"
             />
-            <p className="text-sm text-gray-700 mt-2">Forging The Next Era of Fundraising</p>
+            <p className="text-sm text-gray-700 mt-2">{t("footer_tagline")}</p>
             <a href="https://linkedin.com/company/philanthroforge" target="_blank" rel="noopener noreferrer" className="mt-1">
               <div className="w-9 h-9 bg-blue-700 rounded flex items-center justify-center text-white font-bold text-sm">in</div>
             </a>
@@ -215,27 +217,27 @@ export function SiteFooter() {
 
           {/* Col 2: Services */}
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">Services</h4>
+            <h4 className="font-bold text-gray-900 mb-4">{t("footer_services")}</h4>
             <ul className="space-y-2 text-sm text-gray-700">
-              <li><a href="https://www.philanthroforge.com/services/digital-fundraising-strategy" className="hover:text-gray-900 transition-colors">Digital Strategy</a></li>
-              <li><a href="https://www.philanthroforge.com/services/consultancy-advisory" className="hover:text-gray-900 transition-colors">Consultancy & Advice</a></li>
-              <li><a href="https://www.philanthroforge.com/services/website-donation-optimization" className="hover:text-gray-900 transition-colors">UX Optimization</a></li>
-              <li><a href="https://www.philanthroforge.com/services/donation-form-optimization" className="hover:text-gray-900 transition-colors">Donation Optimization</a></li>
-              <li><a href="https://www.philanthroforge.com/services/fundraising-campaign-journey-design" className="hover:text-gray-900 transition-colors">Campaign Design</a></li>
-              <li><a href="https://www.philanthroforge.com/services/donor-behaviour-analysis-revenue-growth" className="hover:text-gray-900 transition-colors">Analysis & Growth</a></li>
-              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">Communication</a></li>
-              <li><a href="https://www.philanthroforge.com/services/csr-major-donor-support" className="hover:text-gray-900 transition-colors">CSR & Major Donor</a></li>
-              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">KPIs & Dashboards</a></li>
+              <li><a href="https://www.philanthroforge.com/services/digital-fundraising-strategy" className="hover:text-gray-900 transition-colors">{t("svc_strategy") || "Digital Strategy"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/consultancy-advisory" className="hover:text-gray-900 transition-colors">{t("svc_consultancy") || "Consultancy & Advice"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/website-donation-optimization" className="hover:text-gray-900 transition-colors">{t("svc_ux") || "UX Optimization"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/donation-form-optimization" className="hover:text-gray-900 transition-colors">{t("svc_donation") || "Donation Optimization"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/fundraising-campaign-journey-design" className="hover:text-gray-900 transition-colors">{t("svc_campaign") || "Campaign Design"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/donor-behaviour-analysis-revenue-growth" className="hover:text-gray-900 transition-colors">{t("svc_analysis") || "Analysis & Growth"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">{t("svc_comm") || "Communication"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/csr-major-donor-support" className="hover:text-gray-900 transition-colors">{t("svc_csr") || "CSR & Major Donor"}</a></li>
+              <li><a href="https://www.philanthroforge.com/services/brand-identity-impact-communication" className="hover:text-gray-900 transition-colors">{t("svc_kpi") || "KPIs & Dashboards"}</a></li>
             </ul>
           </div>
 
           {/* Col 3: About & Case Studies */}
           <div>
-            <h4 className="font-bold text-gray-900 mb-4">About</h4>
+            <h4 className="font-bold text-gray-900 mb-4">{t("footer_about")}</h4>
             <ul className="space-y-2 text-sm text-gray-700 mb-8">
               <li><a href="https://www.philanthroforge.com/about" className="hover:text-gray-900">Our Story</a></li>
             </ul>
-            <h4 className="font-bold text-gray-900 mb-4">Case Studies</h4>
+            <h4 className="font-bold text-gray-900 mb-4">{t("nav_case_studies")}</h4>
             <ul className="space-y-2 text-sm text-gray-700">
               <li><a href="https://www.philanthroforge.com/case-studies/rewarding-generosity" className="hover:text-gray-900">Rewarding Generosity</a></li>
               <li><a href="https://www.philanthroforge.com/case-studies/turning-supporters-into-fundraisers" className="hover:text-gray-900">Supporters Into Fundraisers</a></li>
@@ -245,27 +247,27 @@ export function SiteFooter() {
 
           {/* Col 4: Contact */}
           <div>
-            <h4 className="font-bold text-gray-900 mb-2">Legal</h4>
-            <a href="https://www.philanthroforge.com/privacy-policy" className="text-sm text-gray-700 hover:text-gray-900 block mb-1">Privacy Policy</a>
-            <a href="https://www.philanthroforge.com/terms-and-conditions" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">Terms and Conditions</a>
-            <h4 className="font-bold text-gray-900 mb-1">Email</h4>
+            <h4 className="font-bold text-gray-900 mb-2">{t("footer_legal")}</h4>
+            <a href="https://www.philanthroforge.com/privacy-policy" className="text-sm text-gray-700 hover:text-gray-900 block mb-1">{t("privacy_policy") || "Privacy Policy"}</a>
+            <a href="https://www.philanthroforge.com/terms-and-conditions" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">{t("terms_conditions") || "Terms and Conditions"}</a>
+            <h4 className="font-bold text-gray-900 mb-1">{t("footer_email")}</h4>
             <a href="mailto:hello@philanthroforge.com" className="text-sm text-gray-700 hover:text-gray-900 block mb-6">hello@philanthroforge.com</a>
-            <h4 className="font-bold text-gray-900 mb-3">Schedule a Meeting</h4>
+            <h4 className="font-bold text-gray-900 mb-3">{t("footer_meeting")}</h4>
             <Link
               href="/onboarding"
               className="block w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-center py-3 px-6 rounded transition-colors"
             >
-              Book Now
+              {t("book_now")}
             </Link>
           </div>
         </div>
 
         <div className="border-t border-yellow-300 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm font-semibold text-gray-800">
-          <span>© 2025 PhilanthroForge. All Rights Reserved.</span>
+          <span>{t("footer_copyright")}</span>
           <div className="flex items-center gap-4 text-xs text-gray-500">
-            <Link href="/login" className="hover:text-gray-800 transition-colors">NGO Login</Link>
+            <Link href="/login" className="hover:text-gray-800 transition-colors">{t("ngo_login")}</Link>
             <span>·</span>
-            <Link href="/admin" className="hover:text-gray-800 transition-colors">Platform Admin</Link>
+            <Link href="/admin" className="hover:text-gray-800 transition-colors">{t("platform_admin")}</Link>
           </div>
         </div>
       </div>
