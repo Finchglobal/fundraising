@@ -2,7 +2,11 @@
 
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp, Zap } from "lucide-react"
+import {
+  ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp,
+  Zap, Star, CheckCircle2, Globe2, Landmark, BadgeCheck, Share2, FileText,
+  PhoneCall, IndianRupee
+} from "lucide-react"
 import { useLang } from "@/components/LanguageSwitcher"
 import { ShareButton } from "@/components/ui/ShareButton"
 
@@ -33,12 +37,12 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
           <img
             src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2670"
             alt="Fundraising Hero"
-            className="w-full h-full object-cover opacity-15"
+            className="w-full h-full object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-gray-950/80 via-gray-950/60 to-gray-950" />
         </div>
-        <div className="absolute top-20 left-10 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 text-center max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-xs font-semibold tracking-widest uppercase text-green-400 bg-green-500/10 rounded-full border border-green-500/20 backdrop-blur-sm">
@@ -87,6 +91,83 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
               <div key={stat.label} className="text-center">
                 <div className="text-3xl font-black text-white">{stat.value}</div>
                 <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY PHILANTHROFORGE — NEW USP SECTION ────────────────── */}
+      <section className="py-24 px-4 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#16a34a 0.5px, transparent 0.5px)', backgroundSize: '22px 22px' }} />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left: image */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-teal-900/10">
+              <img
+                src="/donation_upi_scene.png"
+                alt="Indian families donating via UPI"
+                className="w-full h-[420px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/60 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="flex gap-3">
+                  <span className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm text-green-700 text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+                    <ShieldCheck className="h-3 w-3" /> 100% Verified NGOs
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+                    <IndianRupee className="h-3 w-3" /> Zero Platform Fees
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* Right: USPs */}
+            <div>
+              <p className="text-xs font-black tracking-widest uppercase text-green-600 mb-3">Why PhilanthroForge</p>
+              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight mb-6">India's Most Trusted <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-teal-500">Giving Platform</span></h2>
+              <p className="text-gray-500 mb-10 leading-relaxed text-base">We verify every NGO, eliminate payment friction with UPI, and give you real-time proof of impact — so your rupee always reaches those who need it most.</p>
+              <div className="space-y-5">
+                {[
+                  { icon: BadgeCheck, color: "text-green-600 bg-green-50", title: "Government-Registered NGOs Only", desc: "Every partner NGO holds valid 12A, 80G, or CSR-1 registration — vetted by our trust team." },
+                  { icon: QrCode, color: "text-blue-600 bg-blue-50", title: "Instant UPI Donations", desc: "No payment gateway, no hidden fees. Scan a QR and donate directly — 100% reaches the cause." },
+                  { icon: FileText, color: "text-purple-600 bg-purple-50", title: "80G Tax Certificates", desc: "Download your Section 80G receipt instantly — making every donation tax-deductible." },
+                  { icon: Share2, color: "text-indigo-600 bg-indigo-50", title: "Grassroots Ambassador Program", desc: "Become an Impact Ambassador — share campaigns and watch your tracked referrals create change." },
+                ].map(usp => (
+                  <div key={usp.title} className="flex items-start gap-4 group">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${usp.color} group-hover:scale-110 transition-transform duration-300`}>
+                      <usp.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-0.5">{usp.title}</h4>
+                      <p className="text-sm text-gray-500 leading-relaxed">{usp.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── IMPACT BY THE NUMBERS ─────────────────────────────────── */}
+      <section className="py-20 px-4 bg-gradient-to-br from-gray-950 via-slate-900 to-gray-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#22c55e 0.5px, transparent 0.5px)', backgroundSize: '28px 28px' }} />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-green-500/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl" />
+        <div className="max-w-6xl mx-auto relative z-10 text-center">
+          <p className="text-xs font-black tracking-widest uppercase text-green-400 mb-3">Impact By Numbers</p>
+          <h2 className="text-4xl sm:text-5xl font-black text-white mb-14">Every Rupee. Tracked. Verified. Impactful.</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { value: "₹32,500+", label: "Raised This Month", icon: IndianRupee, color: "from-green-500/20 to-green-600/10 border-green-500/20 text-green-400" },
+              { value: "100%", label: "Verified NGOs", icon: BadgeCheck, color: "from-teal-500/20 to-teal-600/10 border-teal-500/20 text-teal-400" },
+              { value: "0%", label: "Platform / Gateway Fees", icon: Star, color: "from-yellow-500/20 to-yellow-600/10 border-yellow-500/20 text-yellow-400" },
+              { value: "80G", label: "Tax Benefit on All Donations", icon: Landmark, color: "from-purple-500/20 to-purple-600/10 border-purple-500/20 text-purple-400" },
+            ].map(stat => (
+              <div key={stat.label} className={`bg-gradient-to-br ${stat.color} border rounded-2xl p-6 flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform duration-300`}>
+                <stat.icon className="h-7 w-7 opacity-80" />
+                <div className="text-4xl font-black text-white">{stat.value}</div>
+                <div className="text-sm text-gray-400 font-medium text-center">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -289,7 +370,81 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
         </div>
       </section>
 
-      {/* ── TRUST STRIP ──────────────────────────────────────────── */}
+      {/* ── AMBASSADOR PROGRAM ─────────────────────────────────────── */}
+      <section className="py-24 px-4 bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#818cf8 0.5px, transparent 0.5px)', backgroundSize: '26px 26px' }} />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 mb-5 text-[10px] font-black tracking-widest uppercase text-indigo-300 bg-indigo-500/20 rounded-full border border-indigo-500/30">
+                <Share2 className="h-3 w-3" /> Impact Ambassador Program
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-5">Share a Link. <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Change a Life.</span></h2>
+              <p className="text-indigo-200 text-base leading-relaxed mb-8">Become a PhilanthroForge Impact Ambassador — share tracked links to campaigns and watch your personal network drive real, measurable change across India.</p>
+              <div className="space-y-4 mb-10">
+                {[
+                  { icon: Globe2, text: "Every click on your unique link is tracked and attributed to you" },
+                  { icon: CheckCircle2, text: "One-click upgrade — no forms, no waiting" },
+                  { icon: Star, text: "AI-generated captions make sharing effortless" },
+                  { icon: Users, text: "See how many people donated because of your share" },
+                ].map(item => (
+                  <div key={item.text} className="flex items-start gap-3">
+                    <item.icon className="h-5 w-5 text-indigo-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-indigo-200 text-sm leading-relaxed">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white font-bold px-8 py-4 rounded-xl text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+              >
+                Become an Ambassador <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+            {/* Right: impact collage */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-indigo-900/40">
+              <img
+                src="/ngo_impact_collage.png"
+                alt="NGO Impact across India"
+                className="w-full h-[420px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/70 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 flex gap-3 flex-wrap">
+                <span className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm text-indigo-700 text-[11px] font-black uppercase px-3 py-1.5 rounded-full shadow-lg">
+                  <HeartPulse className="h-3 w-3" /> Real Impact
+                </span>
+                <span className="flex items-center gap-1.5 bg-indigo-500 text-white text-[11px] font-black uppercase px-3 py-1.5 rounded-full shadow-lg">
+                  <Users className="h-3 w-3" /> Grassroots Driven
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUST BADGES ──────────────────────────────────────────── */}
+      <section className="py-16 px-4 bg-white border-y border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-xs font-black tracking-widest uppercase text-gray-400 mb-10">Trusted, Transparent Giving</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { icon: ShieldCheck, color: "text-teal-600 bg-teal-50 border-teal-100", title: "PF Verified", desc: "Every NGO manually verified by our trust team before going live." },
+              { icon: Landmark, color: "text-purple-600 bg-purple-50 border-purple-100", title: "12A Registered", desc: "Legal exemption status confirmed for all partner organizations." },
+              { icon: Zap, color: "text-blue-600 bg-blue-50 border-blue-100", title: "80G Tax Benefit", desc: "Claim income tax deductions on every donation you make." },
+              { icon: PhoneCall, color: "text-green-600 bg-green-50 border-green-100", title: "Donor Support", desc: "Our team is available to assist with any donation queries." },
+            ].map(badge => (
+              <div key={badge.title} className={`flex flex-col items-center text-center p-6 rounded-2xl border ${badge.color} hover:-translate-y-1 hover:shadow-md transition-all duration-300`}>
+                <badge.icon className="h-8 w-8 mb-3" />
+                <h4 className="font-black text-gray-900 text-sm mb-1">{badge.title}</h4>
+                <p className="text-xs text-gray-500 leading-relaxed">{badge.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUST STRIP / CTA ──────────────────────────────────────── */}
       <section className="py-16 px-4 bg-gray-950 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-black mb-4">{t("raise_funds_heading")}</h2>

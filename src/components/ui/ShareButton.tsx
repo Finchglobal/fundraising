@@ -127,7 +127,7 @@ export function ShareButton({ campaignId, campaignTitle, className = "" }: Share
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl" onClick={e => e.stopPropagation()}>
+        <DialogContent className="sm:max-w-md rounded-3xl overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
           
           {/* ── AMBASSADOR VIEW ─────────────────────────── */}
           {isAmbassador ? (
