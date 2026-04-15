@@ -35,11 +35,11 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
       <section id="hero" className="relative flex flex-col items-center justify-center px-4 py-28 sm:py-36 bg-gray-950 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2670"
+            src="/hero_banner.png"
             alt="Fundraising Hero"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-950/80 via-gray-950/60 to-gray-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-950/70 via-gray-950/55 to-gray-950" />
         </div>
         <div className="absolute top-20 left-10 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
