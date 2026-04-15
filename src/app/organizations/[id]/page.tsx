@@ -117,7 +117,7 @@ export default async function NGOProfilePage({ params }: { params: Promise<{ id:
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex flex-wrap gap-3">
               {trustBadges.map(badge => (
-                <div key={badge.label} className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${badge.color} transition-all hover:-translate-y-0.5 hover:shadow-sm`}>
+                <div key={badge.tLabel} className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${badge.color} transition-all hover:-translate-y-0.5 hover:shadow-sm`}>
                   <badge.icon className="h-4 w-4 shrink-0" />
                   <div>
                     <div className="text-xs font-bold leading-tight"><TranslatedText tKey={badge.tLabel} /></div>
