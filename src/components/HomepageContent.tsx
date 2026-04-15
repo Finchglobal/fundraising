@@ -31,102 +31,128 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
 
   return (
     <>
-      {/* ── HERO (Split Layout) ─────────────────────────────────── */}
-      <section id="hero" className="relative bg-gray-950 overflow-hidden min-h-[92vh] flex items-stretch">
-        {/* Subtle grid pattern on dark side */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
-        {/* Glow blobs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ── HERO — AWWWARDS Editorial ─────────────────────────── */}
+      <section id="hero" className="relative min-h-screen bg-gradient-to-br from-teal-950 via-emerald-900 to-green-950 overflow-hidden flex items-center">
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 py-20 lg:py-0">
+        {/* Giant ghost manifesto text */}
+        <div className="absolute inset-0 flex items-end justify-start overflow-hidden select-none pointer-events-none px-4 pb-4">
+          <span className="text-[22vw] font-black leading-none tracking-tighter text-white/[0.04] whitespace-nowrap">GIVE.TRUST.</span>
+        </div>
 
-          {/* ── LEFT: Text Content ──────────────────────────────── */}
-          <div className="flex-1 flex flex-col justify-center text-left py-8 lg:py-20 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-7 text-xs font-bold tracking-widest uppercase text-green-400 bg-green-500/10 rounded-full border border-green-500/20 w-fit">
+        {/* Glowing aura blobs */}
+        <div className="absolute -top-40 right-0 w-[700px] h-[700px] bg-emerald-400/15 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-teal-300/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-green-400/5 rounded-full blur-[80px] pointer-events-none" />
+
+        {/* Dot matrix accent */}
+        <div className="absolute inset-0 opacity-[0.035] pointer-events-none" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.8) 0.5px, transparent 0.5px)', backgroundSize: '28px 28px' }} />
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-[1fr_1.1fr] gap-10 min-h-screen items-center py-24 lg:py-0">
+
+          {/* ── LEFT: Full editorial image ──────────────────────── */}
+          <div className="relative hidden lg:flex items-center self-stretch py-16">
+            <div className="relative w-full h-full max-h-[78vh] rounded-[2rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
+              <img
+                src="/hero_banner.png"
+                alt="PhilanthroForge — Real Impact"
+                className="w-full h-full object-cover"
+              />
+              {/* Subtle bottom vignette for the card */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+
+              {/* Live donation floating card */}
+              <div className="absolute bottom-6 left-6 bg-white/96 backdrop-blur-xl shadow-2xl rounded-2xl p-4 flex items-center gap-4 max-w-[260px] border border-white/60">
+                <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center text-xl flex-shrink-0">💚</div>
+                <div>
+                  <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Just donated</div>
+                  <div className="font-black text-gray-900 text-sm">₹1,100 → Clean Water</div>
+                  <div className="text-[10px] text-emerald-600 font-bold mt-0.5">80G receipt sent ✓</div>
+                </div>
+              </div>
+
+              {/* Top-right trust badge */}
+              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md shadow-xl rounded-2xl px-4 py-3 flex flex-col items-center border border-white/50">
+                <ShieldCheck className="h-5 w-5 text-emerald-600 mb-1" />
+                <div className="text-[10px] font-black uppercase tracking-widest text-gray-800">PF Verified</div>
+              </div>
+            </div>
+
+            {/* Floating side stat */}
+            <div className="absolute -right-5 top-1/2 -translate-y-1/2 bg-gradient-to-br from-yellow-400 to-orange-400 shadow-2xl shadow-orange-500/30 rounded-2xl px-4 py-5 flex flex-col items-center gap-0.5">
+              <div className="text-2xl font-black text-white">₹0</div>
+              <div className="text-[9px] font-black uppercase tracking-widest text-orange-900">Platform Fees</div>
+            </div>
+          </div>
+
+          {/* ── RIGHT: Text Content ──────────────────────────────── */}
+          <div className="flex flex-col justify-center lg:pl-6 py-12 lg:py-20">
+
+            {/* Eyebrow pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-xs font-bold tracking-widest uppercase text-emerald-300 bg-white/10 rounded-full border border-white/15 backdrop-blur-sm w-fit">
               <ShieldCheck className="h-3.5 w-3.5" />
               {t("hero_verified_tag")}
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-[4.5rem] font-black text-white tracking-tight leading-[1.05] mb-6">
-              {t("real_impact")}<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-teal-400 to-cyan-400">
-                {t("real_trust")}
+            {/* Headline — editorial manifesto style */}
+            <h1 className="font-black text-white tracking-tight leading-[0.9] mb-7" style={{ fontSize: 'clamp(3.5rem, 7vw, 6rem)' }}>
+              {t("real_impact")}<span className="text-emerald-400">.</span><br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-400">
+                {t("real_trust")}<span className="text-yellow-300">.</span>
               </span>
             </h1>
 
-            <p className="text-lg text-gray-400 mb-10 leading-relaxed">
-              {t("hero_subtitle")}
-            </p>
+            {/* Rule + subtitle */}
+            <div className="flex items-start gap-4 mb-10">
+              <div className="w-1 h-16 bg-gradient-to-b from-emerald-400 to-transparent rounded-full flex-shrink-0 mt-1" />
+              <p className="text-lg text-emerald-100/70 leading-relaxed max-w-md">
+                {t("hero_subtitle")}
+              </p>
+            </div>
 
+            {/* CTAs */}
             <div className="flex flex-wrap gap-3 mb-12">
               <a
                 href="#campaigns"
-                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold px-7 py-3.5 rounded-xl text-base transition-all duration-300 hover:shadow-[0_0_30px_rgba(34,197,94,0.45)] hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 hover:shadow-[0_0_40px_rgba(250,204,21,0.5)] hover:-translate-y-0.5"
               >
                 {t("donate_now")} <ArrowRight className="h-4 w-4" />
               </a>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-white/8 hover:bg-white/15 text-white font-semibold px-7 py-3.5 rounded-xl text-base border border-white/15 transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-7 py-4 rounded-2xl text-base border border-white/20 transition-all duration-300 hover:-translate-y-0.5 backdrop-blur-sm"
               >
                 {t("join_supporter")}
               </Link>
               <Link
                 href="/onboarding"
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white font-semibold px-5 py-3.5 rounded-xl text-base border border-white/8 hover:border-white/20 transition-all duration-300"
+                className="inline-flex items-center text-emerald-300/80 hover:text-white font-semibold px-5 py-4 text-base transition-colors"
               >
-                {t("ngo_onboarding")}
+                {t("ngo_onboarding")} <ArrowRight className="h-3 w-3 ml-1" />
               </Link>
             </div>
 
-            {/* Stats row */}
-            <div className="flex flex-wrap gap-8 pt-8 border-t border-white/8">
+            {/* Stats — bold editorial numbers */}
+            <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
               {[
                 { value: "₹32,500+", label: t("stat_raised_month") },
                 { value: "100%", label: t("stat_verified_orgs") },
                 { value: "0%", label: t("stat_gateway_fees") },
               ].map(stat => (
                 <div key={stat.label}>
-                  <div className="text-2xl font-black text-white">{stat.value}</div>
-                  <div className="text-xs text-gray-500 mt-0.5 font-medium">{stat.label}</div>
+                  <div className="text-3xl font-black text-white leading-none">{stat.value}</div>
+                  <div className="text-xs text-emerald-300/60 mt-1.5 font-medium leading-tight">{stat.label}</div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* ── RIGHT: Image Mosaic ──────────────────────────────── */}
-          <div className="flex-1 flex items-center justify-center py-10 lg:py-16 w-full max-w-xl lg:max-w-none">
-            <div className="relative w-full" style={{ aspectRatio: '4/3', maxHeight: '80vh' }}>
-              {/* Top-left card */}
-              <div className="absolute top-0 left-0 w-[58%] h-[50%] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-2 ring-white/10">
-                <img src="/hero_banner.png" alt="Children education" className="w-full h-full object-cover object-left-top scale-[2.05] origin-top-left" />
-              </div>
-              {/* Top-right card */}
-              <div className="absolute top-0 right-0 w-[38%] h-[46%] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-2 ring-white/10">
-                <img src="/hero_banner.png" alt="Clean water" className="w-full h-full object-cover object-right-top scale-[2.5] origin-top-right" />
-              </div>
-              {/* Bottom-left small card */}
-              <div className="absolute bottom-0 left-0 w-[35%] h-[46%] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-2 ring-white/10">
-                <img src="/hero_banner.png" alt="Volunteers" className="w-full h-full object-cover object-bottom-right scale-[2.6] origin-bottom-right" />
-              </div>
-              {/* Bottom-right large card */}
-              <div className="absolute bottom-0 right-0 w-[61%] h-[50%] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-2 ring-white/10">
-                <img src="/hero_banner.png" alt="Healthcare" className="w-full h-full object-cover object-right-bottom scale-[2.1] origin-bottom-right" />
-              </div>
-              {/* Center floating badge */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                <div className="bg-white/95 backdrop-blur-xl shadow-2xl rounded-2xl px-5 py-3.5 flex flex-col items-center gap-1 border border-white/60">
-                  <div className="text-2xl font-black text-gray-900">₹0</div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-green-600">Platform Fees</div>
-                </div>
-              </div>
+            {/* Mobile image */}
+            <div className="lg:hidden mt-10 rounded-3xl overflow-hidden shadow-2xl">
+              <img src="/hero_banner.png" alt="PhilanthroForge Impact" className="w-full object-cover max-h-72" />
             </div>
           </div>
 
         </div>
       </section>
-
 
       {/* ── WHY PHILANTHROFORGE — NEW USP SECTION ────────────────── */}
       <section className="py-24 px-4 bg-white relative overflow-hidden">
