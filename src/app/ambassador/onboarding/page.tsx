@@ -21,7 +21,10 @@ export default function AmbassadorOnboardingPage() {
   const [socialLinks, setSocialLinks] = useState({
     instagram: "",
     youtube: "",
-    twitter: ""
+    twitter: "",
+    linkedin: "",
+    facebook: "",
+    website: ""
   })
   
   useEffect(() => {
@@ -165,6 +168,30 @@ export default function AmbassadorOnboardingPage() {
                           placeholder="YouTube Channel URL"
                           value={socialLinks.youtube}
                           onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
+                          className="h-11"
+                        />
+                        <Input
+                          placeholder="Twitter/X Handle (e.g. @username)"
+                          value={socialLinks.twitter}
+                          onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
+                          className="h-11"
+                        />
+                        <Input
+                          placeholder="LinkedIn Profile URL"
+                          value={socialLinks.linkedin}
+                          onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
+                          className="h-11"
+                        />
+                        <Input
+                          placeholder="Facebook Profile URL"
+                          value={socialLinks.facebook}
+                          onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
+                          className="h-11"
+                        />
+                        <Input
+                          placeholder="Personal Website or Blog"
+                          value={socialLinks.website}
+                          onChange={(e) => setSocialLinks({...socialLinks, website: e.target.value})}
                           className="h-11"
                         />
                       </div>

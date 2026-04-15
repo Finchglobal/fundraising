@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { SiteNavbar, SiteFooter } from "@/components/BrandLayout"
 import { MapPin, Link as LinkIcon, Sparkles, AlertCircle } from "lucide-react"
-import { IconBrandInstagram, IconBrandYoutube, IconBrandX } from "@tabler/icons-react"
+import { IconBrandInstagram, IconBrandYoutube, IconBrandX, IconBrandLinkedin, IconBrandFacebook, IconWorld } from "@tabler/icons-react"
 import { NativeShare } from "@/components/ui/NativeShare"
 
 export default async function AmbassadorPublicProfile({ params }: { params: Promise<{ username: string }> }) {
@@ -42,20 +42,35 @@ export default async function AmbassadorPublicProfile({ params }: { params: Prom
             <Sparkles className="h-5 w-5" /> Verified Impact Ambassador
           </p>
 
-          <div className="flex items-center justify-center gap-4 text-slate-500 mb-8">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-slate-400 mb-8">
             {profile.social_links?.instagram && (
-              <a href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">
+              <a href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 transition-colors">
                 <IconBrandInstagram className="h-6 w-6" />
               </a>
             )}
             {profile.social_links?.youtube && (
-              <a href={profile.social_links.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
+              <a href={profile.social_links.youtube.startsWith('http') ? profile.social_links.youtube : `https://youtube.com/${profile.social_links.youtube}`} target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">
                 <IconBrandYoutube className="h-6 w-6" />
               </a>
             )}
             {profile.social_links?.twitter && (
-              <a href={`https://twitter.com/${profile.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+              <a href={`https://twitter.com/${profile.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">
                 <IconBrandX className="h-6 w-6" />
+              </a>
+            )}
+            {profile.social_links?.linkedin && (
+              <a href={profile.social_links.linkedin.startsWith('http') ? profile.social_links.linkedin : `https://linkedin.com/in/${profile.social_links.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-700 transition-colors">
+                <IconBrandLinkedin className="h-6 w-6" />
+              </a>
+            )}
+            {profile.social_links?.facebook && (
+              <a href={profile.social_links.facebook.startsWith('http') ? profile.social_links.facebook : `https://facebook.com/${profile.social_links.facebook}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
+                <IconBrandFacebook className="h-6 w-6" />
+              </a>
+            )}
+            {profile.social_links?.website && (
+              <a href={profile.social_links.website.startsWith('http') ? profile.social_links.website : `https://${profile.social_links.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 transition-colors">
+                <IconWorld className="h-6 w-6" />
               </a>
             )}
           </div>
