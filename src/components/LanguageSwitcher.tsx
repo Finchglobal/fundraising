@@ -72,18 +72,15 @@ export function LanguageSwitcher() {
             className={`
               relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full 
               text-[11px] font-bold transition-all duration-200 ease-out
-              active:scale-95 touch-manipulation cursor-pointer z-[100] pointer-events-auto
+              active:scale-95 touch-manipulation cursor-pointer select-none
               ${isActive 
                 ? "bg-teal-600 text-white shadow-md ring-1 ring-teal-500/20" 
                 : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
               }
             `}
           >
-            <span className="text-sm leading-none drop-shadow-sm">{opt.flag}</span>
-            <span className="relative z-10">{opt.short}</span>
-            {isActive && (
-              <span className="absolute inset-0 rounded-full bg-teal-600 -z-0" />
-            )}
+            <span className="text-sm leading-none drop-shadow-sm pointer-events-none">{opt.flag}</span>
+            <span className="pointer-events-none">{opt.short}</span>
           </button>
         )
       })}
