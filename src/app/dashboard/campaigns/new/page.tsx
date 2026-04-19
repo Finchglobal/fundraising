@@ -31,19 +31,32 @@ export default function CampaignWizard() {
   const bufferAmount = actualNeed ? Math.round(Number(actualNeed) * 0.02) : 0
   const publicGoal = actualNeed ? Number(actualNeed) + bufferAmount : 0
 
-  const validate = () => {
+  const validate = (status: "draft" | "published") => {
     const newErrors: Record<string, string> = {}
-    if (title.length < 10) newErrors.title = t("campaign_val_title")
-    if (story.length < 100) newErrors.story = t("campaign_val_story")
-    if (!actualNeed || actualNeed < 1000) newErrors.actualNeed = t("campaign_val_goal_min")
+    
+    // Drafts are more lenient, but still need a basic title for identification
+    if (status === "draft") {
+      if (title.length < 3) newErrors.title = "Draft needs at least a short title (min 3 chars)"
+    } else {
+      if (title.length < 10) newErrors.title = t("campaign_val_title")
+      if (story.length < 100) newErrors.story = t("campaign_val_story")
+      if (!actualNeed || actualNeed < 1000) newErrors.actualNeed = t("campaign_val_goal_min")
+    }
+
     if (heroImage && !heroImage.startsWith("http")) newErrors.heroImage = t("campaign_val_image")
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handlePublish = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
+  const handleSave = async (status: "draft" | "published") => {
+    if (!validate(status)) {
+      toast.error(status === "published" ? "Cannot publish" : "Cannot save draft", {
+        description: status === "published" 
+          ? "Please complete all mandatory fields to publish your campaign." 
+          : "Drafts require at least a 3-character title."
+      })
+      return
+    }
     
     setLoading(true)
     
@@ -56,38 +69,47 @@ export default function CampaignWizard() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("organization_id")
+      .select("organization_id, role")
       .eq("id", user.id)
       .single()
     
     const orgId = profile?.organization_id
+    const isNgoAdmin = profile?.role === 'ngo_admin' || profile?.role === 'super_admin'
 
-    if (!orgId) {
+    if (!orgId || !isNgoAdmin) {
       toast.error(t("campaign_val_no_org"))
       setLoading(false)
+      setTimeout(() => router.push("/dashboard"), 1500)
       return
     }
     
-    const { error } = await supabase.from("campaigns").insert({
+    const campaignData = {
       organization_id: orgId,
-      title,
-      story,
+      title: title.trim(),
+      story: story.trim() || (status === "draft" ? "Draft campaign story..." : ""),
       hero_image_url: heroImage || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
       video_url: mediaGallery.find(m => m.type === 'video' || m.type === 'short' || m.type === 'reel')?.url || "",
       media_gallery: mediaGallery,
-      actual_need: Number(actualNeed),
-      platform_buffer: bufferAmount,
-      public_goal: publicGoal,
-      status: "published",
-      raised_amount: 0
-    })
+      actual_need: Number(actualNeed) || 0,
+      platform_buffer: bufferAmount || 0,
+      public_goal: publicGoal || 0,
+      status: status
+    }
+
+    console.log(`[CampaignWizard] Saving ${status}...`, campaignData)
+    const { error } = await supabase.from("campaigns").insert(campaignData)
 
     setLoading(false)
     if (!error) {
+      console.log(`[CampaignWizard] Save successful: ${status}`)
+      toast.success(status === "published" ? t("campaign_success_publish") : t("campaign_success_draft"))
       router.push("/dashboard")
       router.refresh()
     } else {
-      toast.error(`${t("campaign_error_publish")} ${error.message}`)
+      console.error("[CampaignWizard] Save FAILED:", error)
+      toast.error(status === "published" ? t("campaign_error_publish") : t("campaign_error_draft"), {
+        description: `Error: ${error.message} (Code: ${error.code || 'unknown'})`
+      })
     }
   }
 
@@ -140,8 +162,7 @@ export default function CampaignWizard() {
             <CardHeader className="bg-gray-50/50 border-b border-gray-50">
               <CardTitle className="text-lg font-bold text-gray-900">{t("campaign_form_basic")}</CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={handlePublish} className="space-y-6">
+              <div className="space-y-6 pt-6">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="title" className="font-bold text-gray-700">{t("campaign_form_title")}</Label>
@@ -232,23 +253,33 @@ export default function CampaignWizard() {
                 </div>
 
                 <div className="space-y-4">
-                  <Label className="text-gray-700 font-bold">{t("onboarding_main_doc")} <span className="text-gray-400 font-medium text-[10px] ml-2 uppercase tracking-wider">(Videos, Shorts, Reels & Images)</span></Label>
+                  <Label className="text-gray-700 font-bold">{t("media_add_title")} <span className="text-gray-400 font-medium text-[10px] ml-2 uppercase tracking-wider">(Videos, Shorts, Reels & Images)</span></Label>
                   <div className="rounded-2xl overflow-hidden">
                     <MediaManager media={mediaGallery} onChange={setMediaGallery} />
                   </div>
                 </div>
 
                 <div className="pt-4 flex flex-col sm:flex-row gap-4">
-                  <Button type="button" variant="outline" className="flex-1 rounded-xl h-12 font-bold text-gray-600 border-gray-200 hover:bg-gray-50 bg-white" disabled={loading}>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="flex-1 rounded-xl h-12 font-bold text-gray-600 border-gray-200 hover:bg-gray-50 bg-white" 
+                    disabled={loading}
+                    onClick={() => handleSave("draft")}
+                  >
                     <Save className="h-4 w-4 mr-2" /> {t("campaign_status_draft")}
                   </Button>
-                  <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-500 text-white rounded-xl h-12 font-black uppercase tracking-widest shadow-lg shadow-teal-500/10 active:scale-[0.98] transition-all" disabled={loading}>
+                  <Button 
+                    type="button"
+                    className="flex-1 bg-teal-600 hover:bg-teal-500 text-white rounded-xl h-12 font-black uppercase tracking-widest shadow-lg shadow-teal-500/10 active:scale-[0.98] transition-all" 
+                    disabled={loading}
+                    onClick={() => handleSave("published")}
+                  >
                     {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
                     {t("campaign_form_save")}
                   </Button>
                 </div>
-              </form>
-            </CardContent>
+              </div>
           </Card>
         </div>
 

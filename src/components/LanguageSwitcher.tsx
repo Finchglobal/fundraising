@@ -31,6 +31,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLang = (l: Lang) => {
     setLangState(l)
     localStorage.setItem("pf_lang", l)
+    // Forced reload to ensure all components (including potential non-reactive ones) reflect the change
+    setTimeout(() => window.location.reload(), 100)
   }
 
   const t = (key: string): string => translations[lang][key] ?? translations["en"][key] ?? key
@@ -43,30 +45,48 @@ export function useLang() {
 }
 
 // ── Switcher UI Component ─────────────────────────────────────────
+const OPTIONS: { value: Lang; label: string; flag: string; short: string; title: string }[] = [
+  { value: "en", label: "English", short: "EN", flag: "🇬🇧", title: "English" },
+  { value: "hinglish", label: "Hinglish", short: "HG", flag: "🤝", title: "Hinglish" },
+  { value: "hi", label: "Hindi", short: "हि", flag: "🇮🇳", title: "हिंदी" },
+]
+
+// ── Switcher UI Component ─────────────────────────────────────────
 export function LanguageSwitcher() {
   const { lang, setLang } = useLang()
-  const OPTIONS: { value: Lang; label: string; flag: string }[] = [
-    { value: "en", label: "EN", flag: "🇬🇧" },
-    { value: "hinglish", label: "HG", flag: "🤝" },
-    { value: "hi", label: "हि", flag: "🇮🇳" },
-  ]
 
   return (
-    <div className="flex items-center gap-1 bg-slate-100 rounded-full p-0.5 border border-slate-200">
-      {OPTIONS.map(opt => (
-        <button
-          key={opt.value}
-          onClick={() => setLang(opt.value)}
-          title={opt.value === "en" ? "English" : opt.value === "hi" ? "हिंदी" : "Hinglish"}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
-            lang === opt.value
-              ? "bg-teal-600 text-white shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          {opt.flag} {opt.label}
-        </button>
-      ))}
+    <div className="inline-flex items-center gap-0.5 bg-slate-100/80 backdrop-blur-sm rounded-full p-1 border border-slate-200 shadow-sm">
+      {OPTIONS.map(opt => {
+        const isActive = lang === opt.value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setLang(opt.value)
+            }}
+            title={opt.title}
+            aria-pressed={isActive}
+            className={`
+              relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full 
+              text-[11px] font-bold transition-all duration-200 ease-out
+              active:scale-95 touch-manipulation cursor-pointer z-[100] pointer-events-auto
+              ${isActive 
+                ? "bg-teal-600 text-white shadow-md ring-1 ring-teal-500/20" 
+                : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
+              }
+            `}
+          >
+            <span className="text-sm leading-none drop-shadow-sm">{opt.flag}</span>
+            <span className="relative z-10">{opt.short}</span>
+            {isActive && (
+              <span className="absolute inset-0 rounded-full bg-teal-600 -z-0" />
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }

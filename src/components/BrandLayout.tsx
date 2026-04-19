@@ -57,7 +57,7 @@ export function SiteNavbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-700" ref={dropdownRef}>
+        <div className="hidden md:flex items-center justify-center gap-5 lg:gap-7 text-sm font-medium text-gray-700 px-4" ref={dropdownRef}>
           {NAV_LINKS.map(link => {
             if (link.cta) {
               return (
@@ -115,7 +115,7 @@ export function SiteNavbar() {
         </div>
 
         {/* Language Switcher + Mobile Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0 ml-auto relative z-[60]">
           <div className="hidden sm:block">
             <LanguageSwitcher />
           </div>

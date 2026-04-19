@@ -12,6 +12,7 @@ export default function DonorDashboard() {
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [donations, setDonations] = useState<any[]>([])
+  const [globalImpact, setGlobalImpact] = useState(0)
   const [loading, setLoading] = useState(true)
   const { t } = useLang()
 
@@ -27,6 +28,16 @@ export default function DonorDashboard() {
         .eq("donor_id", user.id)
       
       setDonations(donations || [])
+
+      // Fetch Global Impact
+      const { data: campaigns } = await supabase
+        .from("campaigns")
+        .select("raised_amount")
+        .in("status", ["published", "completed"])
+      
+      const total = campaigns?.reduce((sum, c) => sum + (Number(c.raised_amount) || 0), 0) || 0
+      setGlobalImpact(total)
+
       setLoading(false)
     }
     fetchData()
@@ -39,6 +50,10 @@ export default function DonorDashboard() {
   const totalImpact = verifiedDonations.reduce((acc, d) => acc + (Number(d.amount) || 0), 0)
   const uniqueNGOs = new Set(verifiedDonations.map(d => (d.campaigns as any)?.organizations?.name)).size
   const pendingCount = donations?.filter(d => d.status === "pending").length || 0
+
+  // Calculation for progress bar (target 1M for demo, or dynamic)
+  const targetImpact = 1000000
+  const progressPercent = Math.min((globalImpact / targetImpact) * 100, 100)
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -154,9 +169,12 @@ export default function DonorDashboard() {
                <TrendingUp className="h-5 w-5 text-green-600" /> Global Impact
              </h3>
              <div className="space-y-4">
-                <p className="text-sm text-gray-500 font-medium">Your contributions have helped Philanthroforge cross ₹10,00,000 in collective impact this month!</p>
+                <p className="text-sm text-gray-500 font-medium">Your contributions have helped Philanthroforge cross ₹{globalImpact.toLocaleString('en-IN')} in collective impact!</p>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                   <div className="h-full bg-green-500 rounded-full w-[65%] shadow-sm"></div>
+                   <div 
+                      className="h-full bg-green-500 rounded-full shadow-sm transition-all duration-1000" 
+                      style={{ width: `${progressPercent}%` }}
+                   ></div>
                 </div>
              </div>
           </div>

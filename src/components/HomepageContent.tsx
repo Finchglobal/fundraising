@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   ShieldCheck, QrCode, HeartPulse, ArrowRight, Trophy, Users, TrendingUp,
   Zap, Star, CheckCircle2, Globe2, Landmark, BadgeCheck, Share2, FileText,
-  PhoneCall, IndianRupee
+  PhoneCall, IndianRupee, Sparkles
 } from "lucide-react"
 import { useLang } from "@/components/LanguageSwitcher"
 import { ShareButton } from "@/components/ui/ShareButton"
@@ -24,9 +24,12 @@ interface Campaign {
 interface HomepageContentProps {
   campaigns: Campaign[]
   featuredCampaigns: Campaign[]
+  totalRaised: number
+  verifiedNgoCount: number
+  platformFees: number
 }
 
-export function HomepageContent({ campaigns, featuredCampaigns }: HomepageContentProps) {
+export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, verifiedNgoCount, platformFees }: HomepageContentProps) {
   const { t } = useLang()
 
   return (
@@ -79,7 +82,7 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
 
             {/* Floating side stat */}
             <div className="absolute -right-5 top-1/2 -translate-y-1/2 bg-gradient-to-br from-yellow-400 to-orange-400 shadow-2xl shadow-orange-500/30 rounded-2xl px-4 py-5 flex flex-col items-center gap-0.5">
-              <div className="text-2xl font-black text-white">₹0</div>
+              <div className="text-2xl font-black text-white">₹{platformFees.toLocaleString('en-IN')}</div>
               <div className="text-[9px] font-black uppercase tracking-widest text-orange-900">Platform Fees</div>
             </div>
           </div>
@@ -134,8 +137,8 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
             {/* Stats — bold editorial numbers */}
             <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
               {[
-                { value: "₹32,500+", label: t("stat_raised_month") },
-                { value: "100%", label: t("stat_verified_orgs") },
+                { value: `₹${Math.floor(totalRaised).toLocaleString('en-IN')}+`, label: t("stat_raised_month") },
+                { value: `${verifiedNgoCount}+`, label: t("stat_verified_orgs") },
                 { value: "0%", label: t("stat_gateway_fees") },
               ].map(stat => (
                 <div key={stat.label}>
@@ -216,8 +219,8 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
           <h2 className="text-4xl sm:text-5xl font-black text-white mb-14">Every Rupee. Tracked. Verified. Impactful.</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { value: "₹32,500+", label: "Raised This Month", icon: IndianRupee, color: "from-green-500/20 to-green-600/10 border-green-500/20 text-green-400" },
-              { value: "100%", label: "Verified NGOs", icon: BadgeCheck, color: "from-teal-500/20 to-teal-600/10 border-teal-500/20 text-teal-400" },
+              { value: `₹${Math.floor(totalRaised).toLocaleString('en-IN')}+`, label: "Platform Impact", icon: IndianRupee, color: "from-green-500/20 to-green-600/10 border-green-500/20 text-green-400" },
+              { value: `${verifiedNgoCount}+`, label: "Verified NGOs", icon: BadgeCheck, color: "from-teal-500/20 to-teal-600/10 border-teal-500/20 text-teal-400" },
               { value: "0%", label: "Platform / Gateway Fees", icon: Star, color: "from-yellow-500/20 to-yellow-600/10 border-yellow-500/20 text-yellow-400" },
               { value: "80G", label: "Tax Benefit on All Donations", icon: Landmark, color: "from-purple-500/20 to-purple-600/10 border-purple-500/20 text-purple-400" },
             ].map(stat => (
@@ -225,6 +228,73 @@ export function HomepageContent({ campaigns, featuredCampaigns }: HomepageConten
                 <stat.icon className="h-7 w-7 opacity-80" />
                 <div className="text-4xl font-black text-white">{stat.value}</div>
                 <div className="text-sm text-gray-400 font-medium text-center">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── THE ECOSYSTEM — MULTI-LAYERED IMPACT ───────────────────── */}
+      <section className="py-24 px-4 bg-white relative">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tight mb-4">{t("eco_title")}</h2>
+            <p className="text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed">
+              {t("eco_subtitle")}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { 
+                title: t("eco_ngo_title"), 
+                desc: t("eco_ngo_desc"), 
+                cta: t("eco_ngo_cta"), 
+                href: "/onboarding", 
+                icon: Landmark, 
+                color: "from-emerald-500 to-teal-600 shadow-emerald-500/20",
+                iconColor: "text-emerald-600 bg-emerald-50"
+              },
+              { 
+                title: t("eco_campaign_title"), 
+                desc: t("eco_campaign_desc"), 
+                cta: t("eco_campaign_cta"), 
+                href: "#campaigns", 
+                icon: HeartPulse, 
+                color: "from-blue-500 to-indigo-600 shadow-blue-500/20",
+                iconColor: "text-blue-600 bg-blue-50"
+              },
+              { 
+                title: t("eco_ambassador_title"), 
+                desc: t("eco_ambassador_desc"), 
+                cta: t("eco_ambassador_cta"), 
+                href: "/signup", 
+                icon: Share2, 
+                color: "from-indigo-500 to-purple-600 shadow-indigo-500/20",
+                iconColor: "text-indigo-600 bg-indigo-50"
+              },
+              { 
+                title: t("eco_donor_title"), 
+                desc: t("eco_donor_desc"), 
+                cta: t("eco_donor_cta"), 
+                href: "/signup", 
+                icon: Sparkles, 
+                color: "from-amber-400 to-orange-500 shadow-amber-500/20",
+                iconColor: "text-amber-600 bg-amber-50"
+              },
+            ].map((item, idx) => (
+              <div key={idx} className="group relative bg-white border border-gray-100 rounded-[2.5rem] p-8 flex flex-col h-full hover:border-transparent hover:shadow-[0_30px_70px_rgba(0,0,0,0.08)] transition-all duration-500">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${item.iconColor}`}>
+                  <item.icon className="h-7 w-7" />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8 flex-grow">{item.desc}</p>
+                <Link 
+                  href={item.href}
+                  className={`inline-flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-sm text-white bg-gradient-to-r ${item.color} shadow-lg transition-all duration-300 hover:-translate-y-1 hover:brightness-110`}
+                >
+                  {item.cta} <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             ))}
           </div>
