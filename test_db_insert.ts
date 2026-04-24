@@ -7,6 +7,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
 
 async function test() {
   const { data: orgs } = await supabase.from('organizations').select('id').limit(1)
+  if (!orgs || orgs.length === 0) return
   const orgId = orgs[0].id
   console.log("Using Org ID:", orgId)
 
