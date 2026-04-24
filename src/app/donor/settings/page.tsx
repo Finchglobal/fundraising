@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Save, UserCircle, Upload, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { uploadAvatar, removeAvatar } from "./actions"
 
 export default function DonorSettingsPage() {
   const supabase = createClient()
@@ -84,37 +85,27 @@ export default function DonorSettingsPage() {
 
     setUploading(true)
     try {
-      const ext = file.name.split(".").pop()
-      const filePath = `${UserId}/avatar.${ext}`
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true })
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath)
-
-      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`
-
-      setFormData(prev => ({ ...prev, avatar_url: urlWithCacheBust }))
-
-      // Save immediately to profile
-      await supabase.from("profiles").update({ avatar_url: urlWithCacheBust }).eq("id", UserId)
+      const fd = new FormData()
+      fd.append("file", file)
+      const result = await uploadAvatar(UserId, fd)
+      if (result.error) throw new Error(result.error)
+      setFormData(prev => ({ ...prev, avatar_url: result.url! }))
       toast.success("Profile picture updated!")
     } catch (err: any) {
       toast.error("Upload failed", { description: err.message })
     } finally {
       setUploading(false)
+      // Reset input so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 
   const handleAvatarRemove = async () => {
     if (!UserId) return
+    setUploading(true)
+    await removeAvatar(UserId)
     setFormData(prev => ({ ...prev, avatar_url: "" }))
-    await supabase.from("profiles").update({ avatar_url: null }).eq("id", UserId)
+    setUploading(false)
     toast.info("Profile picture removed.")
   }
 
