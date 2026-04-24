@@ -22,10 +22,11 @@ export default function DonorDashboard() {
       if (!user) return
       setUser(user)
 
+      const emailQuery = user.email ? `,donor_email.eq.${user.email}` : ""
       const { data: donations } = await supabase
         .from("donations")
         .select("*, campaigns(title, organization_id, organizations(*))")
-        .eq("donor_id", user.id)
+        .or(`donor_id.eq.${user.id}${emailQuery}`)
         .order("created_at", { ascending: false })
       
       setDonations(donations || [])
