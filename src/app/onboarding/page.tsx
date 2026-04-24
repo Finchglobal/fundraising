@@ -104,9 +104,6 @@ export default function NGOOnboardingPage() {
         registration_80g: formData.registration_80g || null,
         csr_1_registration: formData.csr_1_registration || null,
         registration_certificate_url: formData.registration_certificate_url || null,
-        registration_12a_url: formData.registration_12a_url || null,
-        registration_80g_url: formData.registration_80g_url || null,
-        csr_1_url: formData.csr_1_url || null,
         is_verified: false 
       }).select().single()
 
