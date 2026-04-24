@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
-import { ShieldCheck, LayoutDashboard, History, Heart, LogOut, Search, UserCircle } from "lucide-react"
+import { ShieldCheck, LayoutDashboard, History, Heart, LogOut, Search, UserCircle, Trophy } from "lucide-react"
 import { LogoutLink } from "@/components/LogoutLink"
 
 export default async function DonorLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,7 @@ export default async function DonorLayout({ children }: { children: React.ReactN
   // Check role
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name")
+    .select("role, full_name, is_ambassador")
     .eq("id", user.id)
     .single()
 
@@ -55,6 +55,11 @@ export default async function DonorLayout({ children }: { children: React.ReactN
           <Link href="/#campaigns" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
             <Search className="h-5 w-5 text-green-400" /> Explore Causes
           </Link>
+          {profile?.is_ambassador && (
+            <Link href="/ambassador/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
+              <Trophy className="h-5 w-5 text-green-400" /> Ambassador HQ
+            </Link>
+          )}
         </nav>
 
         <div className="p-4 border-t border-green-900">

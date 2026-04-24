@@ -10,29 +10,35 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 const TEST_USERS = [
   {
     email: 'admin@philanthroforge.com',
-    password: 'PF@Admin2025!',
+    password: 'Forge@Admin2026',
     role: 'super_admin',
     full_name: 'Platform Administrator'
   },
   {
-    email: 'ngo@bmat.org',
-    password: 'NGO@Demo2025!',
+    email: 'ngo1@bmat.org',
+    password: 'Forge@Ngo2026',
     role: 'ngo_admin',
     full_name: 'Bangalore Medical Aid Trust',
     organization_id: '3326759e-b8d4-4bb3-accb-8ab2d9cd7ea1' // Bangalore Medical Aid Trust
   },
   {
-    email: 'ngo@rgef.org',
-    password: 'NGO@Demo2025!',
+    email: 'ngo2@rgef.org',
+    password: 'Forge@Ngo2026',
     role: 'ngo_admin',
     full_name: 'Rural Girls Education Foundation',
     organization_id: '3326759e-b8d4-4bb3-accb-8ab2d9cd7ea2' // Rural Girls Education Foundation
   },
   {
-    email: 'donor@example.com',
-    password: 'Donor@Demo2025!',
+    email: 'donor1@example.com',
+    password: 'Forge@Donor2026',
     role: 'donor',
-    full_name: 'Regular Impact Donor'
+    full_name: 'Impact Donor One'
+  },
+  {
+    email: 'donor2@example.com',
+    password: 'Forge@Donor2026',
+    role: 'donor',
+    full_name: 'Impact Donor Two'
   }
 ]
 

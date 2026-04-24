@@ -51,9 +51,9 @@ export default function DonorDashboard() {
   const uniqueNGOs = new Set(verifiedDonations.map(d => (d.campaigns as any)?.organizations?.name)).size
   const pendingCount = donations?.filter(d => d.status === "pending").length || 0
 
-  // Calculation for progress bar (target 1M for demo, or dynamic)
-  const targetImpact = 1000000
-  const progressPercent = Math.min((globalImpact / targetImpact) * 100, 100)
+  // Calculation for progress bar (target 50K for demo)
+  const targetImpact = 50000
+  const progressPercent = Math.min((totalImpact / targetImpact) * 100, 100)
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -166,10 +166,10 @@ export default function DonorDashboard() {
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-               <TrendingUp className="h-5 w-5 text-green-600" /> Global Impact
+               <TrendingUp className="h-5 w-5 text-green-600" /> Your Impact Progress
              </h3>
              <div className="space-y-4">
-                <p className="text-sm text-gray-500 font-medium">Your contributions have helped Philanthroforge cross ₹{globalImpact.toLocaleString('en-IN')} in collective impact!</p>
+                <p className="text-sm text-gray-500 font-medium">You have contributed ₹{totalImpact.toLocaleString('en-IN')} towards your ₹50,000 impact goal!</p>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                    <div 
                       className="h-full bg-green-500 rounded-full shadow-sm transition-all duration-1000" 

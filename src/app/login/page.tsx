@@ -33,20 +33,7 @@ export default function LoginPage() {
 
     if (authError) {
       if (authError.message.includes("rate limit") || authError.message.includes("Invalid login credentials")) {
-        // PITCH-SAFE FAILSAFE: If login fails during the demo, we offer a quick demo login.
-        setError(`${authError.message}. Triggering Demo Mode fallback...`)
-        
-        // Wait 1.5s then auto-login as demo NGO
-        setTimeout(async () => {
-          const { error: fallbackError } = await supabase.auth.signInWithPassword({ 
-            email: "ngo@bmat.org", 
-            password: "NGO@Demo2025!" 
-          })
-          if (!fallbackError) {
-            toast.info("Resilience Mode: Logged in as Demo NGO.")
-            router.push("/dashboard")
-          }
-        }, 1500)
+        setError(`${authError.message}. Please use one of the Demo Access accounts below.`)
       } else {
         setError(authError.message)
       }
@@ -247,9 +234,9 @@ export default function LoginPage() {
             </p>
             <div className="space-y-2">
               {[
-                { label: "Super Admin", email: "admin@philanthroforge.com", pw: "PF@Admin2025!" },
-                { label: "NGO Admin", email: "ngo@bmat.org", pw: "NGO@Demo2025!" },
-                { label: "Donor Profile", email: "donor@example.com", pw: "Donor@Demo2025!" },
+                { label: "Super Admin", email: "admin@philanthroforge.com", pw: "Forge@Admin2026" },
+                { label: "NGO Admin", email: "ngo1@bmat.org", pw: "Forge@Ngo2026" },
+                { label: "Donor Profile", email: "donor1@example.com", pw: "Forge@Donor2026" },
               ].map(cred => (
                 <button
                   key={cred.label}

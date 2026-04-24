@@ -36,8 +36,8 @@ export default function SignupPage() {
       // we log them into the appropriate demo account based on their chosen role.
       console.warn("Signup error, triggering demo fallback:", result.error)
       
-      const demoEmail = role === "ngo_admin" ? "ngo@bmat.org" : "donor@example.com"
-      const demoPw = role === "ngo_admin" ? "NGO@Demo2025!" : "Donor@Demo2025!"
+      const demoEmail = role === "ngo_admin" ? "ngo1@bmat.org" : "donor1@example.com"
+      const demoPw = role === "ngo_admin" ? "Forge@Ngo2026" : "Forge@Donor2026"
 
       const { error: fallbackError } = await supabase.auth.signInWithPassword({ 
         email: demoEmail, 

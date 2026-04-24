@@ -44,7 +44,15 @@ export default function NGOOnboardingPage() {
         toast.error(t("onboarding_val_auth"))
         router.push("/login")
       } else {
-        setCheckingAuth(false)
+        // Prevent existing NGO admins from onboarding again
+        supabase.from("profiles").select("organization_id").eq("id", user.id).single().then(({ data }) => {
+          if (data?.organization_id) {
+            toast.info("You already have an organization.")
+            router.push("/dashboard")
+          } else {
+            setCheckingAuth(false)
+          }
+        })
       }
     })
   }, [router, supabase.auth, t])
