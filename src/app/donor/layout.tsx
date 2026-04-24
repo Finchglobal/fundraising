@@ -34,7 +34,7 @@ export default async function DonorLayout({ children }: { children: React.ReactN
       <aside className="w-full md:w-64 bg-green-950 text-green-100 flex flex-col border-r border-green-900 flex-shrink-0">
         <div className="p-6 border-b border-green-900 flex items-center gap-2">
            <ShieldCheck className="h-6 w-6 text-green-400" />
-           <span className="font-bold text-lg text-white">Donor Portal</span>
+           <span className="font-bold text-lg text-white">Dashboard</span>
         </div>
         
         <div className="p-6 pb-2">
@@ -44,7 +44,10 @@ export default async function DonorLayout({ children }: { children: React.ReactN
 
         <nav className="flex-1 px-4 py-4 space-y-1">
           <Link href="/donor" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
-            <LayoutDashboard className="h-5 w-5 text-green-400" /> My Impact
+            <LayoutDashboard className="h-5 w-5 text-green-400" /> Dashboard
+          </Link>
+          <Link href="/donor/campaigns/new" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
+            <Heart className="h-5 w-5 text-green-400" /> Create Campaign
           </Link>
           <Link href="/donor/history" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-colors">
             <History className="h-5 w-5 text-green-400" /> Donation History

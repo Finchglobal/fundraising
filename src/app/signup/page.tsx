@@ -142,12 +142,12 @@ export default function SignupPage() {
               onClick={() => setRole("donor")}
               className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${role === "donor" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              <User className="h-4 w-4 text-green-500" /> {t("role_donor")}            </button>
+              <User className="h-4 w-4 text-green-500" /> Individual/Donor            </button>
             <button 
               onClick={() => setRole("ngo_admin")}
               className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${role === "ngo_admin" ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"}`}
             >
-              <Building2 className="h-4 w-4 text-teal-500" /> {t("role_ngo_admin")}            </button>
+              <Building2 className="h-4 w-4 text-teal-500" /> Nonprofit/Trust            </button>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5">
