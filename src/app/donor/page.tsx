@@ -26,6 +26,7 @@ export default function DonorDashboard() {
         .from("donations")
         .select("*, campaigns(title, organization_id, organizations(*))")
         .eq("donor_id", user.id)
+        .order("created_at", { ascending: false })
       
       setDonations(donations || [])
 
