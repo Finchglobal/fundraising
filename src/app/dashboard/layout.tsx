@@ -53,7 +53,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         <nav className="flex-1 px-4 py-4 space-y-1">
           <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
-            <LayoutDashboard className="h-5 w-5 text-teal-500" /> Dashboard Hub
+            <LayoutDashboard className="h-5 w-5 text-teal-500" /> Dashboard
           </Link>
           <Link href="/dashboard/campaigns/new" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
             <Send className="h-5 w-5 text-teal-500" /> Create Campaign
