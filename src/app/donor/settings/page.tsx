@@ -1,19 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Save, UserCircle, Image as ImageIcon } from "lucide-react"
+import { Loader2, Save, UserCircle, Upload, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 export default function DonorSettingsPage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [UserId, setUserId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -67,6 +69,55 @@ export default function DonorSettingsPage() {
     setSaving(false)
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !UserId) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file (JPG, PNG, WebP).")
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB.")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const ext = file.name.split(".").pop()
+      const filePath = `${UserId}/avatar.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath)
+
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`
+
+      setFormData(prev => ({ ...prev, avatar_url: urlWithCacheBust }))
+
+      // Save immediately to profile
+      await supabase.from("profiles").update({ avatar_url: urlWithCacheBust }).eq("id", UserId)
+      toast.success("Profile picture updated!")
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleAvatarRemove = async () => {
+    if (!UserId) return
+    setFormData(prev => ({ ...prev, avatar_url: "" }))
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", UserId)
+    toast.info("Profile picture removed.")
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -90,23 +141,62 @@ export default function DonorSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6 mb-6">
-               <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center border-4 border-white shadow-md overflow-hidden">
-                 {formData.avatar_url ? (
-                   <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                 ) : (
-                   <UserCircle className="h-12 w-12 text-slate-300" />
-                 )}
+               {/* Avatar preview + action buttons */}
+               <div className="relative group">
+                 <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center border-4 border-white shadow-md overflow-hidden">
+                   {formData.avatar_url ? (
+                     <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                   ) : (
+                     <UserCircle className="h-12 w-12 text-slate-300" />
+                   )}
+                 </div>
+                 {/* Overlay on hover */}
+                 <button
+                   type="button"
+                   onClick={() => fileInputRef.current?.click()}
+                   className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                 >
+                   {uploading ? (
+                     <Loader2 className="h-6 w-6 text-white animate-spin" />
+                   ) : (
+                     <Upload className="h-6 w-6 text-white" />
+                   )}
+                 </button>
+                 <input
+                   ref={fileInputRef}
+                   type="file"
+                   accept="image/*"
+                   className="hidden"
+                   onChange={handleAvatarUpload}
+                 />
                </div>
-               <div className="flex-1 space-y-2">
-                 <Label>Profile Picture URL</Label>
-                 <div className="relative">
-                   <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                   <Input 
-                     value={formData.avatar_url} 
-                     onChange={(e) => setFormData({...formData, avatar_url: e.target.value})} 
-                     placeholder="https://..."
-                     className="pl-9"
-                   />
+               <div className="space-y-2">
+                 <p className="text-sm font-semibold text-slate-700">Profile Picture</p>
+                 <p className="text-xs text-slate-500">JPG, PNG or WebP — max 2MB</p>
+                 <div className="flex gap-2">
+                   <Button
+                     type="button"
+                     variant="outline"
+                     size="sm"
+                     onClick={() => fileInputRef.current?.click()}
+                     disabled={uploading}
+                     className="text-xs gap-1.5"
+                   >
+                     <Upload className="h-3 w-3" />
+                     {uploading ? "Uploading..." : "Upload Photo"}
+                   </Button>
+                   {formData.avatar_url && (
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={handleAvatarRemove}
+                       className="text-xs gap-1.5 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-400"
+                     >
+                       <Trash2 className="h-3 w-3" />
+                       Remove
+                     </Button>
+                   )}
                  </div>
                </div>
             </div>
