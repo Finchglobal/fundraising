@@ -7,34 +7,29 @@ import { LogoutLink } from "@/components/LogoutLink"
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
-  // MVP Mock Auth handling: We'll retrieve the first NGO for demo purposes if no user is logged in
-  // In production, this strictly uses await supabase.auth.getUser()
   const { data: user } = await supabase.auth.getUser()
   
-  let orgId = null
-  let orgName = "Demo NGO Admin"
-
-  if (user?.user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role, organization_id, organizations(id, name)")
-      .eq("id", user.user.id)
-      .single()
-    
-    if (profile?.role === 'donor') {
-      redirect("/donor")
-    }
-
-    orgId = profile?.organization_id
-    const org = profile?.organizations as any
-    if (org?.name) orgName = org.name
+  if (!user?.user) {
+    redirect("/login")
   }
 
-  // Fallback for MVP Presentation if not strictly logged in
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, organization_id, organizations(id, name)")
+    .eq("id", user.user.id)
+    .single()
+  
+  if (profile?.role !== 'ngo_admin') {
+    if (profile?.role === 'super_admin') redirect("/admin")
+    redirect("/donor")
+  }
+
+  const orgId = profile?.organization_id
+  const org = profile?.organizations as any
+  const orgName = org?.name || "NGO Admin"
+
   if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id, name").limit(1).single()
-    orgId = fallbackOrg?.id
-    orgName = fallbackOrg?.name || orgName
+    redirect("/onboarding")
   }
 
   return (

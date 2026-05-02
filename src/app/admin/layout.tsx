@@ -7,19 +7,18 @@ import { LogoutLink } from "@/components/LogoutLink"
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
-  // MVP Mock Auth handling: In production, strictly enforce super_admin role
   const { data: user } = await supabase.auth.getUser()
   
-  let role = "super_admin"
-  if (user?.user) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.user.id).single()
-    role = profile?.role || "donor"
+  if (!user?.user) {
+    redirect("/login")
   }
 
-  // Strict check (mocked for MVP presentation purposes, assumes we are allowed if not totally rejected)
-  // if (role !== "super_admin") {
-  //   redirect("/")
-  // }
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.user.id).single()
+  const role = profile?.role || "donor"
+
+  if (role !== "super_admin") {
+    redirect("/")
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">

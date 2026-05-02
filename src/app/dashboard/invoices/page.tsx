@@ -18,11 +18,7 @@ export default async function PlatformInvoicesPage() {
 
   let orgId = profile?.organization_id
 
-  // Fallback for MVP Presentation if no org is specifically linked to profile (e.g. for Platform Admins)
-  if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id").limit(1).single()
-    orgId = fallbackOrg?.id
-  }
+
 
   if (!orgId) return (
     <div className="py-20 text-center">

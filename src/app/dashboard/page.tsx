@@ -48,12 +48,7 @@ export default function DashboardHub() {
       orgName = (profile?.organizations as any)?.name || orgName
       isVerified = (profile?.organizations as any)?.is_verified || false
 
-      if (!orgId) {
-        const { data: fallbackOrg } = await supabase.from("organizations").select("id, name, is_verified").limit(1).single()
-        orgId = fallbackOrg?.id
-        orgName = fallbackOrg?.name || orgName
-        isVerified = fallbackOrg?.is_verified || false
-      }
+
 
       if (!orgId) {
         setLoading(false)

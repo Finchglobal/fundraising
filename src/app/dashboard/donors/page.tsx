@@ -19,11 +19,7 @@ export default async function DonorsCRMPage() {
     
   orgId = profile?.organization_id
 
-  // MVP Mock Auth check
-  if (!orgId) {
-    const { data: fallbackOrg } = await supabase.from("organizations").select("id").limit(1).single()
-    orgId = fallbackOrg?.id
-  }
+
 
   if (!orgId) {
     return (
