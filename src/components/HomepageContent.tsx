@@ -56,7 +56,7 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, rai
           <div className="relative hidden lg:flex items-center self-stretch py-16">
             <div className="relative w-full h-full max-h-[78vh] rounded-[2rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
               <img
-                src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=2000&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1585082041600-5fc73cd5bc72?q=80&w=2000&auto=format&fit=crop"
                 alt="PhilanthroForge — Real Impact"
                 className="w-full h-full object-cover"
               />
@@ -150,7 +150,7 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, rai
 
             {/* Mobile image */}
             <div className="lg:hidden mt-10 rounded-3xl overflow-hidden shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=2000&auto=format&fit=crop" alt="PhilanthroForge Impact" className="w-full object-cover max-h-72" />
+              <img src="https://images.unsplash.com/photo-1585082041600-5fc73cd5bc72?q=80&w=2000&auto=format&fit=crop" alt="PhilanthroForge Impact" className="w-full object-cover max-h-72" />
             </div>
           </div>
 

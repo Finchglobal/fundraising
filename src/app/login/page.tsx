@@ -225,39 +225,9 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          {/* Quick fill demo credentials */}
+          {/* Quick links */}
           <div className="mt-12 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <span className="h-px bg-gray-200 dark:bg-gray-800 flex-1"></span>
-              Demo Access
-              <span className="h-px bg-gray-200 dark:bg-gray-800 flex-1"></span>
-            </p>
-            <div className="space-y-2">
-              {[
-                { label: "Super Admin", email: "hello@philanthroforge.com", pw: "72099Sh@" },
-                { label: "NGO Admin (BMAT)", email: "ngo1@bmat.org", pw: "Forge@Ngo2026" },
-                { label: "NGO Admin (RGEF)", email: "ngo2@rgef.org", pw: "Forge@Ngo2026" },
-                { label: "Donor Profile 1", email: "donor1@example.com", pw: "Forge@Donor2026" },
-                { label: "Donor Profile 2", email: "donor2@example.com", pw: "Forge@Donor2026" },
-              ].map(cred => (
-                <button
-                  key={cred.label}
-                  type="button"
-                  onClick={() => { setMode("password"); setEmail(cred.email); setPassword(cred.pw) }}
-                  className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-900/50 hover:bg-green-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-green-300 dark:hover:border-green-500/50 rounded-xl transition-all flex justify-between items-center group"
-                >
-                  <div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-gray-200">{cred.label}</div>
-                    <div className="text-xs text-gray-500 font-medium">{cred.email}</div>
-                  </div>
-                  <div className="text-xs font-bold text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Autofill →
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            <p className="text-center text-sm font-medium text-gray-500 mt-8">
+            <p className="text-center text-sm font-medium text-gray-500 mt-2">
               Want to support a cause?{" "}
               <Link href="/#campaigns" className="text-green-600 hover:text-green-700 font-bold hover:underline underline-offset-4">
                 Donate without an account
