@@ -162,7 +162,8 @@ export default function CampaignWizard() {
             <CardHeader className="bg-gray-50/50 border-b border-gray-50">
               <CardTitle className="text-lg font-bold text-gray-900">{t("campaign_form_basic")}</CardTitle>
             </CardHeader>
-              <div className="space-y-6 pt-6">
+            <CardContent className="pt-6">
+              <div className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="title" className="font-bold text-gray-700">{t("campaign_form_title")}</Label>
@@ -280,6 +281,7 @@ export default function CampaignWizard() {
                   </Button>
                 </div>
               </div>
+            </CardContent>
           </Card>
         </div>
 
