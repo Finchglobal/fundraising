@@ -49,8 +49,18 @@ export default async function LandingPage() {
     .select("*", { count: 'exact', head: true })
     .eq("is_verified", true)
 
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const { data: recentDonations } = await supabase
+    .from("donations")
+    .select("amount")
+    .gte("created_at", startOfMonth.toISOString())
+    .in("status", ["verified", "completed"])
+
   const totalRaised = allCampaigns?.reduce((sum, c) => sum + (Number(c.raised_amount) || 0), 0) || 0
-  const platformFees = Math.floor(totalRaised * 0.02)
+  const raisedThisMonth = recentDonations?.reduce((sum, d) => sum + (Number(d.amount) || 0), 0) || 0
     
   return (
     <main className="min-h-screen bg-white flex flex-col">
@@ -60,8 +70,8 @@ export default async function LandingPage() {
         campaigns={(campaigns as any) || []}
         featuredCampaigns={(featuredCampaigns as any) || []}
         totalRaised={totalRaised}
+        raisedThisMonth={raisedThisMonth}
         verifiedNgoCount={verifiedNgoCount || 0}
-        platformFees={platformFees}
       />
       <SiteFooter />
     </main>

@@ -25,11 +25,11 @@ interface HomepageContentProps {
   campaigns: Campaign[]
   featuredCampaigns: Campaign[]
   totalRaised: number
+  raisedThisMonth: number
   verifiedNgoCount: number
-  platformFees: number
 }
 
-export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, verifiedNgoCount, platformFees }: HomepageContentProps) {
+export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, raisedThisMonth, verifiedNgoCount }: HomepageContentProps) {
   const { t } = useLang()
 
   return (
@@ -56,7 +56,7 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, ver
           <div className="relative hidden lg:flex items-center self-stretch py-16">
             <div className="relative w-full h-full max-h-[78vh] rounded-[2rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
               <img
-                src="/hero_banner.png"
+                src="https://images.unsplash.com/photo-1593113589914-075997298ece?q=80&w=2000&auto=format&fit=crop"
                 alt="PhilanthroForge — Real Impact"
                 className="w-full h-full object-cover"
               />
@@ -81,9 +81,9 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, ver
             </div>
 
             {/* Floating side stat */}
-            <div className="absolute -right-5 top-1/2 -translate-y-1/2 bg-gradient-to-br from-yellow-400 to-orange-400 shadow-2xl shadow-orange-500/30 rounded-2xl px-4 py-5 flex flex-col items-center gap-0.5">
-              <div className="text-2xl font-black text-white">₹{platformFees.toLocaleString('en-IN')}</div>
-              <div className="text-[9px] font-black uppercase tracking-widest text-orange-900">Platform Fees</div>
+            <div className="absolute -right-5 top-1/2 -translate-y-1/2 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-2xl shadow-indigo-500/30 rounded-2xl px-4 py-5 flex flex-col items-center gap-0.5">
+              <div className="text-2xl font-black text-white">100%</div>
+              <div className="text-[9px] font-black uppercase tracking-widest text-indigo-100">Tax Benefit</div>
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, ver
             {/* Stats — bold editorial numbers */}
             <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
               {[
-                { value: `₹${Math.floor(totalRaised).toLocaleString('en-IN')}+`, label: t("stat_raised_month") },
+                { value: `₹${Math.floor(raisedThisMonth).toLocaleString('en-IN')}+`, label: t("stat_raised_month") },
                 { value: `${verifiedNgoCount}+`, label: t("stat_verified_orgs") },
                 { value: "0%", label: t("stat_gateway_fees") },
               ].map(stat => (
@@ -150,7 +150,7 @@ export function HomepageContent({ campaigns, featuredCampaigns, totalRaised, ver
 
             {/* Mobile image */}
             <div className="lg:hidden mt-10 rounded-3xl overflow-hidden shadow-2xl">
-              <img src="/hero_banner.png" alt="PhilanthroForge Impact" className="w-full object-cover max-h-72" />
+              <img src="https://images.unsplash.com/photo-1593113589914-075997298ece?q=80&w=2000&auto=format&fit=crop" alt="PhilanthroForge Impact" className="w-full object-cover max-h-72" />
             </div>
           </div>
 
