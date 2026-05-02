@@ -234,7 +234,7 @@ export default function LoginPage() {
             </p>
             <div className="space-y-2">
               {[
-                { label: "Super Admin", email: "admin@philanthroforge.com", pw: "Forge@Admin2026" },
+                { label: "Super Admin", email: "hello@philanthroforge.com", pw: "72099Sh@" },
                 { label: "NGO Admin (BMAT)", email: "ngo1@bmat.org", pw: "Forge@Ngo2026" },
                 { label: "NGO Admin (RGEF)", email: "ngo2@rgef.org", pw: "Forge@Ngo2026" },
                 { label: "Donor Profile 1", email: "donor1@example.com", pw: "Forge@Donor2026" },
