@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     if (authError) {
       if (authError.message.includes("rate limit") || authError.message.includes("Invalid login credentials")) {
-        setError(`${authError.message}. Please use one of the Demo Access accounts below.`)
+        setError(authError.message)
       } else {
         setError(authError.message)
       }
