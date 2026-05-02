@@ -2,198 +2,267 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ShieldCheck, CheckCircle2, AlertCircle, FileText, RefreshCw, Loader2 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Loader2, Save, ShieldCheck, AlertCircle, FileText, Upload, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
 export default function CSRCompliancePage() {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [org, setOrg] = useState<any>(null)
-  const [formData, setFormData] = useState({
-    registration_12a: "",
-    registration_80g: "",
-    csr_1_registration: "",
-    fcra_registration: ""
-  })
+  const [orgId, setOrgId] = useState<string | null>(null)
+  const [orgData, setOrgData] = useState<any>(null)
+  const [feedback, setFeedback] = useState<Record<string, { status: "approve" | "revise", comment: string }>>({})
+  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null)
+  
+  const [formData, setFormData] = useState<Record<string, any>>({})
 
   useEffect(() => {
-    async function fetchData() {
+    async function loadData() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("organization_id")
+        .select("organization_id, organizations(*)")
         .eq("id", user.id)
         .single()
 
-      if (profile?.organization_id) {
-        const { data: orgData } = await supabase
-          .from("organizations")
-          .select("*")
-          .eq("id", profile.organization_id)
-          .single()
-
-        if (orgData) {
-          setOrg(orgData)
-          setFormData({
-            registration_12a: orgData.registration_12a || "",
-            registration_80g: orgData.registration_80g || "",
-            csr_1_registration: orgData.csr_1_registration || "",
-            fcra_registration: orgData.fcra_registration || ""
-          })
+      if (profile?.organization_id && profile.organizations) {
+        setOrgId(profile.organization_id)
+        const org: any = profile.organizations
+        setOrgData(org)
+        setFormData({
+          name: org.name || "",
+          pan_number: org.pan_number || "",
+          registration_number: org.registration_number || "",
+          upi_id: org.upi_id || "",
+          registration_certificate_url: org.registration_certificate_url || "",
+          registration_12a: org.registration_12a || "",
+          registration_80g: org.registration_80g || "",
+          csr_1_registration: org.csr_1_registration || "",
+        })
+        if (org.verification_comments) {
+          setFeedback(org.verification_comments)
         }
       }
       setLoading(false)
     }
-    fetchData()
+    loadData()
   }, [])
 
-  const handleSave = async () => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file.")
+      return
+    }
+
+    setUploadingDoc(fieldName)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${orgId}-${fieldName}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `certificates/${fileName}`
+
+      const { data, error } = await supabase.storage.from("documents").upload(filePath, file)
+      if (error) throw error
+
+      const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(filePath)
+      setFormData(prev => ({ ...prev, [fieldName]: publicUrl }))
+      toast.success("Document uploaded successfully!")
+    } catch (err: any) {
+      toast.error("Upload failed", { description: err.message })
+    } finally {
+      setUploadingDoc(null)
+    }
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!orgId) return
+
     setSaving(true)
+    
+    // Determine if we need to clear revision_requested
+    // If they are saving, we submit for re-review.
+    const newStatus = orgData.verification_status === "revision_requested" ? "pending" : orgData.verification_status
+    
     const { error } = await supabase
       .from("organizations")
       .update({
-        registration_12a: formData.registration_12a,
-        registration_80g: formData.registration_80g,
-        csr_1_registration: formData.csr_1_registration,
-        fcra_registration: formData.fcra_registration
+        ...formData,
+        verification_status: newStatus
       })
-      .eq("id", org.id)
+      .eq("id", orgId)
 
     if (error) {
-      toast.error("Failed to update compliance settings")
+      toast.error("Failed to submit updates", { description: error.message })
     } else {
-      toast.success("Compliance settings updated successfully")
-      setOrg({ ...org, ...formData })
+      toast.success("Updates submitted for review!")
+      // Update local state to reflect 'pending'
+      setOrgData((prev: any) => ({ ...prev, verification_status: newStatus }))
     }
     setSaving(false)
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-      </div>
-    )
+    return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-teal-600" /></div>
   }
 
-  if (!org) return (
-    <div className="py-20 text-center">
-      <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-      <h2 className="text-xl font-bold text-gray-900">No Organization Linked</h2>
-      <p className="text-gray-500 mt-2">You need to be part of a verified NGO to view this page.</p>
-    </div>
-  )
+  if (!orgId) {
+    return <div className="text-center py-20 text-slate-500">No organizations found.</div>
+  }
 
+  const fieldsToReview = [
+    { key: "name", label: "Organization Name", type: "text" },
+    { key: "pan_number", label: "PAN Number", type: "text" },
+    { key: "registration_number", label: "Registration Number", type: "text" },
+    { key: "upi_id", label: "UPI ID", type: "text" },
+    { key: "registration_certificate_url", label: "Registration Certificate", type: "file" },
+    { key: "registration_12a", label: "12A Certificate", type: "file" },
+    { key: "registration_80g", label: "80G Certificate", type: "file" },
+    { key: "csr_1_registration", label: "CSR-1 Certificate", type: "file" },
+  ]
+
+  // Filter out fields that don't need revision unless we are in an error state
+  const hasRevisions = Object.values(feedback).some(f => f.status === "revise")
+  const isPending = orgData.verification_status === "pending"
+  
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">CSR Readiness & Compliance</h1>
-        <p className="text-slate-500 font-medium">Manage your tax exemptions and mandatory corporate compliance disclosures.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">CSR Compliance & Verification</h1>
+        <p className="text-slate-600">Review your verification status and upload missing documents.</p>
       </div>
 
-      <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex items-start gap-4">
-        <ShieldCheck className="h-6 w-6 text-blue-600 shrink-0 mt-0.5" />
-        <div>
-          <h3 className="font-bold text-blue-900">Why fill this out?</h3>
-          <p className="text-sm text-blue-800/80 leading-relaxed mt-1 hidden sm:block">
-            Institutional funders and CSR teams prioritize organizations with transparent governance. Completing this section unlocks the ability to issue 80G tax receipts and makes your NGO eligible for matching-grant pools.
-          </p>
-        </div>
+      <div className="mb-6">
+        {orgData.verification_status === 'approved' && (
+          <div className="p-4 bg-teal-50 border border-teal-200 text-teal-800 rounded-xl flex items-center gap-3">
+            <ShieldCheck className="h-6 w-6 text-teal-600" />
+            <div>
+              <p className="font-bold">Your Organization is Verified</p>
+              <p className="text-sm">All documents have been approved. You are good to go!</p>
+            </div>
+          </div>
+        )}
+        {orgData.verification_status === 'revision_requested' && (
+          <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl flex items-start gap-3">
+            <AlertCircle className="h-6 w-6 text-amber-600 mt-0.5" />
+            <div>
+              <p className="font-bold">Revisions Requested</p>
+              <p className="text-sm mt-1">Please fix the issues highlighted below and re-submit for verification.</p>
+            </div>
+          </div>
+        )}
+        {orgData.verification_status === 'pending' && (
+          <div className="p-4 bg-slate-100 border border-slate-200 text-slate-800 rounded-xl flex items-center gap-3">
+            <Loader2 className="h-6 w-6 text-slate-500 animate-spin" />
+            <div>
+              <p className="font-bold">Verification Pending</p>
+              <p className="text-sm">Your profile is currently under review by our team.</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-6 text-slate-900">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold flex items-center gap-2"><FileText className="h-4 w-4 text-teal-600" /> 12A Registration</h3>
-            {org.registration_12a ? (
-              <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</span>
-            ) : (
-              <span className="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Pending</span>
-            )}
+      <form onSubmit={handleSave} className="space-y-6">
+        {fieldsToReview.map(field => {
+          const fieldFeedback = feedback[field.key]
+          
+          const needsRevision = fieldFeedback?.status === 'revise'
+          const isReadOnly = orgData.verification_status === 'approved' || (hasRevisions && !needsRevision)
+
+          if (!formData[field.key] && !needsRevision) return null // Hide empty optional fields if not asked to revise
+
+          return (
+            <Card key={field.key} className={`border-2 transition-colors ${needsRevision ? 'border-amber-400 bg-amber-50/20' : 'border-slate-200'}`}>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex-1 space-y-4">
+                    <Label className="text-base font-bold text-slate-800">{field.label}</Label>
+                    
+                    {field.type === "text" ? (
+                      <Input
+                        value={formData[field.key] || ""}
+                        onChange={(e) => setFormData(prev => ({ ...prev, [field.key]: e.target.value }))}
+                        disabled={isReadOnly}
+                        className={needsRevision ? "border-amber-300 focus-visible:ring-amber-500 bg-white" : "bg-slate-50"}
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        {formData[field.key] ? (
+                          <div className="flex items-center gap-3">
+                            <a href={formData[field.key]} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">
+                              <FileText className="h-5 w-5 text-teal-600" />
+                              View Uploaded PDF
+                            </a>
+                            {!isReadOnly && <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">or Replace:</span>}
+                          </div>
+                        ) : null}
+                        
+                        {!isReadOnly && (
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              onChange={(e) => handleFileUpload(e, field.key)}
+                              disabled={uploadingDoc === field.key}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 text-slate-500 group hover:border-teal-400 hover:bg-teal-50 transition-colors">
+                              {uploadingDoc === field.key ? (
+                                <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+                              ) : (
+                                <Upload className="h-5 w-5 group-hover:text-teal-600" />
+                              )}
+                              <span className="font-semibold">{formData[field.key] ? "Upload Replacement PDF" : "Upload PDF"}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {needsRevision && (
+                    <div className="md:w-72 bg-amber-100/50 p-4 rounded-xl border border-amber-200 flex flex-col gap-2">
+                      <div className="flex items-center gap-1.5 text-amber-800 font-bold text-sm uppercase tracking-wider">
+                        <AlertCircle className="h-4 w-4" /> Feedback
+                      </div>
+                      <p className="text-sm text-amber-900">{fieldFeedback.comment || "Please review and update this field."}</p>
+                    </div>
+                  )}
+                  
+                  {fieldFeedback?.status === 'approve' && (
+                    <div className="md:w-72 flex items-center justify-center p-4 rounded-xl">
+                      <div className="flex items-center gap-2 text-teal-600 font-bold">
+                        <CheckCircle2 className="h-5 w-5" /> Approved
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+
+        {orgData.verification_status !== 'approved' && !isPending && (
+          <div className="pt-6 flex justify-end">
+            <Button 
+              type="submit" 
+              disabled={saving}
+              className="bg-teal-600 hover:bg-teal-500 text-white px-8 h-12 text-lg font-bold rounded-xl shadow-lg shadow-teal-500/20"
+            >
+              {saving ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Save className="h-5 w-5 mr-2" />}
+              {hasRevisions ? "Submit Revisions for Review" : "Save Changes"}
+            </Button>
           </div>
-          <p className="text-sm text-slate-500 mb-4">Allows your trust/society to claim exemption from paying income tax.</p>
-          <input 
-            type="text" 
-            placeholder="e.g. AAATT1234E1234" 
-            value={formData.registration_12a}
-            onChange={(e) => setFormData({ ...formData, registration_12a: e.target.value })}
-            className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium"
-          />
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold flex items-center gap-2"><FileText className="h-4 w-4 text-teal-600" /> 80G Registration</h3>
-             {org.registration_80g ? (
-              <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</span>
-            ) : (
-              <span className="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Pending</span>
-            )}
-          </div>
-          <p className="text-sm text-slate-500 mb-4">Enables donors to claim 50% tax deductions on their contributions.</p>
-          <input 
-            type="text" 
-            placeholder="e.g. AAATT1234E1234" 
-            value={formData.registration_80g}
-            onChange={(e) => setFormData({ ...formData, registration_80g: e.target.value })}
-            className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium"
-          />
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold flex items-center gap-2"><FileText className="h-4 w-4 text-teal-600" /> CSR-1 Number</h3>
-            {org.csr_1_registration ? (
-              <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</span>
-            ) : (
-              <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Optional</span>
-            )}
-          </div>
-          <p className="text-sm text-slate-500 mb-4">MCA registration required for receiving corporate CSR funds in India.</p>
-          <input 
-             type="text"
-             placeholder="e.g. CSR00012345"
-             value={formData.csr_1_registration}
-             onChange={(e) => setFormData({ ...formData, csr_1_registration: e.target.value })}
-             className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium" 
-          />
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold flex items-center gap-2"><FileText className="h-4 w-4 text-teal-600" /> FCRA Account</h3>
-            {org.fcra_registration ? (
-              <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Verified</span>
-            ) : (
-              <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Optional</span>
-            )}
-          </div>
-          <p className="text-sm text-slate-500 mb-4">Required by MHA to receive foreign donations legally in India.</p>
-          <input 
-             type="text"
-             placeholder="e.g. 123450000"
-             value={formData.fcra_registration}
-             onChange={(e) => setFormData({ ...formData, fcra_registration: e.target.value })}
-             className="w-full text-sm border-b border-slate-200 py-2 focus:outline-none focus:border-teal-500 font-medium" 
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end pt-4 border-t border-slate-200">
-        <Button 
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-teal-600 hover:bg-teal-500 text-white font-bold w-full sm:w-auto shadow-lg shadow-teal-500/20"
-        >
-           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />} 
-           Save Compliance Settings
-        </Button>
-      </div>
-
+        )}
+      </form>
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ShieldCheck, ShieldX, Building2, Loader2, RefreshCw, ExternalLink, FileCheck2, CheckCircle2, Clock } from "lucide-react"
+import { ShieldCheck, ShieldX, Building2, Loader2, RefreshCw, ExternalLink, FileCheck2, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import Link from "next/link"
 
 export default function NGOVerificationPage() {
   const supabase = createClient()
@@ -40,8 +41,9 @@ export default function NGOVerificationPage() {
   }
 
   const filtered = orgs.filter(o => {
-    if (filter === "pending") return !o.is_verified
-    if (filter === "verified") return o.is_verified
+    const status = o.verification_status || (o.is_verified ? 'approved' : 'pending')
+    if (filter === "pending") return status === 'pending' || status === 'revision_requested'
+    if (filter === "verified") return status === 'approved'
     return true
   })
 
@@ -141,15 +143,24 @@ export default function NGOVerificationPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="font-bold text-slate-900 text-lg">{org.name}</h3>
-                        {org.is_verified ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-teal-100 text-teal-700 rounded-full border border-teal-200">
-                            <ShieldCheck className="h-3 w-3" /> Verified
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
-                            <Clock className="h-3 w-3" /> Pending Review
-                          </span>
-                        )}
+                        {(() => {
+                          const status = org.verification_status || (org.is_verified ? 'approved' : 'pending')
+                          if (status === 'approved') return (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-teal-100 text-teal-700 rounded-full border border-teal-200">
+                              <ShieldCheck className="h-3 w-3" /> Verified
+                            </span>
+                          )
+                          if (status === 'revision_requested') return (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full border border-red-200">
+                              <AlertCircle className="h-3 w-3" /> Revision Requested
+                            </span>
+                          )
+                          return (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
+                              <Clock className="h-3 w-3" /> Pending Review
+                            </span>
+                          )
+                        })()}
                       </div>
                       <p className="text-sm text-slate-500 line-clamp-1">{org.description}</p>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
@@ -173,27 +184,11 @@ export default function NGOVerificationPage() {
                         <ExternalLink className="h-4 w-4" /> Public Profile
                       </Button>
                     </a>
-                    {org.is_verified ? (
-                      <Button
-                        variant="outline" size="sm"
-                        className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 gap-1.5"
-                        disabled={actionLoading === org.id}
-                        onClick={() => handleRevoke(org.id)}
-                      >
-                        {actionLoading === org.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldX className="h-4 w-4" />}
-                        Revoke
+                    <Link href={`/admin/organizations/${org.id}`}>
+                      <Button size="sm" className="bg-purple-600 hover:bg-purple-500 text-white gap-1.5">
+                        <FileCheck2 className="h-4 w-4" /> Review Details
                       </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="bg-teal-600 hover:bg-teal-500 text-white gap-1.5"
-                        disabled={actionLoading === org.id}
-                        onClick={() => handleVerify(org.id)}
-                      >
-                        {actionLoading === org.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                        Verify & Approve
-                      </Button>
-                    )}
+                    </Link>
                   </div>
                 </div>
               </CardContent>

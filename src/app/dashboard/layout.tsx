@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, organization_id, organizations(id, name)")
+    .select("role, organization_id, organizations(id, name, verification_status)")
     .eq("id", user.user.id)
     .single()
   
@@ -91,6 +91,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Main Content */}
       <main className="flex-1 p-6 md:p-10 max-h-screen overflow-y-auto">
+         {org?.verification_status === 'revision_requested' && (
+           <div className="mb-6 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg text-amber-800 flex items-start gap-3 shadow-sm">
+             <ShieldCheck className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+             <div>
+               <h3 className="font-bold">Action Required: Compliance Verification</h3>
+               <p className="text-sm mt-1">Our team reviewed your NGO details but needs some revisions before we can verify your account. Please review the feedback and update your documents.</p>
+               <Link href="/dashboard/compliance" className="inline-block mt-3 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 text-sm font-bold rounded-lg transition-colors">
+                 Review Feedback & Fix
+               </Link>
+             </div>
+           </div>
+         )}
          {children}
       </main>
     </div>
